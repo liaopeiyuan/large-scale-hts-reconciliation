@@ -1,13 +1,12 @@
 {
-	"title": "Distill Example",
-	"description": "An example project using Webpack, Babel, and Svelte.",
-	"password": "svgs",
+	"title": "Parallel Hierarchical Time-series Reconciliation on GPU",
+	"description": "Speeding up Parallel Hierarchical Time-series Reconciliation on single- and multi-node GPU environments with PyTorch.",
 	"authors": [
 		{
-			"author": "Ludwig Schubert",
-			"authorURL": "https://schubert.io/",
-			"affiliation": "OpenAI",
-			"affiliationURL": "https://openai.com"
+			"author": "Peiyuan Liao",
+			"authorURL": "https://www.liaopeiyuan.com/",
+			"affiliation": "Carnegie Mellon University",
+			"affiliationURL": "https://www.cmu.edu/"
 		}
 	],
 	"katex": {
