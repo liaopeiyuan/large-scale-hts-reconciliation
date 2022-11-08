@@ -1,7 +1,2 @@
-FROM node:16
-WORKDIR /usr/src/app
-COPY . /usr/src/app
-RUN npm install
-RUN npm update
-EXPOSE 8080
-CMD [ "npm", "run", "dev" ]
+FROM pierrezemb/gostatic
+COPY ./public/ /srv/http/
