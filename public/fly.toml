@@ -1,7 +1,6 @@
-# fly.toml file generated for gostatic-example on 2022-03-01T14:38:17-05:00
+# fly.toml file generated for hts on 2022-11-08T13:50:48-05:00
 
-app = "HTS Reconciliation"
-
+app = "hts"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -18,7 +17,6 @@ processes = []
   processes = ["app"]
   protocol = "tcp"
   script_checks = []
-
   [services.concurrency]
     hard_limit = 25
     soft_limit = 20
