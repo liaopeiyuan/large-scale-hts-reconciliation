@@ -6,7 +6,13 @@
 			"author": "Peiyuan Liao",
 			"authorURL": "https://www.liaopeiyuan.com/",
 			"affiliation": "Carnegie Mellon University",
-			"affiliationURL": "https://www.cmu.edu/"
+			"affiliationURL": "https://www.cs.cmu.edu/"
+		},
+		{
+			"author": "Yifei Chen",
+			"authorURL": "https://www.yifeichen1121.com/",
+			"affiliation": "Carnegie Mellon University",
+			"affiliationURL": "https://www.cs.cmu.edu/"
 		}
 	],
 	"katex": {
