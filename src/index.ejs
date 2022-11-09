@@ -18,15 +18,15 @@
   </d-front-matter>
 
   <d-title>
-    <h1>Parallel HTS Reconciliation</h1>
-    <p>Speeding up Parallel Hierarchical Time-series Reconciliation on single- and multi-node GPU environments with PyTorch. </p>
+    <h1>Large-Scale HTS Reconciliation</h1>
+    <p> Designing a system for reconciling large datasets on systems with overall tight memory limit and raw forecasts co-located with each processor core. </p>
   </d-title>
 
   <d-article>
 
+    <h4>Summary</h4>
     <p>
-      Welcome to a Distill example article: meant to get you writing up your research quickly. Let's demo some
-      features:
+      We are going to design and implement a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple matrix-based reconciliation methods (top-down, bottom-up, middle-out, OLS and WLS) on single-node, multi-core and multi-node Intel CPU platforms using LAPACK, OpenMP, and MPI. It is suitable for heavy workloads with overall tight memory limit and raw forecasts co-located with each processor core, and we plan to perform an in-depth study on the performance characteristics, especially memory constraints and communication profile, of our system compared to existing methods (naive matrix-based solution, Nixtla HierarchicalForecast).
     </p>
 
     <h4>Hot reloading</h4>
