@@ -1,0 +1,188 @@
+<!doctype html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style id="distill-article-specific-styles">
+    <%=require("../static/styles.css") %>
+  </style>
+  <script src="https://distill.pub/template.v2.js"></script>
+</head>
+
+<body>
+
+  <d-front-matter>
+    <script type="text/json">
+      <%= JSON.stringify(require("./frontmatter.json"), null, 4) %>
+    </script>
+  </d-front-matter>
+
+  <d-title>
+    <h1>Large-Scale HTS Reconciliation</h1>
+    <p> Designing a system for reconciling large datasets on systems with overall tight memory limit and raw forecasts co-located with each processor core. </p>
+  </d-title>
+
+  <d-article>
+
+    <h4>Summary</h4>
+    <p>
+      We are going to design and implement a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple matrix-based reconciliation methods (top-down, bottom-up, middle-out, OLS and WLS) on single-node, multi-core and multi-node Intel CPU platforms using LAPACK, OpenMP, and MPI. It is suitable for heavy workloads with overall tight memory limit and raw forecasts co-located with each processor core, and we plan to perform an in-depth study on the performance characteristics, especially memory constraints and communication profile, of our system compared to existing methods (naive matrix-based solution, Nixtla HierarchicalForecast).
+    </p>
+
+    <h4>Background</h4>
+    <p>Time-series forecasting is a very popular field in statistical and machine learning and has many applications in financial markets (predicting stocks), IoT (predicting sensors), geosciences (predicting earthquakes), and so on. Time-series are usually represented as a list of values <span class="math inline"><em>y</em><sub>1</sub>⋯<em>y</em><sub><em>k</em></sub></span> with timestamps <span class="math inline"><em>t</em><sub>1</sub>⋯<em>t</em><sub><em>k</em></sub></span> associated with each value, and the task of forecasting could be defined as "extending" the values to certain time stamps <span class="math inline"><em>t</em><sub><em>k</em> + 1</sub>⋯<em>t</em><sub><em>k</em> + <em>l</em></sub></span> into the future <span class="math inline"><em>y</em><sub><em>k</em> + 1</sub>⋯<em>y</em><sub><em>k</em> + <em>l</em></sub></span>. <span class="citation" data-cites="hyndman_forecast"></span></p>
+    <p>Oftentimes, the time-series we are forecasting can be organized by certain characteristics of interests, which can naturally be aggregated into different levels of a hierarchy. For example, if we are forecasting Australia's domestic visitors per day <span class="citation" data-cites="mint"></span>, we would be interested in at city-level, state-level, or nation-level forecasts. Notably, these forecasts have constraints placed on some of them with respect to the hierarcy; e.g., a state's forecast is the sum of all of the cities' forecasts. Thus, a natural question would be:</p>
+    <p><em>How can we effectively leverage the structural information in the hierarchy to make forecasts on all levels more accurate in a more efficient manner?</em></p>
+    <p>In most settings, the time-series forecasting algorithm is oblivious of this hierarchy, hence we focus on a reconciliation-oriented approach, where forecast are individually produced for each entity <span class="math inline"><em>Ŷ</em><sub><em>v</em></sub></span> (for node <span class="math inline"><em>v</em></span> in the directed graph of hierarchy <span class="math inline"><em>G</em> = {<em>V</em>, <em>E</em>}</span>), and we need to find a way to "reconcile" each forecast to produce <span class="math inline">$\overline{Y}_v$</span> such that they conform to the constraints imposed by the hierarchy (such as parent equalling to sum of children) and more desirably, achieves a lower error metric <span class="math inline">ℒ</span> across all levels <span class="math inline">$\Sigma_{v \in V}\mathcal{L}(Y_v, \overline{Y}_v)$</span>. The set of updated forecasts <span class="math inline">$\overline{Y}_v$</span> is often called <strong>coherent forecasts</strong>. This approach also fits our intuition because e.g. 1: if our model independently predicts tourism on city level and on state level, it is very unlikely that the city-level forecast could sum to the state-one naively; 2: there are patterns within the state-level forecast than can help improve city-level forecast, and vice versa.</p>
+    <p>We don't have to forecast all nodes <span class="math inline"><em>v</em></span> to reconcile and produce forecasts for all nodes. In the system we are proposing, we plan to implement five methods, each of which have different requirements on nodes to forecast to produce a coherent forecast:</p>
+    <ol>
+    <li><p>Bottom-up <span class="citation" data-cites="hyndman_forecast"></span>: produce forecast for all leaves, then gradually aggregating up to root (via summing or other methods).</p></li>
+    <li><p>Top-down <span class="citation" data-cites="hyndman_forecast"></span>: product forecast for root only, then specify, at each level, how a parent forecast breaks down to its children. Then execute the gradual breakdown as we go down the levels.</p></li>
+    <li><p>Middle-out <span class="citation" data-cites="hyndman_forecast"></span>: pick a level that is not the leaves nor the root, then produce bottom-up for all levels above and top-down for all levels below.</p></li>
+    <li><p>OLS <span class="citation" data-cites="bottom_up"></span> (Ordinary Least Square): produce forecast for all nodes, then multiply by reconciliation matrix <span class="math inline"><em>G</em> = (<em>S</em><sup><em>T</em></sup><em>S</em>)<sup> - 1</sup><em>S</em><sup><em>T</em></sup></span>, where <span class="math inline"><em>S</em></span> is the summing matrix (explained below).</p></li>
+    <li><p>WLS <span class="citation" data-cites="temporal"></span> (Weighted Least Square): produce forecast for all nodes, then multiply by reconciliation matrix <span class="math inline"><em>G</em> = (<em>S</em><sup><em>T</em></sup><em>W</em><em>S</em>)<sup> - 1</sup><em>S</em><sup><em>T</em></sup><em>W</em></span> for some diagonal matrix <span class="math inline"><em>W</em></span>, where <span class="math inline"><em>S</em></span> is the summing matrix (explained below).</p></li>
+    </ol>
+    <p>Before discussing the parallelization of forecast reconciliation, it's useful to remark that forecasts on each node are independent, and therefore easily parallelizable. Thus, a usage pattern we often observe in production is each core <span class="math inline"><em>c</em><sub><em>i</em></sub></span> producing a subset of forecast: <span class="math display">$$M_{c_i} \in \mathbb{R}^{l_{c_i} \times k} = \begin{bmatrix} \hat{Y}_{v_1} \\ \hat{Y}_{v_2} \\ \cdots \\ \hat{Y}_{v_{l_{c_i}}} \end{bmatrix}$$</span> represented as a matrix of dimension (number of forecasts the core is responsible for) times (time horizon). The matrices of each node will reside on memory close to the core in a NUMA (Non-uniform memory access) architecture, and, with individual forecasts within a hierarchy scattered across many cores, time for a particular process to access a particular node's forecast is also highly non-uniform with respect to the interconnect topology. We will explain why this setting is important in the next section, but for now, we assume that the matrices on each process is collected and vertically stacked into a single matrix representing all nodes forecasted, as shown in the right hand side of Figure 1 in the next paragraph. This can be seen as the "pseudo-code" of our baseline algorithm.</p>
+    <p>In addition to naively reconciles forecast node-by-node along the graph hierarchy in a sequential way, there are a few works on a single-process parallelization technique inspired by matrix algebra. The core intuition of the existng approach is that if we allow repetitive computation, aggregation of each node along the hierarchy can be thought of as independent computations <span class="citation" data-cites="bottom_up"></span>. This allows a neat matrix-multiplication-based interpretation of the reconciliation problem, reformulated as a matrix multiplication by <span class="math inline"><em>G</em></span> (the reconciliation matrix) to map partial forecasts from nodes <span class="math inline"><em>W</em></span> to base level forecasts, then summing up to each node via <span class="math inline"><em>S</em></span> (the summing matrix) to obtain the full forecast of nodes in <span class="math inline"><em>V</em></span>:</p>
+    <p><span class="math display">$$\begin{bmatrix} \overline{Y}_{v_0} \\ \cdots \\ \overline{Y}_{v_{|V|-1}} \end{bmatrix}_{v_{i} \in V}  = S G \begin{bmatrix} \hat{Y}_{w_0} \\ \cdots \\ \hat{Y}_{w_k} \end{bmatrix}_{w_{i} \in W \subseteq V}$$</span> <span id="reconcile" label="reconcile">[reconcile]</span></p>
+    <p><span class="image">Sample Hierarchy from <span class="citation" data-cites="hyndman_forecast"></span>.</span> <span id="hier" label="hier">[hier]</span></p>
+    <p>For example, given the following hierarchy in Figure <a href="#hier" data-reference-type="ref" data-reference="hier">1</a> in <span class="citation" data-cites="hyndman_forecast"></span>, a bottom-up reconciliation approach would have a reconciliation matrix <span class="math display">$$G =
+      \begin{bmatrix}
+        0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\\
+      \end{bmatrix}$$</span> and a summing matrix <span class="math inline"><em>S</em></span> bearing a relationship like <span class="math display">$$\begin{bmatrix}
+        \overline{Y}_{\text{total}_{t}} \\
+        \overline{Y}_{A_{t}} \\
+        \overline{Y}_{B_{t}} \\
+        \overline{Y}_{AA_{t}} \\
+        \overline{Y}_{AB_{t}} \\
+        \overline{Y}_{AC_{t}} \\
+        \overline{Y}_{BA_{t}} \\
+        \overline{Y}_{BB_{t}}
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 \\
+        1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\
+        0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\
+        1  &amp; 0  &amp; 0  &amp; 0  &amp; 0  \\
+        0  &amp; 1  &amp; 0  &amp; 0  &amp; 0  \\
+        0  &amp; 0  &amp; 1  &amp; 0  &amp; 0  \\
+        0  &amp; 0  &amp; 0  &amp; 1  &amp; 0  \\
+        0  &amp; 0  &amp; 0  &amp; 0  &amp; 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        \hat{Y}_{AA_{t}} \\
+        \hat{Y}_{AB_{t}} \\
+        \hat{Y}_{AC_{t}} \\
+        \hat{Y}_{BA_{t}} \\
+        \hat{Y}_{BB_{t}}
+      \end{bmatrix}$$</span></p>
+    <p>The process of matrix multiplication is then sped up using BLAS (Basic Linear Algebra Subprograms) libraries efficiently leveraging SIMD and threaded-parallelism over the naive sequential solution. Commercial solutions like Nixtla HierarchicalForecast <span class="citation" data-cites="olivares2022hierarchicalforecast"></span> leverages this property as well.</p>
+
+    <h4>The Challenge</h4>
+    <p>On the first look, the matrix-based solution in a single process seems to be efficient enough and embarrassingly parallel. We instead focus on the case where where are scaling with memory constraints and the forecasts start off in different memory locations with non-uniform access cost, as hinted in the previous section.</p>
+
+    <h4>Constraints</h4>
+    <p>Real-world hierarchical time-series forecast datasets are large and unsuitable for a naive matrix-based parallelization. For example, the Web Traffic Time Series Forecasting <span class="citation" data-cites="wikipedia"></span> contains 145,063 timeseries for 551 time-stamps across multiple hierarchies (e.g. locale, access, agent), which places a lower bound of <span class="math inline">145, 063<sup>2</sup> × 4 ≈ 84.17</span> gigabytes to store the summing and reconciliation matrices, not to mention the time it takes to perform the matrix multiplication. The difficulty therefore lies in how to efficiently design an algorithm that has less memory footprint while efficiently parallelizing the reconciliation.</p>
+    <p>Another challenge is communication. Under our setting, the forecasts before reconciliation is spread across many processes on cores that are far away from each other. Naively sending all forecasts to one process to centrally process them would be one solution, but it would induce a large communication overhead than we'd like. Devising an efficient method to distribute the computation across different processes while minimizing communication is another major aspect of the challenge.</p>
+    <p>Finally, forecast reconciliation are performed to either produce forecasts that was not made in the first place (e.g. bottom-up), or improve existing forecasts with information from other nodes along the hierarchy (e.g. OLS). For the latter scenario, there is a case to be made on performing intra-process reconciliation, therefore eliminating the need for extra communication. However, an important metric in machine learning is the error metric of the algorithm in addition to the performance, and the proposed approach could harm the effectiveness of the reconciliation method in general. Elucidating the tradeoff space between latency and metric performance in forecast reconciliation is another major constraints in the design of the system, where we may find certain optimizations infeasible as it diminishes the algorithmic significance of our process.</p>
+    
+    <h4>Workload</h4>
+    <p>There's more to expand on the data dependencies and memory access characteristics of our system, both of which ties back to the graph structure of the hierarchy. All processes require a copy of the hierarchy itself to be aware of where communication takes place. Based on communication and computation intensity, we need to also devise non-trivial strategies for splitting up work into chunks owned by each process, even when assuming that producing the forecast for each is uniform. For bottom-up, top-down and middle-out approaches, subsequent levels has a choice of waiting on previous levels to finish computing, or choose to independently perform aggregation. The different choices here could result in divergent execution. Locality also exists in this place based on where forecasts are originally: if all forecasts of a certain level exists on a process in the first place, we could eliminate communication altogether in this round. This intricate interplay between graph topology and communication-to-computation ratio also presents a challenge in optimizing our system across many different real-life datasets. We list out three examples, where strategies that minimizes workload imbalance could look very different:</p>
+    <ul>
+    <li><p>Wikipedia <span class="citation" data-cites="wikipedia"></span>: few levels, each node containing many children, essentially a “flat hierarchy”</p></li>
+    <li><p>Suggested Upper Merged Ontology (SUMO) <span class="citation" data-cites="cua-etal-2010-representing"></span>: many levels which implies more aggregations, a "tall hierarchy”</p></li>
+    <li><p>Retail Goods in Walmart <span class="citation" data-cites="m5"></span>: uneven, "ragged" hierarchy with each level having different compute intensity.</p></li>
+    </ul>
+    <p>For OLS and WLS reconciliation, computing the <span class="math inline"><em>G</em></span> matrix for large datasets in a message-passing setting could be challenging or even unfeasible due to memory constraints. Splitting the works efficiently across many processes in conjunction with BLAS functionalities, and only preserving information required for timeseries of each process presents many challenges to system and algorithmic design.</p>
+
+    <h4>Resources</h4>
+    <p>There's a wide range of literature on matrix-based forecast reconciliation methods <span class="citation" data-cites="hyndman_forecast bottom_up mint temporal"></span> as well as a commercial single-process implementation in Python and Numpy <span class="citation" data-cites="olivares2022hierarchicalforecast"></span>, which uses BLAS/LAPACK under the hood. Our implementation, however, will be in C++, so we will likely start from scratch and reason through our parallelization strategies with less help. To prepare test-data for benchmark, we will be downloading data from cited sources <span class="citation" data-cites="wikipedia m5 cua-etal-2010-representing"></span> and using Python to train basic forecasting models like Prophet <span class="citation" data-cites="taylor2018forecasting"></span>. We will be implementing the serialization/deserialization of data from Python to C++ from scratch with inspirations from common protocols like protobuf <span class="citation" data-cites="protobuf"></span>. We hope to connect our system to Python via pybind11, and there any many online resources on how to do that. For message-passing libraries, we will be referring to common implementations of MPI to seek inspirations. For platforms, we will use the CPU platform the GHC and PSC machines to emulate various single-node and multi-node workloads. It would be beneficial to eventually test on a multi-node CPU system with remote direct memory access (RDMA) enabled to test the efficacy of our system under new environments.</p>
+
+    <h4>Goals and Deliverable</h4>
+    <p>We are going implement a system that performs multiple matrix-based forecast reconciliation methods (top-down, bottom-up, middle-out, OLS and WLS) on Intel CPU platforms with LAPACK, OpenMP and MPI. We plan to present an in-depth performance study on memory footprint, communication overhead, and overall speedup on single-node, multi-core and multi-node settings (1-128 processes) with benchmark datasets like Wikipedia, SUMO and Retail Goods (M5). We will also present a demo showing how a data scientist could effectively leverage this system to perform time-series forecast reconciliation.</p>
+
+    <h5>Plan to Achieve</h5>
+    <p>[75%] represents deliverables if things go slowly, and [100%] represents the full scope.</p>
+    <ul>
+    <li><p>A modular framework that is easy to install and useful to a data scientist in performing large-scale forecast reconciliation.</p></li>
+    <li><p>Naive single-process, matrix-based solution for all 5 methods. Latency is recorded as gathering individual forecasts from all processes.</p></li>
+    <li><p>Naive MPI-based solution for all 5 methods (top-down, bottom-up, middle-out, OLS and WLS). Expect to achieve at 4x less memory footprint and 5x less communication overhead over naive single-process solution.</p></li>
+    <li><p>MPI + OpenMP + LAPACK solution for all 5 methods (top-down, bottom-up, middle-out, OLS and WLS). Expect to achieve a further 20% to 80% speedup.</p></li>
+    <li><p>Communication reduction techniques for top-down, bottom-up and middle-out approaches. Expect to achieve at least 5x speedup over matrix-based solution.</p></li>
+    <li><p>A simple benchmark system for single-node and multi-node CPU reconciliation performance evaluation: memory, communication, latency and error metrics (SMAPE + MAPE).</p></li>
+    <li><p>Data loader for time-series forecasts and sample program for producing forecasts for the benchmark datasets. Data loader simluates loading serialized forecasts into each process.</p></li>
+    <li><p>Local OLS and WLS reconciliation method, with discussion on impact in error metric (e.g. SMAPE and MAPE of new approach vs old, as well as increase in performance).</p></li>
+    <li><p>Performance study mentioned above.</p></li>
+    </ul>
+
+    <h5>Demo (Plan)</h5>
+    <ul>
+    <li><p>A Jupyter notebook producing Prophet forecasts for Wikipedia dataset and serializing them into per-process files.</p></li>
+    <li><p>An example program leveraging our system to simulate loading per-process forecasts and perform reconciliation, and calculates performance.</p></li>
+    </ul>
+    <h5>Hope to Achieve</h5>
+    <ul>
+    <li><p>Global communication reduction techniques for OLS and WLS reconciliation methods. Expect to achieve at least 2x speedup over matrix-based solution.</p></li>
+    <li><p>Connecting the system to Python via pybind11 and mpi4py, so that the per-process forecasts could be readily reconciled as soon as it is produced from another library in memory.</p></li>
+    </ul>
+    <h5>Demo (Hope)</h5>
+    <ul>
+    <li><p>A Python program launched through mpi4py that trains Prophet model on individual time-series in the Wikipedia.</p></li>
+    <li><p>Within the same program, calls the Python binding to our system to reconcile forecasts</p></li>
+    <li><p>Compute and report error metrics</p></li>
+    </ul>
+    <h5>Hoping to Learn</h5>
+    <ul>
+    <li><p>What is the memory impact of existing matrix-based approaches, and how can we open up a tradeoff space between parallelism, performance, communciation and memory consumption with MPI?</p></li>
+    <li><p>How to still effectively leverage LAPACK + OpenMP within MPI?</p></li>
+    <li><p>How do we maintain workload balance per process with respect to the graph hierarchy. If a static assignment is used, how to compute it efficiently?</p></li>
+    <li><p>Will local (in-process) OLS and WLS reconciliation method make a huge impact on performance?</p></li>
+    </ul>
+
+    <h4>Platform Choice</h4>
+    <p>We have chosen to implement our system in C++ on CPU systems in single-node and multi-node settings. The rationale behind C++ is mainly from the performance of the programming language and easy access of relevant parallelization libraries such as LAPACK (for linear algebra), OpenMP (for shared-memory parallelism) and MPI (for message-passing parallelism). We chose CPU systems over GPU due to the increase flexibility in memory (ease of working with MPI over NCCL) and parallelism (ease of working with OpenMP + LAPACK over CUDA + CUBLAS). Most forecasting algorithms (ARIMA, Prophet, exponential smoothing, etc.) run on CPU platforms, and our approach here will likely be harder to parallelize on a multi-GPU platform. Moreover, not many multi-node GPU platforms that will be available to us have high-bandwidth interconnection networks, and our solution may suffer under that setting. The CPU-based solution, on the other hand, may have less requirements on such bandwidth.</p>
+
+    <h4>Schedule</h4>
+    <ul>
+    <li><p>11/09 - 11/15  Create skeleton of project and prepare data loader with sample program. Implement all 5 naive matrix-based solution.</p></li>
+    <li><p>11/16 - 11/23  Set up benchmark system for performance comparison against Nixtla's implementation, and implement naive MPI-based solution. Start measuring metrics and begin performance study.</p></li>
+    <li><p>11/24 - 11/30  Implement MPI + OpenMP + LAPACK solution for all 5 methods and communication reduction techniques for top-down, bottom-up and middle-out. Improve performance study and complete the Milestone Report.</p></li>
+    <li><p>12/01 - 12/07  Implement local OLS and WLS reconciliation method and wrap up the performance study; begin working on demo (plan) and Final Report.</p></li>
+    <li><p>12/08 - 12/17  Enable Python binding and improve demo with end-to-end capability outlined in demo (hope). Implement global OLS and WLS communication techniques, and add to performance study. Complete Final Report.</p></li>
+    </ul>
+
+
+
+  <d-appendix>
+    <h3>Acknowledgments</h3>
+    <p>
+      We are deeply grateful to...
+    </p>
+
+    <p>
+      Many of our diagrams are based on...
+    </p>
+
+    <h3>Author Contributions</h3>
+    <p>
+      <b>Research:</b> Alex developed ...
+    </p>
+
+    <p>
+      <b>Writing & Diagrams:</b> The text was initially drafted by...
+    </p>
+
+
+    <d-footnote-list></d-footnote-list>
+    <d-citation-list></d-citation-list>
+  </d-appendix>
+
+  <!-- bibliography will be inlined during Distill pipeline's pre-rendering -->
+  <d-bibliography src="bibliography.bib"></d-bibliography>
+
+</body>
