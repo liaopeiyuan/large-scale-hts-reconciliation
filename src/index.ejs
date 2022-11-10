@@ -19,7 +19,7 @@
 
   <d-title>
     <h1>Large-Scale HTS Reconciliation</h1>
-    <p> Designing a system for reconciling large datasets on systems with overall tight memory limit and raw forecasts co-located with each processor core. </p>
+    <p> Reconciling large-scale time-series forecasts on systems with tight memory limit and non-uniform data access latency. </p>
   </d-title>
 
   <d-article>
@@ -28,6 +28,9 @@
     <p>
       We are going to design and implement a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple matrix-based reconciliation methods (top-down, bottom-up, middle-out, OLS and WLS) on single-node, multi-core and multi-node Intel CPU platforms using LAPACK, OpenMP, and MPI. It is suitable for heavy workloads with overall tight memory limit and raw forecasts co-located with each processor core, and we plan to perform an in-depth study on the performance characteristics, especially memory constraints and communication profile, of our system compared to existing methods (naive matrix-based solution, Nixtla HierarchicalForecast).
     </p>
+
+    <embed src="../static/pdfs/proposal.pdf" width="500" height="375" type="application/pdf">
+
 
     <h4>Background</h4>
     <p>Time-series forecasting is a very popular field in statistical and machine learning and has many applications in financial markets (predicting stocks), IoT (predicting sensors), geosciences (predicting earthquakes), and so on. Time-series are usually represented as a list of values <span class="math inline"><em>y</em><sub>1</sub>⋯<em>y</em><sub><em>k</em></sub></span> with timestamps <span class="math inline"><em>t</em><sub>1</sub>⋯<em>t</em><sub><em>k</em></sub></span> associated with each value, and the task of forecasting could be defined as "extending" the values to certain time stamps <span class="math inline"><em>t</em><sub><em>k</em> + 1</sub>⋯<em>t</em><sub><em>k</em> + <em>l</em></sub></span> into the future <span class="math inline"><em>y</em><sub><em>k</em> + 1</sub>⋯<em>y</em><sub><em>k</em> + <em>l</em></sub></span>. <span class="citation" data-cites="hyndman_forecast"></span></p>

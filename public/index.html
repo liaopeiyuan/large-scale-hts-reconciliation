@@ -90,22 +90,77 @@ d-figure > figure {
   </d-front-matter>
 
   <d-title>
-    <h1>Parallel HTS Reconciliation</h1>
-    <p>Speeding up Parallel Hierarchical Time-series Reconciliation on single- and multi-node GPU environments with PyTorch. </p>
+    <h1>Large-Scale HTS Reconciliation</h1>
+    <p> Reconciling large-scale time-series forecasts on systems with tight memory limit and non-uniform data access latency. </p>
   </d-title>
 
   <d-article>
 
+    <h4>Summary</h4>
     <p>
-      Welcome to a Distill example article: meant to get you writing up your research quickly. Let's demo some
-      features:
+      We are going to design and implement a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple matrix-based reconciliation methods (top-down, bottom-up, middle-out, OLS and WLS) on single-node, multi-core and multi-node Intel CPU platforms using LAPACK, OpenMP, and MPI. It is suitable for heavy workloads with overall tight memory limit and raw forecasts co-located with each processor core, and we plan to perform an in-depth study on the performance characteristics, especially memory constraints and communication profile, of our system compared to existing methods (naive matrix-based solution, Nixtla HierarchicalForecast).
     </p>
 
-    <h4>Hot reloading</h4>
-    <p>Your browser can automatically refresh when your editor saves. This should work by default, and you can disable
-      it in <code>index.js</code>. Sometimes hot reloading isn't fully compatible with all types of code, so you may
-      need to try manually reloading if you're seeing inconsistent behavior.</p>
+    <embed src="../static/pdfs/proposal.pdf" width="500" height="375" type="application/pdf">
 
+
+    <h4>Background</h4>
+    <p>Time-series forecasting is a very popular field in statistical and machine learning and has many applications in financial markets (predicting stocks), IoT (predicting sensors), geosciences (predicting earthquakes), and so on. Time-series are usually represented as a list of values <span class="math inline"><em>y</em><sub>1</sub>⋯<em>y</em><sub><em>k</em></sub></span> with timestamps <span class="math inline"><em>t</em><sub>1</sub>⋯<em>t</em><sub><em>k</em></sub></span> associated with each value, and the task of forecasting could be defined as "extending" the values to certain time stamps <span class="math inline"><em>t</em><sub><em>k</em> + 1</sub>⋯<em>t</em><sub><em>k</em> + <em>l</em></sub></span> into the future <span class="math inline"><em>y</em><sub><em>k</em> + 1</sub>⋯<em>y</em><sub><em>k</em> + <em>l</em></sub></span>. <span class="citation" data-cites="hyndman_forecast"></span></p>
+    <p>Oftentimes, the time-series we are forecasting can be organized by certain characteristics of interests, which can naturally be aggregated into different levels of a hierarchy. For example, if we are forecasting Australia’s domestic visitors per day <span class="citation" data-cites="mint"></span>, we would be interested in at city-level, state-level, or nation-level forecasts. Notably, these forecasts have constraints placed on some of them with respect to the hierarcy; e.g., a state's forecast is the sum of all of the cities’ forecasts. Thus, a natural question would be:</p>
+    <p><em>How can we effectively leverage the structural information in the hierarchy to make forecasts on all levels more accurate in a more efficient manner?</em></p>
+    <p>In most settings, the time-series forecasting algorithm is oblivious of this hierarchy, hence we focus on a reconciliation-oriented approach, where forecast are individually produced for each entity <span class="math inline"><em>Ŷ</em><sub><em>v</em></sub></span> (for node <span class="math inline"><em>v</em></span> in the directed graph of hierarchy <span class="math inline"><em>G</em> = {<em>V</em>, <em>E</em>}</span>), and we need to find a way to "reconcile" each forecast to produce <span class="math inline">$\overline{Y}_v$</span> such that they conform to the constraints imposed by the hierarchy (such as parent equalling to sum of children) and more desirably, achieves a lower error metric <span class="math inline">ℒ</span> across all levels <span class="math inline">$\Sigma_{v \in V}\mathcal{L}(Y_v, \overline{Y}_v)$</span>. The set of updated forecasts <span class="math inline">$\overline{Y}_v$</span> is often called <strong>coherent forecasts</strong>. This approach also fits our intuition because e.g. 1: if our model independently predicts tourism on city level and on state level, it is very unlikely that the city-level forecast could sum to the state-one naively; 2: there are patterns within the state-level forecast than can help improve city-level forecast, and vice versa.</p>
+    <p>We don't have to forecast all nodes <span class="math inline"><em>v</em></span> to reconcile and produce forecasts for all nodes. In the system we are proposing, we plan to implement five methods, each of which have different requirements on nodes to forecast to produce a coherent forecast:</p>
+    <ol>
+    <li><p>Bottom-up <span class="citation" data-cites="hyndman_forecast"></span>: produce forecast for all leaves, then gradually aggregating up to root (via summing or other methods).</p></li>
+    <li><p>Top-down <span class="citation" data-cites="hyndman_forecast"></span>: product forecast for root only, then specify, at each level, how a parent forecast breaks down to its children. Then execute the gradual breakdown as we go down the levels.</p></li>
+    <li><p>Middle-out <span class="citation" data-cites="hyndman_forecast"></span>: pick a level that is not the leaves nor the root, then produce bottom-up for all levels above and top-down for all levels below.</p></li>
+    <li><p>OLS <span class="citation" data-cites="bottom_up"></span> (Ordinary Least Square): produce forecast for all nodes, then multiply by <span class="math inline">(<em>S</em><sup><em>T</em></sup><em>S</em>)<sup> - 1</sup><em>S</em><sup><em>T</em></sup></span>, where <span class="math inline"><em>S</em></span> is the summing matrix (explained below).</p></li>
+    <li><p>WLS <span class="citation" data-cites="temporal"></span> (Weighted Least Square): produce forecast for all nodes, then multiply by <span class="math inline">(<em>S</em><sup><em>T</em></sup><em>W</em><em>S</em>)<sup> - 1</sup><em>S</em><sup><em>T</em></sup><em>W</em></span> for some diagonal matrix <span class="math inline"><em>W</em></span>, where <span class="math inline"><em>S</em></span> is the summing matrix (explained below).</p></li>
+    </ol>
+    <p>Before discussing the parallelization of forecast reconciliation, it's useful to remark that forecasts on each node are independent, and therefore easily parallelizable. Thus, a usage pattern we often observe in production is each core <span class="math inline"><em>c</em><sub><em>i</em></sub></span> producing a subset of forecast: <span class="math display">$$M_{c_i} \in \mathbb{R}^{l_{c_i} \times l} = \begin{bmatrix} \hat{Y}_{v_1} \\ \hat{Y}_{v_2} \\ \cdots \\ \hat{Y}_{v_{l_{c_i}}} \end{bmatrix}$$</span> represented as a matrix of dimension (number of forecasts the core is responsible for) times (time horizon). The matrices of each node will reside on memory close to the core in a NUMA (Non-uniform memory access) architecture, and, with individual forecasts within a hierarchy scattered across many cores, time for a particular process to access a particular node's forecast is also highly non-uniform with respect to the interconnect topology.</p>
+    <p>In addition to naively reconciles forecast node-by-node along the graph hierarchy in a sequential way, there are a few works on a single-process parallelization technique inspired by matrix algebra. The core intuition of the existng approach is that if we allow repetitive computation, aggregation of each node along the hierarchy can be thought of as independent computations <span class="citation" data-cites="bottom_up"></span>. This allows a neat matrix-multiplication-based interpretation of the reconciliation problem, reformulated as a matrix multiplication by <span class="math inline"><em>G</em></span> (the reconciliation matrix) to map partial forecasts from nodes <span class="math inline"><em>W</em></span> to base level forecasts, then summing up to each node via <span class="math inline"><em>S</em></span> (the summing matrix) to obtain the full forecast of nodes in <span class="math inline"><em>V</em></span>:</p>
+    <p><span class="math display">$$\begin{bmatrix} \overline{Y}_{v_0} \\ \cdots \\ \overline{Y}_{v_{|V|-1}} \end{bmatrix}_{v_{i} \in V}  = S G \begin{bmatrix} \hat{Y}_{w_0} \\ \cdots \\ \hat{Y}_{w_k} \end{bmatrix}_{w_{i} \in W \subset V}$$</span></p>
+    <p><span class="image">Sample Hierarchy from <span class="citation" data-cites="hyndman_forecast"></span>.</span> <span id="hier" label="hier">[hier]</span></p>
+    <p>For example, given the following hierarchy <a href="#hier" data-reference-type="ref" data-reference="hier">1</a> in <span class="citation" data-cites="hyndman_forecast"></span>, a bottom-up reconciliation approach would have a reconciliation matrix <span class="math display">$$G =
+      \begin{bmatrix}
+        0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\\
+      \end{bmatrix}$$</span> and a summing matrix <span class="math inline"><em>S</em></span> bearing a relationship like <span class="math display">$$\begin{bmatrix}
+        \overline{Y}_{\text{total}_{t}} \\
+        \overline{Y}_{A_{t}} \\
+        \overline{Y}_{B_{t}} \\
+        \overline{Y}_{AA_{t}} \\
+        \overline{Y}_{AB_{t}} \\
+        \overline{Y}_{AC_{t}} \\
+        \overline{Y}_{BA_{t}} \\
+        \overline{Y}_{BB_{t}}
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 \\
+        1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\
+        0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\
+        1  &amp; 0  &amp; 0  &amp; 0  &amp; 0  \\
+        0  &amp; 1  &amp; 0  &amp; 0  &amp; 0  \\
+        0  &amp; 0  &amp; 1  &amp; 0  &amp; 0  \\
+        0  &amp; 0  &amp; 0  &amp; 1  &amp; 0  \\
+        0  &amp; 0  &amp; 0  &amp; 0  &amp; 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        \hat{Y}_{AA_{t}} \\
+        \hat{Y}_{AB_{t}} \\
+        \hat{Y}_{AC_{t}} \\
+        \hat{Y}_{BA_{t}} \\
+        \hat{Y}_{BB_{t}}
+      \end{bmatrix}$$</span></p>
+    <p>The process of matrix multiplication is then sped up using BLAS (Basic Linear Algebra Subprograms) libraries efficiently leveraging SIMD and threaded-parallelism, therefore achieving an over-all speed-up over the naive sequential solution. Commercial solutions like Nixtla HierarchicalForecast <span class="citation" data-cites="olivares2022hierarchicalforecast"></span> leverages this property as well.</p>
+
+    
+    
+    
     <h4>Inlined SVGs</h4>
     <p>SVGs are so small that it can be nice to save an extra request and simply inline them intop your HTML:</p>
 
@@ -117,7 +172,6 @@ d-figure > figure {
       #arrow-2 #arrow-head {
         fill: steelblue;
       }
-
       #arrow-2 #arrow-line {
         stroke: steelblue;
       }
@@ -193,11 +247,9 @@ d-figure > figure {
         justify-content: start;
         grid-row-gap: 10px;
       }
-
       .eq-grid figcaption d-math {
         font-size: 100%;
       }
-
       .eq-grid .expansion-marker {
         border: 1px solid #CCC;
         border-bottom: none;
@@ -294,29 +346,23 @@ d-figure > figure {
       #example-table {
         overflow-x: scroll;
       }
-
       #example-table th {
         white-space: nowrap;
       }
-
       #example-table tbody th {
         font-weight: initial;
         border-bottom: 1px solid rgb(242, 242, 242);
       }
-
       #example-table tbody tr:last-of-type th {
         border-bottom: inherit;
       }
-
       #example-table td,
       #example-table thead th {
         text-align: center;
       }
-
       #example-table td {
         border-color: rgb(242, 242, 242);
       }
-
       #example-table td.no {
         background-color: #f6f6f6;
       }
