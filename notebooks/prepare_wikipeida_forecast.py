@@ -8,9 +8,8 @@
 
 # In[1]:
 
-
-ROOT = "/Users/liaopeiyuan/Documents/"
-data_dir = ROOT + "web-traffic-time-series-forecasting/"
+ROOT = "/data/cmu/large-scale-hts-reconciliation/notebooks/"
+data_dir = ROOT # + "web-traffic-time-series-forecasting/"
 
 
 # In[2]:
@@ -35,7 +34,7 @@ df
 
 import dask.dataframe as dd
 
-ddf = dd.from_pandas(df, npartitions=10000)
+ddf = dd.from_pandas(df, npartitions=4096)
 
 forecast_horizon = 100
 
@@ -60,42 +59,10 @@ dask_series = ddf.apply(predict, axis=1, meta=('float', 'object'))
 # In[15]:
 
 
-result = dask_series.compute()
+if __name__ == "__main__":
+  result = dask_series.compute(scheduler='processes')
 
-
-# In[20]:
-
-
-import pickle
-pickle.dump(result[0], open('result.pkl', 'wb'))
-
-
-# In[ ]:
-
-
-forecast_horizon = 100
-node_list = []
-forecasts = np.zeros((len(df), forecast_horizon)).astype(float)
-
-
-# In[ ]:
-
-
-for i, ro in tqdm(df.iterrows(), total=len(df)):
-    node_list.append(ro.Page)
-    data = pd.DataFrame({'ds': (ro.index)[1:], 'y':(ro.values)[1:]})
-    m = Prophet()
-    m.fit(data)
-    
-    future = m.make_future_dataframe(periods=forecast_horizon)
-    future.tail()
-    forecast = m.predict(future)
-
-    forecasts[i,:] = forecast[['yhat']][-forecast_horizon:].values.reshape(-1)
-
-
-# In[ ]:
-
-
+  import pickle
+  pickle.dump(result[0], open('result.pkl', 'wb'))
 
 
