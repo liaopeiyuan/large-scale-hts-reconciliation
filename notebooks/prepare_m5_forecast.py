@@ -40,7 +40,7 @@ forecast_horizon = 100
 
 def predict(row):
     start = pd.to_datetime("2016-01-01")
-    ds = [start + pd.Timedelta(days = int(x[1:])) for x in (row.index)[6:][-forecast_horizon:]]
+    ds = [start + pd.Timedelta(days = int(x[2:])) for x in (row.index)[6:][-forecast_horizon:]]
     data = pd.DataFrame({'ds': ds, 'y':(row.values)[6:][-forecast_horizon:]})
     m = Prophet()
     m.fit(data)
