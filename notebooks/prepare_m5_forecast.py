@@ -39,7 +39,9 @@ ddf = dd.from_pandas(df, npartitions=4096)
 forecast_horizon = 100
 
 def predict(row):
-    data = pd.DataFrame({'ds': (row.index)[6:][-forecast_horizon:], 'y':(row.values)[6:][-forecast_horizon:]})
+    start = pd.to_datetime("2016-01-01")
+    ds = [start + pd.Timedelta(days = int(x[1:])) for x in (row.index)[6:][-forecast_horizon:]]
+    data = pd.DataFrame({'ds': ds, 'y':(row.values)[6:][-forecast_horizon:]})
     m = Prophet()
     m.fit(data)
     
