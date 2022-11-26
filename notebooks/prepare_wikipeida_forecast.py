@@ -34,7 +34,7 @@ df
 
 import dask.dataframe as dd
 
-ddf = dd.from_pandas(df, npartitions=4096)
+ddf = dd.from_pandas(df, npartitions=120)
 
 forecast_horizon = 100
 
@@ -63,6 +63,6 @@ if __name__ == "__main__":
   result = dask_series.compute(scheduler='processes')
 
   import pickle
-  pickle.dump(result[0], open('result.pkl', 'wb'))
+  pickle.dump(result, open('result.pkl', 'wb'))
 
 
