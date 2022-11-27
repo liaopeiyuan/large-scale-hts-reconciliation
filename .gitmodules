@@ -2,3 +2,7 @@
 	path = lhts/pybind11
 	url = https://github.com/pybind/pybind11
 	branch = stable
+[submodule "large_scale_hts_reconciliation/pybind11"]
+	path = large_scale_hts_reconciliation/pybind11
+	url = https://github.com/pybind/pybind11
+	branch = stable
