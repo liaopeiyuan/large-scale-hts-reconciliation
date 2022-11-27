@@ -73,6 +73,19 @@ public:
 	break;
       }
       int nthreads, tid;
+
+    MPI_Status status;
+    if (0 == world_rank)
+    {
+        MPI_Send(xs.data(), 9, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+    }
+    else if (1 == world_rank)
+    {
+        MPI_Recv(xs.data(), 9, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+        cout << xs << endl;
+    }
+
+
 #pragma omp parallel private(nthreads, tid)
       {
 	
