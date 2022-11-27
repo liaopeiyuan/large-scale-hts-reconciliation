@@ -50,11 +50,11 @@ public:
     MPI_Status status;
     if (world_rank == 0)
     {
-        MPI_Send(xs.data(), 9, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+        MPI_Send((void*)xs.data(), 9, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
     }
     else if (world_rank == 1)
     {
-        MPI_Recv(xs.data(), 9, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv((void*)xs.data(), 9, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
         printf("%s, MPI rank %d out of %d, %f\n",
             processor_name,
             world_rank,
@@ -102,7 +102,7 @@ public:
       }
     }
   }
-  
+
 private:
   MPI_Comm comm_global;
 };
