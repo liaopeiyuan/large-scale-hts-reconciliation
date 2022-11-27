@@ -3,13 +3,14 @@
 cmake_minimum_required(VERSION 3.4...3.18)
 project(lhts)
 
-find_package( PkgConfig )
-pkg_check_modules( EIGEN3 REQUIRED eigen3 )
+find_package (Eigen3 3.3 REQUIRED)
 include_directories( ${EIGEN3_INCLUDE_DIRS} )
 
 add_subdirectory(pybind11)
 pybind11_add_module(lhts src/main.cpp)
 
+
+target_link_libraries (lhts Eigen3::Eigen)
 # EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
 # define (VERSION_INFO) here.
 target_compile_definitions(lhts
