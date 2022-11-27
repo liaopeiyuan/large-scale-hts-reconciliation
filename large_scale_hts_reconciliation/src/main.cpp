@@ -1,4 +1,7 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
+
+#include <Eigen/LU>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
