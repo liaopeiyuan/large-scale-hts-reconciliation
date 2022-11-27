@@ -7,6 +7,16 @@ int add(int i, int j) {
     return i + j;
 }
 
+Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
+{
+  return xs.inverse();
+}
+
+double det(const Eigen::MatrixXd &xs)
+{
+  return xs.determinant();
+}
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(lhts, m) {
@@ -29,6 +39,9 @@ PYBIND11_MODULE(lhts, m) {
         Subtract two numbers
         Some other explanation about the subtract function.
     )pbdoc");
+
+    m.def("inv", &inv);
+    m.def("det", &det);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

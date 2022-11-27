@@ -10,6 +10,8 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 add_subdirectory(pybind11)
 pybind11_add_module(lhts src/main.cpp)
 
+
+target_link_libraries(lhts Eigen3::Eigen)
 # EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
 # define (VERSION_INFO) here.
 target_compile_definitions(lhts
