@@ -1,0 +1,4 @@
+[submodule "lhts/pybind11"]
+	path = lhts/pybind11
+	url = https://github.com/pybind/pybind11
+	branch = stable
