@@ -15,10 +15,9 @@ def main():
     size = comm.Get_size()
     name = MPI.Get_processor_name()
     A = np.random.normal(size=(3, 3))
-    print(name + "," + str(rank) + "," + str(size))
+    print(str(rank) + "," + str(size) + ",", lhts.det(A))
     distrib = Distributed()
     distrib.say_hi(A)
-    print(lhts.det(A))
 
 
 if __name__ == "__main__":
