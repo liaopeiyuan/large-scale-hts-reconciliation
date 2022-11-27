@@ -46,47 +46,47 @@ public:
     char processor_name[MPI_MAX_PROCESSOR_NAME] = "localhost";
     int name_len;
     MPI_Get_processor_name(processor_name, &name_len);
-    printf("[C++]    Hello from machine %s, MPI rank %d out of %d, %f\n",
-	   processor_name,
-	   world_rank,
-	   world_size,
-       xs.determinant());
-    if (world_rank == 0) {
-      int thread_level;
-      MPI_Query_thread( &thread_level );
-      switch (thread_level) {
-      case MPI_THREAD_SINGLE:
-	printf("Detected thread level MPI_THREAD_SINGLE\n");
-	fflush(stdout);
-	break;
-      case MPI_THREAD_FUNNELED:
-	printf("Detected thread level MPI_THREAD_FUNNELED\n");
-	fflush(stdout);
-	break;
-      case MPI_THREAD_SERIALIZED:
-	printf("Detected thread level MPI_THREAD_SERIALIZED\n");
-	fflush(stdout);
-	break;
-      case MPI_THREAD_MULTIPLE:
-	printf("Detected thread level MPI_THREAD_MULTIPLE\n");
-	fflush(stdout);
-	break;
-      }
-      int nthreads, tid;
-
+    
     MPI_Status status;
-    if (0 == world_rank)
+    if (world_rank == 0)
     {
         MPI_Send(xs.data(), 9, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
     }
-    else if (1 == world_rank)
+    else if (world_rank == 1)
     {
         MPI_Recv(xs.data(), 9, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-        cout << xs << endl;
+        printf("%s, MPI rank %d out of %d, %f\n",
+            processor_name,
+            world_rank,
+            world_size,
+            xs.determinant());
     }
 
+    if (world_rank == 0) {
+        int thread_level;
+        MPI_Query_thread( &thread_level );
+        switch (thread_level) {
+            case MPI_THREAD_SINGLE:
+            printf("Detected thread level MPI_THREAD_SINGLE\n");
+            fflush(stdout);
+            break;
+            case MPI_THREAD_FUNNELED:
+            printf("Detected thread level MPI_THREAD_FUNNELED\n");
+            fflush(stdout);
+            break;
+            case MPI_THREAD_SERIALIZED:
+            printf("Detected thread level MPI_THREAD_SERIALIZED\n");
+            fflush(stdout);
+            break;
+            case MPI_THREAD_MULTIPLE:
+            printf("Detected thread level MPI_THREAD_MULTIPLE\n");
+            fflush(stdout);
+            break;
+      }
+    
+    int nthreads, tid;
 
-#pragma omp parallel private(nthreads, tid)
+    #pragma omp parallel private(nthreads, tid)
       {
 	
 	/* Obtain thread number */
@@ -102,6 +102,7 @@ public:
       }
     }
   }
+  
 private:
   MPI_Comm comm_global;
 };
