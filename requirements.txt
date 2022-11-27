@@ -1,1 +1,1 @@
---extra-index-url https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz mpi4py
+mpi4py
