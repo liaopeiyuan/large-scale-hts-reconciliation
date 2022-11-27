@@ -1,2 +1,2 @@
 example:
-	c++ -O3 -Wall -shared -std=c++11 -I/home/peiyuanl/anaconda3/include/python3.7m -fPIC $(python3 -m pybind11 --includes) example.cpp -o example$(python3-config --extension-suffix)
+	c++ -O3 -Wall -shared -std=c++11 -fPIC $(python3-config --includes) -Iextern/pybind11/include example.cpp -o example$(python3-config --extension-suffix)
