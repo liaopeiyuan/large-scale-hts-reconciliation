@@ -3,8 +3,7 @@
 cmake_minimum_required(VERSION 3.4...3.18)
 project(lhts)
 
-find_package( PkgConfig )
-pkg_check_modules( EIGEN3 REQUIRED eigen3 )
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 include_directories( ${EIGEN3_INCLUDE_DIRS} )
 
 add_subdirectory(pybind11)
