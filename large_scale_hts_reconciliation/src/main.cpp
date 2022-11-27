@@ -38,7 +38,7 @@ public:
   
   ~Distributed() {}
   
-  void say_hi() {
+  void say_hi(const Eigen::MatrixXd &xs) {
     int world_size;
     MPI_Comm_size(comm_global, &world_size);
     int world_rank;
@@ -46,10 +46,11 @@ public:
     char processor_name[MPI_MAX_PROCESSOR_NAME] = "localhost";
     int name_len;
     MPI_Get_processor_name(processor_name, &name_len);
-    printf("[C++]    Hello from machine %s, MPI rank %d out of %d\n",
+    printf("[C++]    Hello from machine %s, MPI rank %d out of %d, %f\n",
 	   processor_name,
 	   world_rank,
-	   world_size);
+	   world_size,
+       xs.determinant());
     if (world_rank == 0) {
       int thread_level;
       MPI_Query_thread( &thread_level );
