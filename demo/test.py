@@ -14,7 +14,7 @@ def main():
     rank = comm.Get_rank()
     size = comm.Get_size()
     name = MPI.Get_processor_name()
-    A = np.randn((3, 3))
+    A = np.random.normal(size=(3, 3))
     print(name + "," + str(rank) + "," + str(size))
     distrib = Distributed()
     distrib.say_hi(A)
