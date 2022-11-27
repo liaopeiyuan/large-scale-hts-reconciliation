@@ -55,6 +55,9 @@ public:
     else if (world_rank == 1)
     {
         MPI_Recv((void*)xs.data(), 9, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+        #ifdef _OPENMP
+        printf("OpenMP enabled.\n");
+        #endif
         printf("%s, MPI rank %d out of %d, %f\n",
             processor_name,
             world_rank,
