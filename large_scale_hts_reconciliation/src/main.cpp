@@ -10,6 +10,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <Eigen/LU>
+#include <assert>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -18,6 +19,24 @@ Eigen::MatrixXf reconcile(const Eigen::MatrixXf G, const Eigen::MatrixXf S, cons
     Eigen::MatrixXf res = S * G;
     res = res * yhat;
     return res;
+}
+
+Eigen::MatrixXf construct_S(const Eigen::MatrixXf S_compact, int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXf S = Eigen::MatrixXf::Zero(num_total, num_base);
+    
+    assert(S_compact.rows() == num_total);
+    assert(S_compact.cols() == num_levels);
+    assert(num_levels > 1);
+
+    #pragma omp parallel for 
+    for (int i = 0; i < num_base; i++) {
+        int co = S_compact(i, 0);
+        for (int j = 1; j < num_levels; j++) {
+            S(S_compact(i, j), co) = 1;
+        }
+    }
+
+    return S;
 }
 
 Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
@@ -129,8 +148,11 @@ PYBIND11_MODULE(lhts, m) {
     )pbdoc");
 
     m.def("inv", &inv);
-    m.def("reconcile", &reconcile);
     m.def("det", &det);
+
+    m.def("reconcile", &reconcile);
+    m.def("construct_S", &construct_S);
+    
 
     py::class_<Distributed>(m, "Distributed")    
         .def(py::init<>())
