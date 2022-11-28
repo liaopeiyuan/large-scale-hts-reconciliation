@@ -148,7 +148,7 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     return G;
 }
 
-Eigen::MatrixXf reconcile(const string method,
+Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf yhat,
                           int num_base, int num_total, int num_levels) {
