@@ -257,6 +257,9 @@ public:
     }
 
     if (world_rank == 0) {
+        std::stringstream ss;
+        ss << yhat_total;
+        printf("Matrix %s\n", ss.str().c_str());
         return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     } else {
         return yhat;
