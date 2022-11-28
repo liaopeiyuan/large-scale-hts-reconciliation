@@ -152,21 +152,15 @@ Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf yhat,
                           int num_base, int num_total, int num_levels) {
-    switch (std::hash<std::string>(method)) {
-        case std::hash<std::string>("bottom_up"):
-        break;
-        case std::hash<std::string>("top_down"):
-        break;
-        case std::hash<std::string>("middle_out"):
-        break;
-        case std::hash<std::string>("OLS"):
-        break;
-        case std::hash<std::string>("WLS"):
-        break;
-        default:
-            throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
-        break;
+    if (method == "bottom_up")
+    else if (method == "top_down")
+    else if (method == "middle_out")
+    else if (method == "OLS")
+    else if (method == "WLS")
+    else {
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
+    
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     printf("S\n");
     Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
