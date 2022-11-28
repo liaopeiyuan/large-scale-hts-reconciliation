@@ -204,6 +204,7 @@ class MPI_Utils
 public:
   MPI_Utils() : comm_global(MPI_COMM_WORLD) {
     omp_set_num_threads(8);
+    Eigen::initParallel();
   }
   
   ~MPI_Utils() {}
