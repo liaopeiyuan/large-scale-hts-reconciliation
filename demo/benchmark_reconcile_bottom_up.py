@@ -9,8 +9,10 @@ def main():
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
     y_hat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))[:, 0]
 
+    print(y_hat.shape)
+
     start = timer()
-    print(lhts.reconcile_bottom_up(S_compact, y_hat, 30490, 33549, 4).shape)
+    #print(lhts.reconcile_bottom_up(S_compact, y_hat, 30490, 33549, 4).shape)
     end = timer()
     print(end - start)
 
