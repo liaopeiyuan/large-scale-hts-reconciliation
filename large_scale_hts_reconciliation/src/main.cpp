@@ -152,16 +152,16 @@ Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf yhat,
                           int num_base, int num_total, int num_levels) {
-    switch (std::hash(method)) {
-        case std::hash("bottom_up"):
+    switch (std::hash<std::string>(method)) {
+        case std::hash<std::string>("bottom_up"):
         break;
-        case std::hash("top_down"):
+        case std::hash<std::string>("top_down"):
         break;
-        case std::hash("middle_out"):
+        case std::hash<std::string>("middle_out"):
         break;
-        case std::hash("OLS"):
+        case std::hash<std::string>("OLS"):
         break;
-        case std::hash("WLS"):
+        case std::hash<std::string>("WLS"):
         break;
         default:
             throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
