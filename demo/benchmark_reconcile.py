@@ -2,7 +2,7 @@ import numpy as np
 import lhts
 from timeit import default_timer as timer
 
-SIZE = 10000
+SIZE = 30000
 
 def main():
     S = np.random.normal(0, 1, size=(SIZE, SIZE)).astype(int)
