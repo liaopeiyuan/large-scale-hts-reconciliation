@@ -17,7 +17,7 @@ def main():
     A = np.random.normal(size=(3, 3))
     print(str(rank) + "," + str(size) + ",", lhts.det(A))
     distrib = Distributed()
-    distrib.say_hi(A)
+    distrib.test(A)
 
 
 if __name__ == "__main__":

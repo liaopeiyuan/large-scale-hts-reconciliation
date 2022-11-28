@@ -14,8 +14,10 @@
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-int add(int i, int j) {
-    return i + j;
+Eigen::MatrixXf reconcile(const Eigen::MatrixXf G, const Eigen::MatrixXf S, const Eigen::MatrixXf yhat) {
+    Eigen::MatrixXf res = S * G;
+    res = res * yhat;
+    return res;
 }
 
 Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
@@ -38,7 +40,7 @@ public:
   
   ~Distributed() {}
   
-  void say_hi(const Eigen::MatrixXd &xs) {
+  void test(const Eigen::MatrixXd &xs) {
     int world_size;
     MPI_Comm_size(comm_global, &world_size);
     int world_rank;
@@ -132,11 +134,12 @@ PYBIND11_MODULE(lhts, m) {
     )pbdoc");
 
     m.def("inv", &inv);
+    m.def("reconcile", &reconcile);
     m.def("det", &det);
 
     py::class_<Distributed>(m, "Distributed")    
         .def(py::init<>())
-        .def("say_hi", &Distributed::say_hi, "Each process will say hi");
+        .def("test", &Distributed::test, "test");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
