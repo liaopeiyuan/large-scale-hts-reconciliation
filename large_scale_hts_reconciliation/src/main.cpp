@@ -212,7 +212,7 @@ public:
         MPI_Waitall(world_size, reqs.data(), stats.data());
     } else {
         MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
-        MPI_Wait(1, &reqs[0], &stats[0]);
+        MPI_Wait(&reqs[0], &stats[0]);
     }
 
     if (world_rank == 0) {
