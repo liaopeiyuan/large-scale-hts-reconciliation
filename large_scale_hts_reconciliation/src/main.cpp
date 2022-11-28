@@ -204,8 +204,8 @@ public:
         yhat_total = Eigen::MatrixXi::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
         int curr_row = 0;
-        for (int i = 0; i < world_size; i++) {
-            MPI_Irecv(yhat_total.topRows(curr_row), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+        for (int i = 1; i < world_size; i++) {
+            MPI_Irecv(yhat_total.topRows(curr_row).data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
             curr_row += rows[i];
         }
 
