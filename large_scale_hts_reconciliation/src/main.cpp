@@ -203,7 +203,6 @@ class MPI_Utils
 {
 public:
   MPI_Utils() : comm_global(MPI_COMM_WORLD) {
-    omp_set_num_threads(8);
     Eigen::initParallel();
   }
   
@@ -323,6 +322,7 @@ public:
     }
 
     if (world_rank == 0) {
+        omp_set_num_threads(24);
         return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     } else {
         return yhat;
