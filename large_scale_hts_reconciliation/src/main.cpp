@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
+#include <vector>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -177,6 +178,43 @@ public:
   Distributed() : comm_global(MPI_COMM_WORLD) {}
   
   ~Distributed() {}
+  
+  Eigen::MatrixXf reconcile_naive_mpi(const Eigen::MatrixXi S_compact,
+                                      const Eigen::MatrixXf yhat, int num_base, int num_total, int num_levels) {
+    int world_size;
+    MPI_Comm_size(comm_global, &world_size);
+    int world_rank;
+    MPI_Comm_rank(comm_global, &world_rank);
+
+    int ro = yhat.rows();
+    int co = yhat.cols();
+
+    std::vector<int> rows(world_size);
+    std::vector<int> cols(world_size);
+
+    std::vector<MPI_Request> reqs(world_size);
+    std::vector<MPI_Status> ststs(world_size);
+
+    MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+
+    std::vector<Eigen::MatrixXf> yhats(world_size);
+
+    if (world_rank == 0) {
+        for (int i = 0; i < world_size; i++) {
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+        }
+    } else {
+        MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
+    }
+    
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
+    Eigen::MatrixXf res = (S * G).cast<float>();
+    res = res * yhat;
+    return res;
+  }
   
   void test(const Eigen::MatrixXd &xs) {
     int world_size;
