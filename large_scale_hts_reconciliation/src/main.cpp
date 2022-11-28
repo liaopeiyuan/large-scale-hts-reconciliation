@@ -32,7 +32,11 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
         int co = S_compact(i, 0);
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
-            if (ro != -1) S(ro, co) = 1;
+            if (ro == -1) {
+                break;
+            } else {
+                if (co < num_base) S(ro, co) = 1;
+            }
         }
     }
 
