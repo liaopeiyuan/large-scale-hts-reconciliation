@@ -205,12 +205,72 @@ public:
   
   ~MPI_Utils() {}
   
+  Eigen::MatrixXf reconcile_dp(const std::string method,
+                                const Eigen::MatrixXi S_compact,
+                                const Eigen::MatrixXf P,
+                                const Eigen::MatrixXf yhat,
+                                int level, float w,
+                                int num_base, int num_total, int num_levels) {
+    int world_size;
+    MPI_Comm_size(comm_global, &world_size);
+    int world_rank;
+    MPI_Comm_rank(comm_global, &world_rank);
+
+    int ro = yhat.rows();
+    int co = yhat.cols();
+
+    std::vector<int> rows(world_size);
+    std::vector<int> cols(world_size);
+
+    std::vector<MPI_Request> reqs(world_size);
+    std::vector<MPI_Status> stats(world_size);
+
+    MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+
+    Eigen::MatrixXf yhat_total;
+
+    if (world_rank == 0) {
+        yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
+                                           cols[0]);
+        std::vector<Eigen::MatrixXf> yhats(world_size);
+
+        for (int i = 1; i < world_size; i++) {
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+        }
+
+        MPI_Waitall(world_size, reqs.data(), stats.data());
+
+        int curr_row = rows[0];
+
+        yhat_total.topRows(rows[0]) = yhat;
+
+        for (int i = 1; i < world_size; i++) {
+            yhat_total.middleRows(curr_row, rows[i]) = yhats[i];
+            curr_row += rows[i];
+        }
+
+    } else {
+        MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
+        MPI_Wait(&reqs[0], &stats[0]);
+    }
+
+    if (world_rank == 0) {
+        return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
+    } else {
+        return yhat;
+    }
+  }
+
   Eigen::MatrixXf reconcile_naive(const std::string method,
                                     const Eigen::MatrixXi S_compact,
                                     const Eigen::MatrixXf P,
                                     const Eigen::MatrixXf yhat,
                                     int level, float w,
                                     int num_base, int num_total, int num_levels) {
+    omp_set_num_threads(4);
+    
     int world_size;
     MPI_Comm_size(comm_global, &world_size);
     int world_rank;
