@@ -198,18 +198,28 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    Eigen::MatrixXi yhat_total;
+    Eigen::MatrixXf yhat_total;
 
     if (world_rank == 0) {
         yhat_total = Eigen::MatrixXi::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
-        int curr_row = 0;
+        std::vector<Eigen::MatrixXf> yhats(world_size);
         for (int i = 1; i < world_size; i++) {
-            MPI_Irecv(yhat_total.topRows(curr_row).data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
-            curr_row += rows[i];
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
         }
 
         MPI_Waitall(world_size, reqs.data(), stats.data());
+
+        int curr_row = rows[0];
+
+        yhat_total.topRows(rows[0]) = yhat;
+
+        for (int i = 1; i < world_size; i++) {
+            yhat_total.middleRows(curr_row, rows[i]) = yhats[i];
+            curr_row += rows[i];
+        }
+
     } else {
         MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
         MPI_Wait(&reqs[0], &stats[0]);
