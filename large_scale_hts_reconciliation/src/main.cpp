@@ -154,7 +154,8 @@ Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXf yhat,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
-    
+    int nthreads = omp_get_num_threads();
+    printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     printf("S\n");
     Eigen::MatrixXf G;
@@ -201,7 +202,9 @@ using pymod = pybind11::module;
 class MPI_Utils
 {
 public:
-  MPI_Utils() : comm_global(MPI_COMM_WORLD) {}
+  MPI_Utils() : comm_global(MPI_COMM_WORLD) {
+    omp_set_num_threads(8);
+  }
   
   ~MPI_Utils() {}
   
