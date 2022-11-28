@@ -147,8 +147,11 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
 Eigen::MatrixXf reconcile_bottom_up(const Eigen::MatrixXi S_compact,
                                     const Eigen::MatrixXf yhat, int num_base, int num_total, int num_levels) {
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    printf("S\n");
     Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
+    printf("G\n");
     Eigen::MatrixXf res = (S * G).cast<float>();
+    printf("res\n");
     res = res * yhat;
     return res;
 }
