@@ -56,7 +56,7 @@ Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, int w) {
         W(i, i) = w;
     }
     Eigen::MatrixXf Sp = S.cast<float>();
-    Eigen::MatrixXi St = Sp.transpose();
+    Eigen::MatrixXf St = Sp.transpose();
     return (St * W * Sp).inverse() * St * W;
 }
 
