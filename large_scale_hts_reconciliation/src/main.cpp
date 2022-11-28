@@ -43,19 +43,21 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
     return S;
 }
 
-Eigen::MatrixXi construct_G_OLS(const Eigen::MatrixXi S) {
-    Eigen::MatrixXi St = S.transpose();
-    return (St * S).inverse() * St;
+Eigen::MatrixXf construct_G_OLS(const Eigen::MatrixXi S) {
+    Eigen::MatrixXf Sp = S.cast<float>();
+    Eigen::MatrixXf St = Sp.transpose();
+    return (St * Sp).inverse() * St;
 }
 
-Eigen::MatrixXi construct_G_WLS(const Eigen::MatrixXi S, int w) {
-    Eigen::MatrixXi W = Eigen::MatrixXi::Zero(S.rows(), S.cols());
+Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, int w) {
+    Eigen::MatrixXf W = Eigen::MatrixXf::Zero(S.rows(), S.cols());
     #pragma omp parallel for 
     for (int i = 0; i < S.rows(); i++) {
         W(i, i) = w;
     }
-    Eigen::MatrixXi St = S.transpose();
-    return (St * W * S).inverse() * St * W;
+    Eigen::MatrixXf Sp = S.cast<float>();
+    Eigen::MatrixXi St = Sp.transpose();
+    return (St * W * Sp).inverse() * St * W;
 }
 
 Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact, 
