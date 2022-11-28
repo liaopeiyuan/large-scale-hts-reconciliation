@@ -12,9 +12,11 @@ def main():
     print(y_hat.shape)
 
     start = timer()
-    print(lhts.reconcile_bottom_up(S_compact, y_hat, 5650, 6218, 4).shape)
+    print(lhts.reconcile("bottom_up", S_compact, y_hat, 5650, 6218, 4).shape)
     end = timer()
     print(end - start)
+
+    lhts.reconcile("blah", S_compact, y_hat, 5650, 6218, 4)
 
 if __name__ == "__main__":
     main()

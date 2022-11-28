@@ -4,6 +4,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <vector>
+#include <stdexcept>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -15,7 +16,7 @@
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-Eigen::MatrixXf reconcile(const Eigen::MatrixXf G, const Eigen::MatrixXf S, const Eigen::MatrixXf yhat) {
+Eigen::MatrixXf reconcile_matrix(const Eigen::MatrixXf G, const Eigen::MatrixXf S, const Eigen::MatrixXf yhat) {
     Eigen::MatrixXf res = S * G;
     res = res * yhat;
     return res;
@@ -147,8 +148,25 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     return G;
 }
 
-Eigen::MatrixXf reconcile_bottom_up(const Eigen::MatrixXi S_compact,
-                                    const Eigen::MatrixXf yhat, int num_base, int num_total, int num_levels) {
+Eigen::MatrixXf reconcile(const string method,
+                          const Eigen::MatrixXi S_compact,
+                          const Eigen::MatrixXf yhat,
+                          int num_base, int num_total, int num_levels) {
+    switch (method) {
+        case "bottom_up":
+        break;
+        case "top_down":
+        break;
+        case "middle_out":
+        break;
+        case "OLS":
+        break;
+        case "WLS":
+        break;
+        default:
+            throw std::invalid_argument("invalid reconciliation method");
+        break;
+    }
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     printf("S\n");
     Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
@@ -328,8 +346,8 @@ PYBIND11_MODULE(lhts, m) {
     m.def("inv", &inv);
     m.def("det", &det);
 
+    m.def("reconcile_matrix", &reconcile_matrix);
     m.def("reconcile", &reconcile);
-    m.def("reconcile_bottom_up", &reconcile_bottom_up);
     m.def("construct_S", &construct_S);
     m.def("construct_G_bottom_up", &construct_G_bottom_up);
     m.def("construct_G_top_down", &construct_G_top_down);
