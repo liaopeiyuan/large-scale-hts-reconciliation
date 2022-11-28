@@ -10,7 +10,6 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <Eigen/LU>
-#include <assert>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
