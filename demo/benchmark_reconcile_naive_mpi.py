@@ -25,34 +25,44 @@ def main():
     top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
 
     start = timer()
-    distrib.reconcile_naive_mpi("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_naive_mpi("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): print("Bottom up: " + str(elapsed))
+    if (rank == 0): 
+        print("Bottom up: " + str(elapsed))
+        print(rec)
 
     start = timer()
-    distrib.reconcile_naive_mpi("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_naive_mpi("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): print("Top down: " + str(elapsed))
+    if (rank == 0): 
+        print("Top down: " + str(elapsed))
+        print(rec)
 
     start = timer()
-    distrib.reconcile_naive_mpi("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_naive_mpi("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): print("Middle out: " + str(elapsed))
+    if (rank == 0):
+        print("Middle out: " + str(elapsed))
+        print(rec)
 
     start = timer()
-    distrib.reconcile_naive_mpi("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_naive_mpi("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): print("OLS: " + str(elapsed))
+    if (rank == 0):
+        print("OLS: " + str(elapsed))
+        print(rec)
 
     start = timer()
-    distrib.reconcile_naive_mpi("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
+    rec = distrib.reconcile_naive_mpi("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): print("WLS: " + str(elapsed))
+    if (rank == 0):
+        print("WLS: " + str(elapsed))
+        print(rec)
 
     
 

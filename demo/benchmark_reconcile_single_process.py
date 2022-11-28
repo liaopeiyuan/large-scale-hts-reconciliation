@@ -12,34 +12,39 @@ def main():
     print(y_hat.shape)
 
     start = timer()
-    print(lhts.reconcile("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
+    rec = lhts.reconcile("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("Bottom up: " + str(elapsed))
+    print(rec)
 
     start = timer()
-    print(lhts.reconcile("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
+    rec = lhts.reconcile("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("Top down: " + str(elapsed))
+    print(rec)
 
     start = timer()
-    print(lhts.reconcile("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4).shape)
+    rec = lhts.reconcile("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("Middle out: " + str(elapsed))
+    print(rec)
 
     start = timer()
-    print(lhts.reconcile("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4).shape)
+    rec = lhts.reconcile("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("OLS: " + str(elapsed))
+    print(rec)
 
     start = timer()
-    print(lhts.reconcile("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4).shape)
+    rec = lhts.reconcile("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("WLS: " + str(elapsed))
+    print(rec)
 
     
 
