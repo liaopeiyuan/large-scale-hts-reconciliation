@@ -269,7 +269,6 @@ public:
                                     const Eigen::MatrixXf yhat,
                                     int level, float w,
                                     int num_base, int num_total, int num_levels) {
-    omp_set_num_threads(4);
     
     int world_size;
     MPI_Comm_size(comm_global, &world_size);
@@ -291,6 +290,9 @@ public:
     Eigen::MatrixXf yhat_total;
 
     if (world_rank == 0) {
+        int nthreads = omp_get_num_threads();
+        printf("nthreads: %d\n", nthreads);
+
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
         std::vector<Eigen::MatrixXf> yhats(world_size);
