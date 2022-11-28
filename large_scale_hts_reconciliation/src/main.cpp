@@ -198,22 +198,32 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    std::vector<Eigen::MatrixXf> yhats(world_size);
+    Eigen::MatrixXi yhat_total;
 
     if (world_rank == 0) {
+        yhat_total = Eigen::MatrixXi::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
+                                           cols[0]);
+        int curr_row = 0;
         for (int i = 0; i < world_size; i++) {
-            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
-            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+            MPI_Irecv(yhat_total.topRows(curr_row), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+            curr_row += rows[i];
         }
+
+        MPI_Waitall(world_size, reqs.data(), stats.data());
     } else {
         MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
+        MPI_Wait(1, &reqs[0], &stats[0]);
     }
-    
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-    Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
-    Eigen::MatrixXf res = (S * G).cast<float>();
-    res = res * yhat;
-    return res;
+
+    if (world_rank == 0) {
+        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+        Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
+        Eigen::MatrixXf res = (S * G).cast<float>();
+        res = res * yhat_total;
+        return res;
+    } else {
+        return yhat;
+    }
   }
   
   void test(const Eigen::MatrixXd &xs) {
