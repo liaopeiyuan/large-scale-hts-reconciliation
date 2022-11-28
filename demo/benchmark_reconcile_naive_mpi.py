@@ -23,37 +23,36 @@ def main():
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
     y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
     top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
-    print(y_hat.shape)
 
     start = timer()
-    print(distrib.reconcile_naive_mpi("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
+    distrib.reconcile_naive_mpi("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Bottom up: " + str(elapsed))
+    if (rank == 0): print("Bottom up: " + str(elapsed))
 
     start = timer()
-    print(distrib.reconcile_naive_mpi("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
+    distrib.reconcile_naive_mpi("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Top down: " + str(elapsed))
+    if (rank == 0): print("Top down: " + str(elapsed))
 
     start = timer()
-    print(distrib.reconcile_naive_mpi("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4).shape)
+    distrib.reconcile_naive_mpi("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Middle out: " + str(elapsed))
+    if (rank == 0): print("Middle out: " + str(elapsed))
 
     start = timer()
-    print(distrib.reconcile_naive_mpi("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4).shape)
+    distrib.reconcile_naive_mpi("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("OLS: " + str(elapsed))
+    if (rank == 0): print("OLS: " + str(elapsed))
 
     start = timer()
-    print(distrib.reconcile_naive_mpi("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4).shape)
+    distrib.reconcile_naive_mpi("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("WLS: " + str(elapsed))
+    if (rank == 0): print("WLS: " + str(elapsed))
 
     
 
