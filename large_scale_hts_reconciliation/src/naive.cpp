@@ -29,8 +29,8 @@ Eigen::MatrixXf getS(Eigen::MatrixXf hierachy, int n) {
         S(bottoms[i], i) = 1;
     }
     for (int i = hierachy.rows() - 1; i >= 0; i ++) {
-        int parent = hierachy(i, 0);
-        int child = hierachy(i, 1);
+        float parent = hierachy(i, 0);
+        float child = hierachy(i, 1);
         S(parent) += S(child);
     }
     return S;
