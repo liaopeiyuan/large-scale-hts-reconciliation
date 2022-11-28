@@ -28,14 +28,41 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
     assert(num_levels > 1);
 
     #pragma omp parallel for 
-    for (int i = 0; i < num_base; i++) {
+    for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         for (int j = 1; j < num_levels; j++) {
-            S(S_compact(i, j), co) = 1;
+            int ro = S_compact(i, j);
+            if (ro != -1) S(ro, co) = 1;
         }
     }
 
     return S;
+}
+
+Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_base, num_total);
+    
+    assert(S_compact.rows() == num_total);
+    assert(S_compact.cols() == num_levels);
+    assert(num_levels > 1);
+
+    #pragma omp parallel for 
+    for (int i = 0; i < num_total; i++) {
+        int co = S_compact(i, 0);
+        bool is_base = true;
+        for (int j = 1; j < num_levels; j++) {
+            int ro = S_compact(i, j);
+            if (ro != -1) {
+                is_base = false;
+                break;
+            }
+        }
+        if (is_base) {
+            G(i, i) = 1;
+        }
+    }
+
+    return G;
 }
 
 Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
@@ -151,7 +178,7 @@ PYBIND11_MODULE(lhts, m) {
 
     m.def("reconcile", &reconcile);
     m.def("construct_S", &construct_S);
-    
+    m.def("construct_G_bottom_up", &construct_G_bottom_up);
 
     py::class_<Distributed>(m, "Distributed")    
         .def(py::init<>())
