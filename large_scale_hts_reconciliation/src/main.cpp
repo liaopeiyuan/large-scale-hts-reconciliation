@@ -157,16 +157,16 @@ Eigen::MatrixXf reconcile(const std::string method,
     
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     printf("S\n");
-    Eigen::MatrixXi G;
+    Eigen::MatrixXf G;
     
     if (method == "bottom_up") {
-        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
-        G = construct_G_top_down(S_compact, P, level, num_base, num_total, num_levels);
+        G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
     }
     else if (method == "OLS") {
         G = construct_G_OLS(S);
@@ -179,7 +179,7 @@ Eigen::MatrixXf reconcile(const std::string method,
     }
     
     printf("G\n");
-    Eigen::MatrixXf res = (S * G).cast<float>();
+    Eigen::MatrixXf res = S.cast<float>() * G;
     printf("res\n");
     res = res * yhat;
     return res;
