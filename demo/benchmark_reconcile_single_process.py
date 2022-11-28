@@ -14,7 +14,14 @@ def main():
     start = timer()
     print(lhts.reconcile("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
     end = timer()
-    print(end - start)
+    elapsed = round(end - start, 4)
+    print("Bottom up: " + str(elapsed))
+
+    start = timer()
+    print(lhts.reconcile("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
+    end = timer()
+    elapsed = round(end - start, 4)
+    print("Top down: " + str(elapsed))
 
     lhts.reconcile("blah", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
 
