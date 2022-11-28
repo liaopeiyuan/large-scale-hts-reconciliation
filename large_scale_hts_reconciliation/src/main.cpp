@@ -51,7 +51,7 @@ Eigen::MatrixXi construct_G_OLS(const Eigen::MatrixXi S) {
 Eigen::MatrixXi construct_G_WLS(const Eigen::MatrixXi S, int w) {
     Eigen::MatrixXi W = Eigen::MatrixXi::Zero(S.rows(), S.cols());
     #pragma omp parallel for 
-    for (int i = 0; i < min(S.rows(), S.cols()); i++) {
+    for (int i = 0; i < S.rows(); i++) {
         W(i, i) = w;
     }
     Eigen::MatrixXi St = S.transpose();
