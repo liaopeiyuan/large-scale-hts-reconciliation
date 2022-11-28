@@ -198,14 +198,14 @@ double det(const Eigen::MatrixXd &xs)
 namespace py = pybind11;
 using pymod = pybind11::module;
 
-class Distributed
+class MPI_Utils
 {
 public:
-  Distributed() : comm_global(MPI_COMM_WORLD) {}
+  MPI_Utils() : comm_global(MPI_COMM_WORLD) {}
   
-  ~Distributed() {}
+  ~MPI_Utils() {}
   
-  Eigen::MatrixXf reconcile_naive_mpi(const std::string method,
+  Eigen::MatrixXf reconcile_naive(const std::string method,
                                     const Eigen::MatrixXi S_compact,
                                     const Eigen::MatrixXf P,
                                     const Eigen::MatrixXf yhat,
@@ -257,9 +257,6 @@ public:
     }
 
     if (world_rank == 0) {
-        //std::stringstream ss;
-        //ss << yhat_total;
-        //printf("Matrix %s\n", ss.str().c_str());
         return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     } else {
         return yhat;
@@ -364,9 +361,9 @@ PYBIND11_MODULE(lhts, m) {
     m.def("construct_G_top_down", &construct_G_top_down);
     m.def("construct_G_middle_out", &construct_G_middle_out);
 
-    py::class_<Distributed>(m, "Distributed")    
+    py::class_<MPI_Utils>(m, "MPI_Utils")    
         .def(py::init<>())
-        .def("reconcile_naive_mpi", &Distributed::reconcile_naive_mpi, "reconcile_naive_mpi");
+        .def("reconcile_naive", &MPI_Utils::reconcile_naive, "reconcile_naive");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
