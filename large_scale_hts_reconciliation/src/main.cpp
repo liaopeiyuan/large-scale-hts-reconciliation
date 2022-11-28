@@ -20,15 +20,6 @@ Eigen::MatrixXf reconcile(const Eigen::MatrixXf G, const Eigen::MatrixXf S, cons
     return res;
 }
 
-Eigen::MatrixXf reconcile_bottom_up(const Eigen::MatrixXi S_compact,
-                                    const Eigen::MatrixXf yhat, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-    Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
-    Eigen::MatrixXf res = (S * G).cast<float>();
-    res = res * yhat;
-    return res;
-}
-
 Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
     Eigen::MatrixXi S = Eigen::MatrixXi::Zero(num_total, num_base);
     
@@ -72,6 +63,15 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     }
 
     return G;
+}
+
+Eigen::MatrixXf reconcile_bottom_up(const Eigen::MatrixXi S_compact,
+                                    const Eigen::MatrixXf yhat, int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
+    Eigen::MatrixXf res = (S * G).cast<float>();
+    res = res * yhat;
+    return res;
 }
 
 Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
