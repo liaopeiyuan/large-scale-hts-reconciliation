@@ -1,12 +1,14 @@
 #include <iostream>
 #include <vector>
-#include "xtensor/xarray.hpp"
-#include "xtensor/xio.hpp"
+#include <pybind11/pybind11.h>
+#include <random>
+#include "Eigen"
+#include "cnpy.h"
 
 using namespace std;
 
-bool hasChild(xt::xarray<int> hierachy, int i) {
-    for (int j = 0; j < hierachy.size(); j ++) {
+bool hasChild(Eigen::MatrixXf hierachy, int i) {
+    for (int j = 0; j < hierachy.rows(); j ++) {
         if (i == hierachy(j, 0)) {
             return true;
         }
@@ -14,7 +16,7 @@ bool hasChild(xt::xarray<int> hierachy, int i) {
     return false;
 }
 
-xt::xarray<int> getS(xt::xarray<int> hierachy, int n) {
+Eigen::MatrixXf getS(Eigen::MatrixXf hierachy, int n) {
     vector<int> bottoms;
     for (int i = 0; i < n; i ++) {
         if(!hasChild(hierachy, i)) {
@@ -22,11 +24,11 @@ xt::xarray<int> getS(xt::xarray<int> hierachy, int n) {
         }
     }
     int m = bottoms.size();
-    xt::xarray<int> S = xt::zeros({n, m});
+    Eigen::MatrixXf S = MatrixXd::Zero(n, m);
     for (int i = 0; i < m; i ++) {
         S(bottoms[i], i) = 1;
     }
-    for (int i = hierachy.size() - 1; i >= 0; i ++) {
+    for (int i = hierachy.rows() - 1; i >= 0; i ++) {
         int parent = hierachy(i, 0);
         int child = hierachy(i, 1);
         S(parent) += S(child);
@@ -38,8 +40,8 @@ xt::xarray<int> getS(xt::xarray<int> hierachy, int n) {
 // S, the summing matrix (tree structure) , a matrix
 // and bt, the bottom prediction values, a matrix with size of all bottom leaves,
 // and outputs the series of the whole tree
-xt::xarray<float> BottomUp(int n, xt::xarray<int> hierachy, xt::xarray<float> yt) {
-    xt::xarray<int> S = getS(hierachy, n);
+Eigen::MatrixXf BottomUp(int n, Eigen::MatrixXf hierachy, Eigen::MatrixXf yt) {
+    Eigen::MatrixXf S = getS(hierachy, n);
     vector<int> bottoms;
     for (int i = 0; i < n; i ++) {
         if(!hasChild(hierachy, i)) {
@@ -47,13 +49,13 @@ xt::xarray<float> BottomUp(int n, xt::xarray<int> hierachy, xt::xarray<float> yt
         }
     }
     int m = bottoms.size();
-    xt::xarray<int> G = xt::zeros_like(S);
+    Eigen::MatrixXf G = MatrixXd::Zero(n, m);
     for (int i = 0; i < m; i ++) {
         G(bottoms[i], i) = 1;
     }
-    G = xt::transpose(G);
-    xt::xarray<float> res = xt::linalg::dot(S, G);
-    res = xt::linalg::dot(res, yt);
+    G.transposeInPlace();
+    Eigen::MatrixXf res = S * G;
+    res = res * yt;
     return res;
 }
 
@@ -61,12 +63,12 @@ xt::xarray<float> BottomUp(int n, xt::xarray<int> hierachy, xt::xarray<float> yt
 // S, the summing matrix, yt, the total series,
 // and method in ["average_proportions", "proportion_averages", "forecast_proportions"]
 // and outputs the series of the whole tree
-/*xt::array<float> TopDown(int n, xt::xarray<int> hierachy, xt::xarray<float> yt, string method) {
+/*xt::array<float> TopDown(int n, Eigen::MatrixXf<int> hierachy, Eigen::MatrixXf<float> yt, string method) {
     //get p
     //get G
-    xt::xarray<int> S = getS(hierachy, n);
-    xt::xarray<float> G = xt::zeros_like(S);
-    xt::xarray<float> prop;
+    Eigen::MatrixXf<int> S = getS(hierachy, n);
+    Eigen::MatrixXf<float> G = xt::zeros_like(S);
+    Eigen::MatrixXf<float> prop;
     if (method == "forecast_proportions") {
 
     }
@@ -77,17 +79,17 @@ xt::xarray<float> BottomUp(int n, xt::xarray<int> hierachy, xt::xarray<float> yt
     }
     G(0) = prop;
     G = xt::transpose(G);
-    xt::xarray<float> res = xt::linalg::dot(S, G);
+    Eigen::MatrixXf<float> res = xt::linalg::dot(S, G);
     res = xt::linalg::dot(res, yt);
     return res;
 }*/
 
 
-xt::xarray<float> TopDown(int n, xt::xarray<int> hierachy, xt::xarray<float> yt, 
-                            xt::xarray<float> pnodes) {
+Eigen::MatrixXf TopDown(int n, Eigen::MatrixXf hierachy, Eigen::MatrixXf yt, 
+                            Eigen::MatrixXf pnodes) {
     //get p
     //get G
-    xt::xarray<int> S = getS(hierachy, n);
+    Eigen::MatrixXf S = getS(hierachy, n);
     vector<int> bottoms;
     for (int i = 0; i < n; i ++) {
         if(!hasChild(hierachy, i)) {
@@ -95,12 +97,12 @@ xt::xarray<float> TopDown(int n, xt::xarray<int> hierachy, xt::xarray<float> yt,
         }
     }
     int m = bottoms.size();
-    xt::xarray<float> G = xt::zeros_like(S);
-    xt::xarray<float> phelper = pnodes;
-    xt::xarray<float> prop = xt::zeros({1, m});
-    for (int i = 0; i < hierachy.size(); i ++) {
-        int parent = hierachy(i, 0);
-        int child = hierachy(i, 1);
+    Eigen::MatrixXf G = MatrixXd::Zero(n, m);
+    Eigen::MatrixXf phelper = pnodes;
+    Eigen::MatrixXf prop = MatrixXd::Zero(1, m);
+    for (int i = 0; i < hierachy.rows(); i ++) {
+        float parent = hierachy(i, 0);
+        float child = hierachy(i, 1);
         pnodes(child) *= pnodes(parent);
     }
     for (int i = 0; i < m; i ++) {
@@ -108,54 +110,55 @@ xt::xarray<float> TopDown(int n, xt::xarray<int> hierachy, xt::xarray<float> yt,
         prop(i) = pnodes(index);
     }
     G(0) = prop;
-    G = xt::transpose(G);
-    xt::xarray<float> res = xt::linalg::dot(S, G);
-    res = xt::linalg::dot(res, yt);
+    G.transposeInPlace();
+    Eigen::MatrixXf res = S * G;
+    res = res * yt;
     return res;
 }
 
-xt::xarray<float> MiddleOut(int n, xt::xarray<int> hierachy, xt::xarray<float> yt, 
-                            xt::xarray<float> pnodes, int level_start, int level_end) {
+Eigen::MatrixXf MiddleOut(int n, Eigen::MatrixXf hierachy, Eigen::MatrixXf yt, 
+                            Eigen::MatrixXf pnodes, int level_start, int level_end) {
     int i = 0;
     while (hierachy(i, 0) != level_start) {
         i += 1;
     }
-    xt::xarray buH = xt::view(hierachy, xt::range(_, i));
-    xt::xarray buYt = xt::view(yt, xt::range(_, level_start));
-    xt::xarray buRes = BottomUp(i, buH, buYt);
+    Eigen::MatrixXf buH = hierachy.block(0, 0, i, 2);
+    Eigen::MatrixXf buYt = yt.block(0, 0, level_start, yt.cols());
+    Eigen::MatrixXf buRes = BottomUp(i, buH, buYt);
 
-    xt::xarray tdH = xt::view(hierachy, xt::range(i, _));
-    xt::xarray tdYt = xt::view(yt, xt::range(level_start, _));
-    xt::xarray tdP = xt::view(pnodes, xt::range(level_end, _));
-    xt::xarray tdRes = TopDown(n - i, tdH, tdYt, tdP);
-
-    xt::xarray res = xt::stack(xt::xtuple(buRes, tdRes));
+    Eigen::MatrixXf tdH = hierachy.block(i, 0, hierachy.rows(), 2);
+    Eigen::MatrixXf tdYt = yt.block(level_start, 0, yt.rows(), yt.cols());
+    Eigen::MatrixXf tdP = pnodes.block(level_end, 0, pnodes.rows(), pnodes.cols());
+    Eigen::MatrixXf tdRes = TopDown(n - i, tdH, tdYt, tdP);
+    Eigen::MatrixXf res(buRes.rows() + tdRes.rows(), buRes.cols());
+    res.topRows(buRes.rows()) = buRes;
+    res.bottomRows(tdRes.rows()) = tdRes;
     return res;
 }
 
-xt::xarray<float> OLS(xt::xarray<int> hierachy, xt::xarray<float> yt) {
+Eigen::MatrixXf OLS(Eigen::MatrixXf hierachy, Eigen::MatrixXf yt) {
     //get G
-    xt::xarray<int> S = getS(hierachy, n);
-    xt::xarray<int> ST = xt::transpose(S);
-    xt::xarray<int> G = xt::linalg::dot(ST, S);
-    G = xt::linalg::inv(G);
-    G = xt::linalg::dot(G, ST);
-    xt::xarray<float> res = xt::linalg::dot(S, G);
-    res = xt::linalg::dot(res, yt);
+    Eigen::MatrixXf S = getS(hierachy, n);
+    Eigen::MatrixXf ST = S.transpose();
+    Eigen::MatrixXf G = ST * S;
+    G = G.inverse();
+    G = G * ST;
+    Eigen::MatrixXf res = S * G;
+    res = res * yt;
     return res;
 }
 
-xt::xarray<float> WLS(xt::xarray<int> hierachy, xt::xarray<float> yt, xt::xarray<float> W) {
+Eigen::MatrixXf<float> WLS(Eigen::MatrixXf<int> hierachy, Eigen::MatrixXf<float> yt, Eigen::MatrixXf<float> W) {
     //get G
     //get W? diagonal matrix of S?
-    xt::xarray<int> S = getS(hierachy, n);
-    xt::xarray<int> ST = xt::transpose(S);
-    xt::xarray<int> G = xt::linalg::dot(ST, W);
-    G = xt::linalg::dot(G, S);
-    G = xt::linalg::inv(G);
-    G = xt::linalg::dot(G, ST);
-    G = xt::linalg::dot(G, W);
-    xt::xarray<float> res = xt::linalg::dot(S, G);
-    res = xt::linalg::dot(res, yt);
+    Eigen::MatrixXf<int> S = getS(hierachy, n);
+    Eigen::MatrixXf<int> ST = S.transpose();
+    Eigen::MatrixXf<int> G = ST * W;
+    G = G * S;
+    G = G.inverse();
+    G = G * ST;
+    G = G * W;
+    Eigen::MatrixXf res = S * G;
+    res = res * yt;
     return res;
 }
