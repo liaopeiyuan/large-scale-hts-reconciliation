@@ -201,9 +201,10 @@ public:
     Eigen::MatrixXf yhat_total;
 
     if (world_rank == 0) {
-        yhat_total = Eigen::MatrixXi::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
+        yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
         std::vector<Eigen::MatrixXf> yhats(world_size);
+
         for (int i = 1; i < world_size; i++) {
             yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
             MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
