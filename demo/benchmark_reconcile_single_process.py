@@ -8,7 +8,7 @@ def main():
 
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
     y_hat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
     print(y_hat.shape)
 
     start = timer()
