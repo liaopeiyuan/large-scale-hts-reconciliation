@@ -92,7 +92,7 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
     return G;
 }
 
-Eigen::MatrixXf (const Eigen::MatrixXi S_compact, 
+Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact, 
                 const Eigen::MatrixXf P, 
                 int num_base, int num_total, int num_levels) {
     Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
