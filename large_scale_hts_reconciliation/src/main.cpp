@@ -51,7 +51,7 @@ Eigen::MatrixXf construct_G_OLS(const Eigen::MatrixXi S) {
     return (St * Sp).inverse() * St;
 }
 
-Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, int w) {
+Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, float w) {
     Eigen::MatrixXf W = Eigen::MatrixXf::Zero(S.rows(), S.cols());
     #pragma omp parallel for 
     for (int i = 0; i < S.rows(); i++) {
@@ -92,7 +92,7 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
     return G;
 }
 
-Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact, 
+Eigen::MatrixXf (const Eigen::MatrixXi S_compact, 
                 const Eigen::MatrixXf P, 
                 int num_base, int num_total, int num_levels) {
     Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
@@ -150,30 +150,34 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
 
 Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
+                          const Eigen::MatrixXf P,
                           const Eigen::MatrixXf yhat,
+                          int level, float w,
                           int num_base, int num_total, int num_levels) {
+    
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    printf("S\n");
+    Eigen::MatrixXi G;
+    
     if (method == "bottom_up") {
-
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
     }
     else if (method == "top_down") {
-
+        G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
-
+        G = construct_G_top_down(S_compact, P, level, num_base, num_total, num_levels);
     }
     else if (method == "OLS") {
-
+        G = construct_G_OLS(S);
     }
     else if (method == "WLS") {
-
+        G = construct_G_WLS(S, w);
     }
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
     
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-    printf("S\n");
-    Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
     printf("G\n");
     Eigen::MatrixXf res = (S * G).cast<float>();
     printf("res\n");
@@ -201,8 +205,12 @@ public:
   
   ~Distributed() {}
   
-  Eigen::MatrixXf reconcile_naive_mpi(const Eigen::MatrixXi S_compact,
-                                      const Eigen::MatrixXf yhat, int num_base, int num_total, int num_levels) {
+  Eigen::MatrixXf reconcile_naive_mpi(const std::string method,
+                                    const Eigen::MatrixXi S_compact,
+                                    const Eigen::MatrixXf P,
+                                    const Eigen::MatrixXf yhat,
+                                    int level, float w,
+                                    int num_base, int num_total, int num_levels) {
     int world_size;
     MPI_Comm_size(comm_global, &world_size);
     int world_rank;
@@ -249,11 +257,7 @@ public:
     }
 
     if (world_rank == 0) {
-        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-        Eigen::MatrixXi G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
-        Eigen::MatrixXf res = (S * G).cast<float>();
-        res = res * yhat_total;
-        return res;
+        return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     } else {
         return yhat;
     }

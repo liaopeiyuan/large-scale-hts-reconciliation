@@ -8,15 +8,15 @@ def main():
 
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
     y_hat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-
+    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     print(y_hat.shape)
 
     start = timer()
-    print(lhts.reconcile("bottom_up", S_compact, y_hat, 5650, 6218, 4).shape)
+    print(lhts.reconcile("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4).shape)
     end = timer()
     print(end - start)
 
-    lhts.reconcile("blah", S_compact, y_hat, 5650, 6218, 4)
+    lhts.reconcile("blah", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
 
 if __name__ == "__main__":
     main()
