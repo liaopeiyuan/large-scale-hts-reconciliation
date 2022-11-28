@@ -363,7 +363,7 @@ PYBIND11_MODULE(lhts, m) {
 
     py::class_<Distributed>(m, "Distributed")    
         .def(py::init<>())
-        .def("test", &Distributed::test, "test");
+        .def("reconcile_naive_mpi", &Distributed::reconcile_naive_mpi, "reconcile_naive_mpi");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
