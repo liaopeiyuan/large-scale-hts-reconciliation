@@ -152,11 +152,21 @@ Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf yhat,
                           int num_base, int num_total, int num_levels) {
-    if (method == "bottom_up")
-    else if (method == "top_down")
-    else if (method == "middle_out")
-    else if (method == "OLS")
-    else if (method == "WLS")
+    if (method == "bottom_up") {
+
+    }
+    else if (method == "top_down") {
+
+    }
+    else if (method == "middle_out") {
+
+    }
+    else if (method == "OLS") {
+
+    }
+    else if (method == "WLS") {
+
+    }
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
