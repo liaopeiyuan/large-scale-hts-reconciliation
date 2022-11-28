@@ -20,8 +20,8 @@ Eigen::MatrixXf reconcile(const Eigen::MatrixXf G, const Eigen::MatrixXf S, cons
     return res;
 }
 
-Eigen::MatrixXf construct_S(const Eigen::MatrixXf S_compact, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXf S = Eigen::MatrixXf::Zero(num_total, num_base);
+Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXf S = Eigen::MatrixXi::Zero(num_total, num_base);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
