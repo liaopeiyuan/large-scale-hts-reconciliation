@@ -151,7 +151,6 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
 Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
-                          const Eigen::MatrixXf yhat,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
@@ -280,7 +279,7 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels);
 
     Eigen::MatrixXf reconciliation_matrix_local;
 
