@@ -292,8 +292,8 @@ public:
 
     std::stringstream ss;
     ss << rows << " " << cols;
-    printf("rank %d: %s", ss);
-    
+    printf("rank %d: %s", ss.str().c_str());
+
     int slice_start, slice_length;
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
