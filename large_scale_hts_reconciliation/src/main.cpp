@@ -252,10 +252,6 @@ public:
 
 
     if (world_rank == 0) {
-        for (int i = 0; i < world_size; i++) {
-            printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
-        }
-        
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
         std::vector<Eigen::MatrixXf> yhats(world_size);
@@ -318,6 +314,10 @@ public:
     if (world_rank == 0) {
         int nthreads = omp_get_num_threads();
         printf("nthreads: %d\n", nthreads);
+        for (int i = 0; i < world_size; i++) {
+            printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
+        }
+        
 
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
