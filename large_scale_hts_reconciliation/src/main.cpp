@@ -177,6 +177,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
+    printf("G: %d x %d", G.rows(), G.cols());
+    printf("S: %d x %d", S.rows(), S.cols());
 
     G = G(Eigen::seq(slice_start, slice_length), Eigen::all);
     S = S(Eigen::all, Eigen::seq(slice_start, slice_length));
@@ -298,7 +300,7 @@ public:
         curr_row += rows[i];
     }
 
-    //Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
     //return reconciliation_matrix * yhat;
     return yhat;
 
