@@ -191,8 +191,8 @@ Eigen::MatrixXf reconcile(const std::string method,
     res = res * yhat;
 
     std::stringstream ss3;
-    ss3 << res;
-    printf("res: %s\n", ss3.str().c_str());
+    ss3 << yhat(igen::seqN(0, 10), Eigen::all);
+    printf("yhat: %s\n", ss3.str().c_str());
 
     return res;
 }
