@@ -155,12 +155,12 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
     int nthreads = omp_get_num_threads();
-    printf("nthreads: %d\n", nthreads);
+    // printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
-    std::stringstream ss;
-    ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    printf("S: %s\n", ss.str().c_str());
+    // std::stringstream ss;
+    // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    // printf("S: %s\n", ss.str().c_str());
 
     Eigen::MatrixXf G;
     
@@ -248,40 +248,31 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    Eigen::MatrixXf yhat_total;
+    Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
 
-
-    if (world_rank == 0) {
-        yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
-                                           cols[0]);
-        std::vector<Eigen::MatrixXf> yhats(world_size);
-
-        for (int i = 1; i < world_size; i++) {
-            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
-            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+    int curr_row = rows[0];
+    for (int i = 0; i < world_size; i++) {
+        if (i == world_rank) {
+            yhat_total.middleRows(curr_row, rows[i]) = yhat;
+        } else {
+            yhat_total.middleRows(curr_row, rows[i]) = Eigen::MatrixXf::Zero(rows[i], cols[i]);
         }
-
-        MPI_Waitall(world_size, reqs.data(), stats.data());
-
-        int curr_row = rows[0];
-
-        yhat_total.topRows(rows[0]) = yhat;
-
-        for (int i = 1; i < world_size; i++) {
-            yhat_total.middleRows(curr_row, rows[i]) = yhats[i];
-            curr_row += rows[i];
-        }
-
-    } else {
-        MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
-        MPI_Wait(&reqs[0], &stats[0]);
+        curr_row += rows[i];
     }
 
-    if (world_rank == 0) {
-        return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
-    } else {
-        return yhat;
+    Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
+
+    Eigen::MatrixXf y_ret;
+    curr_row = rows[0];
+    for (int i = 0; i < world_size; i++) {
+        if (i == world_rank) {
+            y_ret = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
+        }
+        curr_row += rows[i];
     }
+
+    return y_ret;
+
   }
 
   Eigen::MatrixXf reconcile_naive(const std::string method,
@@ -313,10 +304,10 @@ public:
 
     if (world_rank == 0) {
         int nthreads = omp_get_num_threads();
-        printf("nthreads: %d\n", nthreads);
-        for (int i = 0; i < world_size; i++) {
-            printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
-        }
+        // printf("nthreads: %d\n", nthreads);
+        // for (int i = 0; i < world_size; i++) {
+        //    printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
+        // }
         
 
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
@@ -476,7 +467,8 @@ PYBIND11_MODULE(lhts, m) {
 
     py::class_<MPI_Utils>(m, "MPI_Utils")    
         .def(py::init<>())
-        .def("reconcile_naive", &MPI_Utils::reconcile_naive, "reconcile_naive");
+        .def("reconcile_naive", &MPI_Utils::reconcile_naive, "reconcile_naive")
+        .def("reconcile_dp", &MPI_Utils::reconcile_dp, "reconcile_dp");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
