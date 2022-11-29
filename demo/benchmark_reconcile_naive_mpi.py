@@ -28,6 +28,7 @@ def main():
     else:
         S_compact, y_hat, top_down_p = np.array([]), np.array([]), np.array([])
     end = timer()
+    elapsed = round(end - start, 4)
     if (rank == 0): 
         print("Load: " + str(elapsed))
         print(rec)
