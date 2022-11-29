@@ -9,4 +9,4 @@
    * use `-DCMAKE_INSTALL_PREFIX=` to install locally
 2. Clone this repository with pybind11 submodule
 3. `python -m pip install large_scale_hts_reconciliation/` to install the pip package with CMake
-4. Test with `mpirun -n 8 python demo/test.py`
+4. Run MPI benchmark with `mpirun -n 12 --bind-to none python3 demo/benchmark_reconcile_naive_mpi.py`
