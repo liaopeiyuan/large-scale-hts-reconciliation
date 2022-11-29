@@ -180,7 +180,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     printf("G: %d x %d\n", G.rows(), G.cols());
     printf("S: %d x %d\n", S.rows(), S.cols());
     printf("%d - %d\n", slice_start, slice_length);
-    
+
     //G = G(Eigen::seq(slice_start, slice_length), Eigen::all);
     //S = S(Eigen::all, Eigen::seq(slice_start, slice_length));
 
@@ -290,6 +290,10 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
+    std::stringstream ss;
+    ss << rows << " " << cols;
+    printf("rank %d: %s", ss);
+    
     int slice_start, slice_length;
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
