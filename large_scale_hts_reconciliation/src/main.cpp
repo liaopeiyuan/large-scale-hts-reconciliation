@@ -187,7 +187,7 @@ Eigen::MatrixXf reconcile(const std::string method,
     Eigen::MatrixXf res = S.cast<float>() * G;
 
     std::stringstream ss2;
-    ss2 << res;
+    ss2 << res(Eigen::seqN(0, 10), Eigen::all);
     printf("res: %s\n", ss2.str().c_str());
 
     res = res * yhat;
@@ -197,8 +197,8 @@ Eigen::MatrixXf reconcile(const std::string method,
     printf("yhat: %s\n", ss3.str().c_str());
 
     std::stringstream ss4;
-    ss4 << yhat(Eigen::seqN(0, 10), Eigen::all);
-    printf("res: %s\n", res.str().c_str());
+    ss4 << res(Eigen::seqN(0, 10), Eigen::all);
+    printf("res: %s\n", SA_64REGSET.str().c_str());
 
     return res;
 }
