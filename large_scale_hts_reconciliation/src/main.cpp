@@ -359,7 +359,7 @@ public:
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
             yhats[i] = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
-            MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, 0, 0, comm_global, &reqs[i]);
+            MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
             curr_row += rows[i];
         }
 
