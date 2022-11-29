@@ -321,11 +321,13 @@ public:
         MPI_Wait(&reqs[0], &stats[0]);
     }
 
+    Eigen::MatrixXf y_return;
+    
     if (world_rank == 0) {
         omp_set_num_threads(24);
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
-        yhat = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
+        y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
@@ -336,13 +338,14 @@ public:
 
         MPI_Waitall(world_size, reqs.data(), stats.data());
 
-        return yhat;
+        return y_return;
     } else {
 
-        MPI_Irecv(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
+        y_return = Eigen::MatrixXf::Zero(ro, co);
+        MPI_Irecv(y_return.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
         MPI_Wait(&reqs[0], &stats[0]);
 
-        return yhat;
+        return y_return;
     }
   }
   
