@@ -157,7 +157,11 @@ Eigen::MatrixXf reconcile(const std::string method,
     int nthreads = omp_get_num_threads();
     printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-    printf("S\n");
+    
+    std::stringstream ss;
+    ss << S;
+    printf("S: %s\n", ss.str().c_str());
+
     Eigen::MatrixXf G;
     
     if (method == "bottom_up") {
@@ -179,9 +183,14 @@ Eigen::MatrixXf reconcile(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
     
-    printf("G\n");
+    std::stringstream ss2;
+    ss2 << G;
+    printf("G: %s\n", ss2.str().c_str());
     Eigen::MatrixXf res = S.cast<float>() * G;
-    printf("res\n");
+
+    std::stringstream ss3;
+    ss3 << res;
+    printf("res: %s\n", ss3.str().c_str());
     res = res * yhat;
     return res;
 }
@@ -325,14 +334,14 @@ public:
 
     if (world_rank == 0) {
         omp_set_num_threads(24);
+        
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
-
-        std::stringstream ss;
-        ss << y_reconciled;
-        printf("y_return: %s\n", ss.str().c_str());
+        //std::stringstream ss;
+        //ss << y_reconciled;
+        //printf("y_return: %s\n", ss.str().c_str());
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
