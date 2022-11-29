@@ -42,6 +42,8 @@ def main():
         print("Bottom up: " + str(elapsed))
         print(rec.shape)
 
+    y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
+    
     start = timer()
     rec = distrib.reconcile_naive("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
