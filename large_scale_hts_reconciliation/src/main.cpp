@@ -254,8 +254,6 @@ public:
     for (int i = 0; i < world_size; i++) {
         if (i == world_rank) {
             yhat_total.middleRows(curr_row, rows[i]) = yhat;
-        } else {
-            yhat_total.middleRows(curr_row, rows[i]) = Eigen::MatrixXf::Zero(rows[i], cols[i]);
         }
         curr_row += rows[i];
     }
