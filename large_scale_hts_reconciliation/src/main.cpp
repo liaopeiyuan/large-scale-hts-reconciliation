@@ -190,17 +190,17 @@ Eigen::MatrixXf reconcile(const std::string method,
     ss2 << res(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
     printf("res: %s\n", ss2.str().c_str());
 
-    res = res * yhat;
+    Eigen::MatrixXf ret = res * yhat;
 
     std::stringstream ss3;
     ss3 << yhat(Eigen::seqN(0, 10), Eigen::all);
     printf("yhat: %s\n", ss3.str().c_str());
 
     std::stringstream ss4;
-    ss4 << res(Eigen::seqN(0, 10), Eigen::all);
-    printf("res: %s\n", ss4.str().c_str());
+    ss4 << ret(Eigen::seqN(0, 10), Eigen::all);
+    printf("ret: %s\n", ss4.str().c_str());
 
-    return res;
+    return ret;
 }
 
 Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
