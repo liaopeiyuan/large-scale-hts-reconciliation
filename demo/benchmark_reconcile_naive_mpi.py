@@ -23,11 +23,13 @@ def main():
     start = timer()
     if (rank == 0):
         S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-        y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
         top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
         print("Init ", y_hat.shape)
     else:
-        S_compact, y_hat, top_down_p = np.array([]), np.array([]), np.array([])
+        S_compact, top_down_p = np.array([]), np.array([])
+    
+    y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
+    
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == 0): 
