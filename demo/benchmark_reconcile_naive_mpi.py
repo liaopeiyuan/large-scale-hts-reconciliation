@@ -20,9 +20,17 @@ def main():
     size = comm.Get_size()
     distrib = MPI_Utils()
 
-    S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-    y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
-    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
+    start = timer()
+    if (rank == 0):
+        S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
+        y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
+        top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
+    else:
+        S_compact, y_hat, top_down_p = np.array([]), np.array([]), np.array([])
+    end = timer()
+    if (rank == 0): 
+        print("Load: " + str(elapsed))
+        print(rec)
 
     start = timer()
     rec = distrib.reconcile_naive("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
