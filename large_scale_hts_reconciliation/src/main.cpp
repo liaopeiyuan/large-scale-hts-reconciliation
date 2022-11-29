@@ -335,7 +335,7 @@ public:
     Eigen::MatrixXf y_return;
 
     if (world_rank == 0) {
-        omp_set_num_threads(24);
+        omp_set_num_threads(2);
         
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
