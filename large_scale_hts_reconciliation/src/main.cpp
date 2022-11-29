@@ -250,7 +250,12 @@ public:
 
     Eigen::MatrixXf yhat_total;
 
+
     if (world_rank == 0) {
+        for (int i = 0; i < world_size; i++) {
+            printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
+        }
+        
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
         std::vector<Eigen::MatrixXf> yhats(world_size);
