@@ -155,12 +155,12 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
     int nthreads = omp_get_num_threads();
-    // printf("nthreads: %d\n", nthreads);
+    printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
-    //std::stringstream ss;
-    //ss << S;
-    //printf("S: %s\n", ss.str().c_str());
+    std::stringstream ss;
+    ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    printf("S: %s\n", ss.str().c_str());
 
     Eigen::MatrixXf G;
     
