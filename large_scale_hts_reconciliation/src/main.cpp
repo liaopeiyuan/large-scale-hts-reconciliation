@@ -291,6 +291,7 @@ public:
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
     Eigen::MatrixXf yhat_total;
+    std::vector<Eigen::MatrixXf> yhats(world_size);
 
     if (world_rank == 0) {
         int nthreads = omp_get_num_threads();
@@ -298,7 +299,6 @@ public:
 
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
-        std::vector<Eigen::MatrixXf> yhats(world_size);
 
         for (int i = 1; i < world_size; i++) {
             yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
@@ -325,11 +325,11 @@ public:
         omp_set_num_threads(24);
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
-        yhat = y_reconciled.topRows(rows[0]);
+        yhat.topLeftCorner(yhat.rows(), yhat.cols()) = y_reconciled.topRows(rows[0]);
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
-            yhats[i] = y_reconciled.middleRows(curr_row, rows[i]);
+            yhats[i].topLeftCorner(yhat.rows(), yhat.cols()) = y_reconciled.middleRows(curr_row, rows[i]);
             MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, 0, 0, comm_global, &reqs[i]);
             curr_row += rows[i];
         }
@@ -341,7 +341,7 @@ public:
 
         MPI_Irecv(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
         MPI_Wait(&reqs[0], &stats[0]);
-        
+
         return yhat;
     }
   }
