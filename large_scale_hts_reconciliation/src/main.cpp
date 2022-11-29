@@ -155,7 +155,7 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
     int nthreads = omp_get_num_threads();
-    printf("nthreads: %d\n", nthreads);
+    // printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     //std::stringstream ss;
@@ -186,21 +186,21 @@ Eigen::MatrixXf reconcile(const std::string method,
     
     Eigen::MatrixXf res = S.cast<float>() * G;
 
-    std::stringstream ss2;
-    ss2 << res.rows() << " " << res.cols() << " " << res(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    printf("res: %s\n", ss2.str().c_str());
+    //std::stringstream ss2;
+    //ss2 << res.rows() << " " << res.cols() << " " << res(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    //printf("res: %s\n", ss2.str().c_str());
 
-    Eigen::MatrixXf ret = res * yhat;
+    res = res * yhat;
 
-    std::stringstream ss3;
-    ss3 << yhat.rows() << " " << yhat.cols() << " " << yhat(Eigen::seqN(0, 10), Eigen::all);
-    printf("yhat: %s\n", ss3.str().c_str());
+    //std::stringstream ss3;
+    //ss3 << yhat.rows() << " " << yhat.cols() << " " << yhat(Eigen::seqN(0, 10), Eigen::all);
+    //printf("yhat: %s\n", ss3.str().c_str());
 
-    std::stringstream ss4;
-    ss4 << ret.rows() << " " << ret.cols() << " " << ret(Eigen::seqN(0, 10), Eigen::all);
-    printf("ret: %s\n", ss4.str().c_str());
+    //std::stringstream ss4;
+    //ss4 << ret.rows() << " " << ret.cols() << " " << ret(Eigen::seqN(0, 10), Eigen::all);
+    //printf("ret: %s\n", ss4.str().c_str());
 
-    return ret;
+    return res;
 }
 
 Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
@@ -313,10 +313,10 @@ public:
 
     if (world_rank == 0) {
         int nthreads = omp_get_num_threads();
-        printf("nthreads: %d\n", nthreads);
-        for (int i = 0; i < world_size; i++) {
-            printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
-        }
+        //printf("nthreads: %d\n", nthreads);
+        //for (int i = 0; i < world_size; i++) {
+        //    printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
+        //}
         
 
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
