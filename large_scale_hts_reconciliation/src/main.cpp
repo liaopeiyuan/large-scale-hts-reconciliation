@@ -198,7 +198,7 @@ Eigen::MatrixXf reconcile(const std::string method,
 
     std::stringstream ss4;
     ss4 << res(Eigen::seqN(0, 10), Eigen::all);
-    printf("res: %s\n", SA_64REGSET.str().c_str());
+    printf("res: %s\n", ss4.str().c_str());
 
     return res;
 }
