@@ -153,7 +153,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXf P,
                           int level, float w,
                           int num_base, int num_total, int num_levels,
-                          int slice_start, int slice_end) {
+                          int slice_start, int slice_length) {
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     Eigen::MatrixXf G;
@@ -177,9 +177,9 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    G = G(Eigen::seq(slice_start, slice_end), Eigen::all);
-    S = S(Eigen::all, Eigen::seq(slice_start, slice_end));
-    
+    G = G(Eigen::seq(slice_start, slice_length), Eigen::all);
+    S = S(Eigen::all, Eigen::seq(slice_start, slice_length));
+
     Eigen::MatrixXf res = S.cast<float>() * G;
 
     return res;
@@ -283,18 +283,18 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    int slice_start, slice_end;
+    int slice_start, slice_length;
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
         if (i == world_rank) {
             slice_start = curr_row;
-            slice_end = curr_row + rows[i];
+            slice_length = rows[i];
             break;
         }
         curr_row += rows[i];
     }
 
-    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_end);
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
     return reconciliation_matrix * yhat;
 
   }
