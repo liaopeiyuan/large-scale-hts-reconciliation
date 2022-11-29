@@ -322,13 +322,17 @@ public:
     }
 
     Eigen::MatrixXf y_return;
-    
+
     if (world_rank == 0) {
         omp_set_num_threads(24);
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
+        std::sstream ss;
+        ss << y_return;
+        printf("y_return: %s\n", ss.str().c_str());
+        
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
             yhats[i] = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
