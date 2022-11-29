@@ -325,11 +325,11 @@ public:
         omp_set_num_threads(24);
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
-        yhat.topLeftCorner(yhat.rows(), yhat.cols()) = y_reconciled.topRows(rows[0]);
+        yhat << y_reconciled.topRows(rows[0]);
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
-            yhats[i].topLeftCorner(yhat.rows(), yhat.cols()) = y_reconciled.middleRows(curr_row, rows[i]);
+            yhats[i] << y_reconciled.middleRows(curr_row, rows[i]);
             MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, 0, 0, comm_global, &reqs[i]);
             curr_row += rows[i];
         }
