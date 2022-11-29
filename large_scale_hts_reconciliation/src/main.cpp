@@ -329,10 +329,10 @@ public:
     
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
-        std::sstream ss;
+        std::stringstream ss;
         ss << y_return;
         printf("y_return: %s\n", ss.str().c_str());
-        
+
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
             yhats[i] = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
