@@ -31,7 +31,6 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == 0): 
         print("Load: " + str(elapsed))
-        print(rec)
 
     start = timer()
     rec = distrib.reconcile_naive("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
