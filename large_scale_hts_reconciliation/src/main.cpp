@@ -152,7 +152,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
                           int level, float w,
-                          int num_base, int num_total, int num_levels) {
+                          int num_base, int num_total, int num_levels,
+                          int slice_start, int slice_end) {
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     Eigen::MatrixXf G;
@@ -176,6 +177,9 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
+    G = G(Eigen::seq(slice_start, slice_end), Eigen::all);
+    S = S(Eigen::all, Eigen::seq(slice_start, slice_end));
+    
     Eigen::MatrixXf res = S.cast<float>() * G;
 
     return res;
@@ -279,19 +283,19 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels);
-
-    Eigen::MatrixXf reconciliation_matrix_local;
-
+    int slice_start, slice_end;
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
         if (i == world_rank) {
-            reconciliation_matrix_local = reconciliation_matrix(Eigen::seqN(curr_row, rows[i]), Eigen::all);
+            slice_start = curr_row;
+            slice_end = curr_row + rows[i];
+            break;
         }
         curr_row += rows[i];
     }
 
-    return reconciliation_matrix_local * yhat;
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_end);
+    return reconciliation_matrix * yhat;
 
   }
 
