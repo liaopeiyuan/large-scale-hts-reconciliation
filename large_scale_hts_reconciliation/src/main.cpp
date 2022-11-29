@@ -158,9 +158,9 @@ Eigen::MatrixXf reconcile(const std::string method,
     printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
-    std::stringstream ss;
-    ss << S;
-    printf("S: %s\n", ss.str().c_str());
+    //std::stringstream ss;
+    //ss << S;
+    //printf("S: %s\n", ss.str().c_str());
 
     Eigen::MatrixXf G;
     
@@ -183,15 +183,17 @@ Eigen::MatrixXf reconcile(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
     
-    std::stringstream ss2;
-    ss2 << G;
-    printf("G: %s\n", ss2.str().c_str());
+    //std::stringstream ss2;
+    //ss2 << G;
+    //printf("G: %s\n", ss2.str().c_str());
     Eigen::MatrixXf res = S.cast<float>() * G;
+
+    res = res * yhat;
 
     std::stringstream ss3;
     ss3 << res;
     printf("res: %s\n", ss3.str().c_str());
-    res = res * yhat;
+
     return res;
 }
 
