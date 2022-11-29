@@ -183,9 +183,9 @@ Eigen::MatrixXf reconcile(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    std::stringstream ss2;
-    ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    printf("G: %s\n", G.str().c_str());
+    //std::stringstream ss2;
+    //ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    //printf("G: %s\n", G.str().c_str());
     
     
     Eigen::MatrixXf res = S.cast<float>() * G;
