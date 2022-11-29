@@ -148,14 +148,46 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     return G;
 }
 
+Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
+                          const Eigen::MatrixXi S_compact,
+                          const Eigen::MatrixXf P,
+                          const Eigen::MatrixXf yhat,
+                          int level, float w,
+                          int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    
+    Eigen::MatrixXf G;
+    
+    if (method == "bottom_up") {
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+    }
+    else if (method == "top_down") {
+        G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
+    }
+    else if (method == "middle_out") {
+        G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
+    }
+    else if (method == "OLS") {
+        G = construct_G_OLS(S);
+    }
+    else if (method == "WLS") {
+        G = construct_G_WLS(S, w);
+    }
+    else {
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
+    }
+
+    Eigen::MatrixXf res = S.cast<float>() * G;
+
+    return res;
+}
+
 Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
                           const Eigen::MatrixXf yhat,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
-    int nthreads = omp_get_num_threads();
-    // printf("nthreads: %d\n", nthreads);
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     // std::stringstream ss;
@@ -248,28 +280,19 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
+
+    Eigen::MatrixXf reconciliation_matrix_local;
 
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
         if (i == world_rank) {
-            yhat_total.middleRows(curr_row, rows[i]) = yhat;
+            reconciliation_matrix_local = reconciliation_matrix(Eigen::seqN(curr_row, rows[i]), Eigen::all);
         }
         curr_row += rows[i];
     }
 
-    Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
-
-    Eigen::MatrixXf y_ret;
-    curr_row = rows[0];
-    for (int i = 0; i < world_size; i++) {
-        if (i == world_rank) {
-            y_ret = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
-        }
-        curr_row += rows[i];
-    }
-
-    return y_ret;
+    return reconciliation_matrix_local * yhat;
 
   }
 
