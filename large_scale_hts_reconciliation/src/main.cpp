@@ -291,7 +291,15 @@ public:
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
     std::stringstream ss;
-    ss << rows << " " << cols;
+    for (int i : rows) {
+        ss << i << ",";
+    }
+    ss << " ";
+    for (int i : cols) {
+        ss << i << ",";
+    }
+    ss << std::endl;
+    
     printf("rank %d: %s", ss.str().c_str());
 
     int slice_start, slice_length;
