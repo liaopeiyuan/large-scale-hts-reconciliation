@@ -34,23 +34,23 @@ def main():
     if (rank == 0): 
         print("Load: " + str(elapsed))
 
-    if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
+    #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
     rec = distrib.reconcile_naive("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == 0): 
         print("Top down: " + str(elapsed))
-        print(rec.shape, rec[:10, :])
+        #print(rec.shape, rec[:10, :])
 
-    if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
+    #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
     rec = distrib.reconcile_naive("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == 0): 
         print("Bottom up: " + str(elapsed))
-        print(rec.shape)
+        #print(rec.shape)
 
 
     start = timer()
@@ -59,7 +59,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == 0):
         print("Middle out: " + str(elapsed))
-        print(rec.shape, rec[:10, :])
+        #print(rec.shape, rec[:10, :])
 
     start = timer()
     rec = distrib.reconcile_naive("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
@@ -67,7 +67,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == 0):
         print("OLS: " + str(elapsed))
-        print(rec.shape, rec[:10, :])
+        #print(rec.shape, rec[:10, :])
 
     start = timer()
     rec = distrib.reconcile_naive("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
@@ -75,7 +75,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == 0):
         print("WLS: " + str(elapsed))
-        print(rec.shape, rec[:10, :])
+        #print(rec.shape, rec[:10, :])
 
     
 
