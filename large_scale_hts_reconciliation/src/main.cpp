@@ -284,8 +284,8 @@ public:
     std::vector<int> rows(world_size, 0);
     std::vector<int> cols(world_size, 0);
 
-    std::vector<MPI_Request> reqs(world_size, MPI_REQUEST_NULL);
-    std::vector<MPI_Status> stats(world_size, MPI_STATUS_IGNORE);
+    std::vector<MPI_Request> reqs(world_size);
+    std::vector<MPI_Status> stats(world_size);
 
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
