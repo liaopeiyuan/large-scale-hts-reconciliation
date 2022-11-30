@@ -278,7 +278,7 @@ public:
     int world_rank;
     MPI_Comm_rank(comm_global, &world_rank);
 
-    printf("%d %d", world_size, world_rank);
+    printf("%d %d\n", world_size, world_rank);
 
     int ro = yhat.rows();
     int co = yhat.cols();
