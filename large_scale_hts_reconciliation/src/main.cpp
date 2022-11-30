@@ -292,7 +292,7 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    printf("rank %d: %d %d\n", rows.size(), cols.size());
+    printf("rank %d: %d %d\n", world_rank, rows.size(), cols.size());
 
     int slice_start, slice_length;
     int curr_row = rows[0];
