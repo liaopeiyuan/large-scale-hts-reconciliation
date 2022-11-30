@@ -183,8 +183,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     Eigen::MatrixXf G_slice = Eigen::MatrixXf::Zero(num_base, slice_length);
     Eigen::MatrixXf S_slice = Eigen::MatrixXf::Zero(slice_length, num_base);
 
-    G_slice << G.middleCols(slice_start, slice_length);
-    S_slice << S.middleRows(slice_start, slice_length);
+    //G_slice << G.middleCols(slice_start, slice_length);
+    //S_slice << S.middleRows(slice_start, slice_length);
 
     //printf("G_slice: %d x %d\n", G_slice.rows(), G_slice.cols());
     //printf("S_slice: %d x %d\n", S_slice.rows(), S_slice.cols());
