@@ -177,12 +177,12 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    printf("G: %d x %d\n", G.rows(), G.cols());
-    printf("S: %d x %d\n", S.rows(), S.cols());
-    printf("%d - %d\n", slice_start, slice_length);
+    //printf("G: %d x %d\n", G.rows(), G.cols());
+    //printf("S: %d x %d\n", S.rows(), S.cols());
+    //printf("%d - %d\n", slice_start, slice_length);
 
-    //G = G(Eigen::seq(slice_start, slice_length), Eigen::all);
-    //S = S(Eigen::all, Eigen::seq(slice_start, slice_length));
+    G = G(Eigen::seq(slice_start, slice_length), Eigen::all);
+    S = S(Eigen::all, Eigen::seq(slice_start, slice_length));
 
     //printf("G: %d x %d", G.rows(), G.cols());
     //printf("S: %d x %d", S.rows(), S.cols());
@@ -289,8 +289,8 @@ public:
     std::vector<MPI_Request> reqs(world_size);
     std::vector<MPI_Status> stats(world_size);
 
-    MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
-    MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+    MPI_AllGather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
+    MPI_AllGather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
     int slice_start, slice_length;
     int curr_row = rows[0];
@@ -303,16 +303,16 @@ public:
         curr_row += rows[i];
     }
 
-    MPI_Barrier(comm_global);
+    //MPI_Barrier(comm_global);
 
-    for (int i = 0; i < world_size; i++) {
-        printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
-    }
+    //for (int i = 0; i < world_size; i++) {
+    //    printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
+    //}
 
-    MPI_Barrier(comm_global);
+    //MPI_Barrier(comm_global);
 
-    //Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
-    //return reconciliation_matrix * yhat;
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+    return reconciliation_matrix * yhat;
     return yhat;
 
   }
