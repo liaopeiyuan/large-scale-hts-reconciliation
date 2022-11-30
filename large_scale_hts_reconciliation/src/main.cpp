@@ -181,15 +181,16 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     //printf("S: %d x %d\n", S.rows(), S.cols());
     //printf("%d - %d\n", slice_start, slice_length);
 
-    S = S(Eigen::seq(slice_start, slice_length), Eigen::all);
-    G = G(Eigen::all, Eigen::seq(slice_start, slice_length));
+    S = S(Eigen::seqN(slice_start, slice_length), Eigen::all);
+    G = G(Eigen::all, Eigen::seqN(slice_start, slice_length));
 
     //printf("G: %d x %d", G.rows(), G.cols());
     //printf("S: %d x %d", S.rows(), S.cols());
 
     Eigen::MatrixXf res = S.cast<float>() * G;
 
-    return res;
+    // return G;
+    //return res;
 }
 
 Eigen::MatrixXf reconcile(const std::string method,
