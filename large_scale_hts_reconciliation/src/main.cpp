@@ -187,9 +187,9 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     //printf("G: %d x %d", G.rows(), G.cols());
     //printf("S: %d x %d", S.rows(), S.cols());
 
-    Eigen::MatrixXf res = S.cast<float>() * G;
+    //Eigen::MatrixXf res = S.cast<float>() * G;
 
-    // return G;
+    return G;
     //return res;
 }
 
