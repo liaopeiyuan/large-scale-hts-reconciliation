@@ -289,8 +289,8 @@ public:
     std::vector<MPI_Request> reqs(world_size);
     std::vector<MPI_Status> stats(world_size);
 
-    MPI_AllGather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
-    MPI_AllGather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
     int slice_start, slice_length;
     int curr_row = rows[0];
