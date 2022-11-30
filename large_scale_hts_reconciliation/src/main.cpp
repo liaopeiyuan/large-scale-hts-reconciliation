@@ -279,7 +279,7 @@ public:
     MPI_Comm_rank(comm_global, &world_rank);
 
     printf("%d %d", world_size, world_rank);
-    
+
     int ro = yhat.rows();
     int co = yhat.cols();
 
@@ -303,7 +303,7 @@ public:
     //ss << rows.size() << " " << cols.size();
     //ss << std::endl;
 
-    printf("rank %d: %s", ss.str().c_str());
+    //printf("rank %d: %s", ss.str().c_str());
 
     int slice_start, slice_length;
     int curr_row = rows[0];
