@@ -292,8 +292,6 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    printf("rank %d: %d %d\n", world_rank, rows.size(), cols.size());
-
     int slice_start, slice_length;
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
@@ -304,6 +302,12 @@ public:
         }
         curr_row += rows[i];
     }
+
+    for (int i = 0; i < world_size; i++) {
+        printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
+    }
+
+    MPI_Barrier(comm_global);
 
     //Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
     //return reconciliation_matrix * yhat;
