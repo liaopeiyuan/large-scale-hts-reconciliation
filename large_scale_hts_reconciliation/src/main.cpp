@@ -278,6 +278,8 @@ public:
     int world_rank;
     MPI_Comm_rank(comm_global, &world_rank);
 
+    printf("%d %d", world_size, world_rank);
+    
     int ro = yhat.rows();
     int co = yhat.cols();
 
@@ -290,7 +292,7 @@ public:
     MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
     MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-    std::stringstream ss;
+    //std::stringstream ss;
     //for (int i : rows) {
     //    ss << i << ",";
     //}
@@ -298,8 +300,8 @@ public:
     //for (int i : cols) {
     //    ss << i << ",";
     //}
-    ss << rows.size() << " " << cols.size();
-    ss << std::endl;
+    //ss << rows.size() << " " << cols.size();
+    //ss << std::endl;
 
     printf("rank %d: %s", ss.str().c_str());
 
@@ -314,7 +316,7 @@ public:
         curr_row += rows[i];
     }
 
-    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+    //Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
     //return reconciliation_matrix * yhat;
     return yhat;
 
