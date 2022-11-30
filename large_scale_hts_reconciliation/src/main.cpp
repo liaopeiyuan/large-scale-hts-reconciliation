@@ -190,7 +190,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     //printf("S_slice: %d x %d\n", S_slice.rows(), S_slice.cols());
     //printf("%d - %d\n", slice_start, slice_length);
 
-    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice).eval();
+    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice);
 
     return res;
 
