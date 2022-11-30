@@ -177,8 +177,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    Eigen::MatrixXf S_slice = S(Eigen::seqN(slice_start, slice_length), Eigen::all).eval().cast<float>();
-    Eigen::MatrixXf G_slice = G(Eigen::all, Eigen::seqN(slice_start, slice_length)).eval();
+    Eigen::MatrixXi S_slice = std::move(S(Eigen::seqN(slice_start, slice_length), Eigen::all));
+    Eigen::MatrixXf G_slice = std::move(G(Eigen::all, Eigen::seqN(slice_start, slice_length)));
     
     //Eigen::MatrixXf G_slice = Eigen::MatrixXf::Zero(num_base, slice_length);
     //Eigen::MatrixXf S_slice = Eigen::MatrixXf::Zero(slice_length, num_base);
@@ -190,7 +190,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     //printf("S_slice: %d x %d\n", S_slice.rows(), S_slice.cols());
     //printf("%d - %d\n", slice_start, slice_length);
 
-    Eigen::MatrixXf res = S_slice * G_slice;
+    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice).eval();
 
     return res;
 
