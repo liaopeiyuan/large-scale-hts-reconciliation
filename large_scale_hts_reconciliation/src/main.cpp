@@ -289,13 +289,13 @@ public:
     std::vector<MPI_Request> reqs(world_size);
     std::vector<MPI_Status> stats(world_size);
 
-    //MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
-    //MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
     std::stringstream ss;
     ss << rows.size() << " " << cols.size();
     ss << std::endl;
-    printf("rank %d: %s\n", ss.str().c_str());
+    //printf("rank %d: %s\n", ss.str().c_str());
 
     int slice_start, slice_length;
     int curr_row = rows[0];
