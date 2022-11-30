@@ -154,7 +154,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels,
                           int slice_start, int slice_length) {
-    Eigen::MatrixXf S = construct_S(S_compact, num_base, num_total, num_levels).cast<float>();
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     Eigen::MatrixXf G;
     
@@ -183,8 +183,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     Eigen::MatrixXf G_slice = Eigen::MatrixXf::Zero(num_base, slice_length);
     Eigen::MatrixXf S_slice = Eigen::MatrixXf::Zero(slice_length, num_base);
 
-    //G_slice << G.middleCols(slice_start, slice_length);
-    //S_slice << S.middleRows(slice_start, slice_length);
+    G_slice << G.middleCols(slice_start, slice_length);
+    // Eigen::MatrixXf S_slice = S.middleRows(slice_start, slice_length).cast<float>();
 
     //printf("G_slice: %d x %d\n", G_slice.rows(), G_slice.cols());
     //printf("S_slice: %d x %d\n", S_slice.rows(), S_slice.cols());
