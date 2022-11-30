@@ -303,6 +303,8 @@ public:
         curr_row += rows[i];
     }
 
+    MPI_Barrier(comm_global);
+
     for (int i = 0; i < world_size; i++) {
         printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
     }
