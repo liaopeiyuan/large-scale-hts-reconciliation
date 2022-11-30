@@ -314,7 +314,7 @@ public:
     //    printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
     //}
 
-    //MPI_Barrier(comm_global);
+    MPI_Barrier(comm_global);
 
     Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
     // return reconciliation_matrix * yhat;
