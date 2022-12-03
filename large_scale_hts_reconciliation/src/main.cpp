@@ -4,7 +4,6 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <vector>
-#include <cmath>
 #include <stdexcept>
 
 #ifdef _OPENMP
@@ -42,6 +41,7 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
             }
         }
     }
+
     return S;
 }
 
@@ -123,13 +123,11 @@ Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact,
 }
 
 Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_total, num_base);
+    Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_base, num_total);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
-
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
 
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
@@ -143,23 +141,21 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
             }
         }
         if (is_base) {
-            G(i) = S(i);
+            G(i, i) = 1;
         }
     }
-    G.transposeInPlace();
+
     return G;
 }
 
-Eigen::MatrixXf reconcile(const std::string method,
+Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
-                          const Eigen::MatrixXf yhat,
                           int level, float w,
-                          int num_base, int num_total, int num_levels) {
-    int nthreads = omp_get_num_threads();
-    printf("nthreads: %d\n", nthreads);
+                          int num_base, int num_total, int num_levels,
+                          int slice_start, int slice_length) {
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-    printf("S\n");
+    
     Eigen::MatrixXf G;
     
     if (method == "bottom_up") {
@@ -180,11 +176,85 @@ Eigen::MatrixXf reconcile(const std::string method,
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
+
+    Eigen::MatrixXi S_slice = std::move(S(Eigen::seqN(slice_start, slice_length), Eigen::all));
+    Eigen::MatrixXf G_slice = std::move(G(Eigen::all, Eigen::seqN(slice_start, slice_length)));
     
-    printf("G\n");
+    //Eigen::MatrixXf G_slice = Eigen::MatrixXf::Zero(num_base, slice_length);
+    //Eigen::MatrixXi S_slice = Eigen::MatrixXi::Zero(slice_length, num_base);
+
+    // G_slice << G.middleCols(slice_start, slice_length);
+    // Eigen::MatrixXf S_slice = S.middleRows(slice_start, slice_length).cast<float>();
+
+    //printf("G_slice: %d x %d\n", G_slice.rows(), G_slice.cols());
+    //printf("S_slice: %d x %d\n", S_slice.rows(), S_slice.cols());
+    //printf("%d - %d\n", slice_start, slice_length);
+
+    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice);
+
+    return res;
+
+    //S = S(Eigen::all, Eigen::seqN(slice_start, slice_length));
+
+    //printf("G: %d x %d", G.rows(), G.cols());
+    //printf("S: %d x %d", S.rows(), S.cols());
+
+    //Eigen::MatrixXf res = S.cast<float>() * G;
+
+    // return G;
+    //return res;
+}
+
+Eigen::MatrixXf reconcile(const std::string method,
+                          const Eigen::MatrixXi S_compact,
+                          const Eigen::MatrixXf P,
+                          const Eigen::MatrixXf yhat,
+                          int level, float w,
+                          int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    
+    // std::stringstream ss;
+    // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    // printf("S: %s\n", ss.str().c_str());
+
+    Eigen::MatrixXf G;
+    
+    if (method == "bottom_up") {
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+    }
+    else if (method == "top_down") {
+        G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
+    }
+    else if (method == "middle_out") {
+        G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
+    }
+    else if (method == "OLS") {
+        G = construct_G_OLS(S);
+    }
+    else if (method == "WLS") {
+        G = construct_G_WLS(S, w);
+    }
+    else {
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
+    }
+
+    //std::stringstream ss2;
+    //ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    //printf("G: %s\n", G.str().c_str());
+    
+    
     Eigen::MatrixXf res = S.cast<float>() * G;
-    printf("res\n");
+
     res = res * yhat;
+
+    //std::stringstream ss3;
+    //ss3 << yhat.rows() << " " << yhat.cols() << " " << yhat(Eigen::seqN(0, 10), Eigen::all);
+    //printf("yhat: %s\n", ss3.str().c_str());
+
+    //std::stringstream ss4;
+    //ss4 << ret.rows() << " " << ret.cols() << " " << ret(Eigen::seqN(0, 10), Eigen::all);
+    //printf("ret: %s\n", ss4.str().c_str());
+
     return res;
 }
 
@@ -196,48 +266,6 @@ Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
 double det(const Eigen::MatrixXd &xs)
 {
   return xs.determinant();
-}
-
-float RMSE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
-    float sum = 0;
-    for (int i = 0; i < res.rows(); i ++) {
-        for (int j = 0; j < res.cols(); j ++) {
-            sum += pow(abs(res(i, j) - gt(i, j)), 2);
-        }
-    }
-    float rmse = sqrt(sum / (res.rows() * res.cols()));
-    return rmse;
-}
-
-float MAE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
-    float sum = 0;
-    for (int i = 0; i < res.rows(); i ++) {
-        for (int j = 0; j < res.cols(); j ++) {
-            sum += abs(res(i, j) - gt(i, j));
-        }
-    }
-    float mae = sum / (res.rows() * res.cols());
-    return mae;
-}
-
-float SMAPE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
-    float sum = 0;
-    for (int i = 0; i < res.rows(); i ++) {
-        for (int j = 0; j < res.cols(); j ++) {
-            float pd = res(i, j);
-            float gtr = gt(i, j);
-            float abse = abs(pd - gtr);
-            float mean = (abs(pd) + abs(gtr)) / 2;
-            if (mean == 0) {
-                sum += 0;
-            } else {
-                float val = abse / mean;
-                sum += val;
-            }
-        }
-    }
-    float smape = sum / (res.rows() * res.cols());
-    return smape;
 }
 
 namespace py = pybind11;
@@ -263,51 +291,43 @@ public:
     int world_rank;
     MPI_Comm_rank(comm_global, &world_rank);
 
+    // printf("%d %d\n", world_size, world_rank);
+
     int ro = yhat.rows();
     int co = yhat.cols();
 
-    std::vector<int> rows(world_size);
-    std::vector<int> cols(world_size);
+    std::vector<int> rows(world_size, 0);
+    std::vector<int> cols(world_size, 0);
 
     std::vector<MPI_Request> reqs(world_size);
     std::vector<MPI_Status> stats(world_size);
 
-    MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
-    MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+    MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, comm_global);
+    MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, comm_global);
 
-    Eigen::MatrixXf yhat_total;
-
-    if (world_rank == 0) {
-        yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
-                                           cols[0]);
-        std::vector<Eigen::MatrixXf> yhats(world_size);
-
-        for (int i = 1; i < world_size; i++) {
-            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
-            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
+    int slice_start, slice_length;
+    int curr_row = rows[0];
+    for (int i = 0; i < world_size; i++) {
+        if (i == world_rank) {
+            slice_start = curr_row;
+            slice_length = rows[i];
+            break;
         }
-
-        MPI_Waitall(world_size, reqs.data(), stats.data());
-
-        int curr_row = rows[0];
-
-        yhat_total.topRows(rows[0]) = yhat;
-
-        for (int i = 1; i < world_size; i++) {
-            yhat_total.middleRows(curr_row, rows[i]) = yhats[i];
-            curr_row += rows[i];
-        }
-
-    } else {
-        MPI_Isend(yhat.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
-        MPI_Wait(&reqs[0], &stats[0]);
+        curr_row += rows[i];
     }
 
-    if (world_rank == 0) {
-        return reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
-    } else {
-        return yhat;
-    }
+    //MPI_Barrier(comm_global);
+
+    //for (int i = 0; i < world_size; i++) {
+    //    printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
+    //}
+
+    MPI_Barrier(comm_global);
+
+    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+    // return reconciliation_matrix * yhat;
+    return yhat;
+
   }
 
   Eigen::MatrixXf reconcile_naive(const std::string method,
@@ -339,7 +359,11 @@ public:
 
     if (world_rank == 0) {
         int nthreads = omp_get_num_threads();
-        printf("nthreads: %d\n", nthreads);
+        // printf("nthreads: %d\n", nthreads);
+        // for (int i = 0; i < world_size; i++) {
+        //    printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
+        // }
+        
 
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                            cols[0]);
@@ -369,31 +393,31 @@ public:
 
     if (world_rank == 0) {
         omp_set_num_threads(24);
+        
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
-
-        std::stringstream ss;
-        ss << y_reconciled;
-        printf("y_return: %s\n", ss.str().c_str());
+        //std::stringstream ss;
+        //ss << y_reconciled;
+        //printf("y_return: %s\n", ss.str().c_str());
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
             yhats[i] = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
-            MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, 0, 0, comm_global, &reqs[i]);
+            MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
             curr_row += rows[i];
         }
 
         MPI_Waitall(world_size, reqs.data(), stats.data());
-
+        MPI_Barrier(comm_global);
         return y_return;
     } else {
 
         y_return = Eigen::MatrixXf::Zero(ro, co);
         MPI_Irecv(y_return.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
         MPI_Wait(&reqs[0], &stats[0]);
-
+        MPI_Barrier(comm_global);
         return y_return;
     }
   }
@@ -491,9 +515,6 @@ PYBIND11_MODULE(lhts, m) {
 
     m.def("reconcile_matrix", &reconcile_matrix);
     m.def("reconcile", &reconcile);
-    m.def("RMSE", &RMSE);
-    m.def("MAE", &MAE);
-    m.def("SMAPE", &SMAPE);
     m.def("construct_S", &construct_S);
     m.def("construct_G_bottom_up", &construct_G_bottom_up);
     m.def("construct_G_top_down", &construct_G_top_down);
@@ -501,7 +522,8 @@ PYBIND11_MODULE(lhts, m) {
 
     py::class_<MPI_Utils>(m, "MPI_Utils")    
         .def(py::init<>())
-        .def("reconcile_naive", &MPI_Utils::reconcile_naive, "reconcile_naive");
+        .def("reconcile_naive", &MPI_Utils::reconcile_naive, "reconcile_naive")
+        .def("reconcile_dp", &MPI_Utils::reconcile_dp, "reconcile_dp");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
