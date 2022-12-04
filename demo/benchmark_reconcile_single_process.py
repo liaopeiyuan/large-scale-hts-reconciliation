@@ -12,6 +12,7 @@ def main():
     top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
     print(y_hat.shape)
 
+    print(gt)
     print("Before Reconciliation: ", lhts.smape(y_hat, gt))
 
     start = timer()
