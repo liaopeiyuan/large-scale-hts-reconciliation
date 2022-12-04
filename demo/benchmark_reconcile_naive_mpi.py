@@ -62,6 +62,7 @@ def main():
         print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
         #print(rec.shape, rec[:10, :])
 
+    """
     start = timer()
     rec = distrib.reconcile_naive("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
@@ -77,6 +78,7 @@ def main():
     if (rank == 0):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
         #print(rec.shape, rec[:10, :])
+    """
 
     
 
