@@ -30,7 +30,7 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
     assert(num_levels > 1);
 
     #pragma omp parallel for 
-    for (int i = 0; i < num_total; i++) {
+    for (int i = 0; i < num_base; i++) {
         int co = S_compact(i, 0);
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
