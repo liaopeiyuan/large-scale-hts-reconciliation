@@ -42,7 +42,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == 0): 
         print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec, gt)
+        print(rec[:5, :], gt[:5, :])
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
@@ -51,7 +51,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == 0): 
         print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec, gt)
+        print(rec[:5, :], gt[:5, :])
 
 
     start = timer()
