@@ -452,7 +452,7 @@ public:
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
         std::stringstream ss;
-        ss << y_reconciled;
+        ss << y_reconciled(Eigen::seqN(0, 5), Eigen::all);
         printf("y_return: %s\n", ss.str().c_str());
 
         int curr_row = rows[0];
