@@ -228,7 +228,6 @@ Eigen::MatrixXf reconcile(const std::string method,
     y = yhat;
     
     if (method == "bottom_up") {
-        // G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
         res = S.cast<float>();
         y = yhat(Eigen::seqN(0, num_base), Eigen::all);    
     }
