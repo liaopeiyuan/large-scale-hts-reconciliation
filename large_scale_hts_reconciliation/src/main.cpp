@@ -224,12 +224,13 @@ Eigen::MatrixXf reconcile(const std::string method,
     // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
     // printf("S: %s\n", ss.str().c_str());
 
-    Eigen::MatrixXf G, res;
+    Eigen::MatrixXf G, res, y;
+    y = yhat;
     
     if (method == "bottom_up") {
         // G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
         res = S;
-        yhat = yhat(Eigen::seqN(0, num_base), Eigen::all);    
+        y = yhat(Eigen::seqN(0, num_base), Eigen::all);    
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
@@ -255,7 +256,7 @@ Eigen::MatrixXf reconcile(const std::string method,
     //ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
     //printf("G: %s\n", G.str().c_str());
     
-    res = res * yhat;
+    res = res * y;
 
     //std::stringstream ss3;
     //ss3 << yhat.rows() << " " << yhat.cols() << " " << yhat(Eigen::seqN(0, 10), Eigen::all);
