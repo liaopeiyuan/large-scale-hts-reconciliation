@@ -229,7 +229,7 @@ Eigen::MatrixXf reconcile(const std::string method,
     
     if (method == "bottom_up") {
         res = S.cast<float>();
-        y = yhat(Eigen::seqN(0, num_base), Eigen::all);    
+        y = yhat.topRows(num_base).eval();    
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
