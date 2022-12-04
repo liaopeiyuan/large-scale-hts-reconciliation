@@ -451,9 +451,9 @@ public:
     
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
-        //std::stringstream ss;
-        //ss << y_reconciled;
-        //printf("y_return: %s\n", ss.str().c_str());
+        std::stringstream ss;
+        ss << y_reconciled;
+        printf("y_return: %s\n", ss.str().c_str());
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
