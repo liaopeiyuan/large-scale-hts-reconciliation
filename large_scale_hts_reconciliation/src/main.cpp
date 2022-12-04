@@ -555,9 +555,9 @@ PYBIND11_MODULE(lhts, m) {
 
     m.def("inv", &inv);
     m.def("det", &det);
-    m.def("RMSE", &RMSE);
-    m.def("MAE", &MAE);
-    m.def("SMAPE", &SMAPE);
+    m.def("rmse", &RMSE);
+    m.def("mae", &MAE);
+    m.def("smape", &SMAPE);
 
     m.def("reconcile_matrix", &reconcile_matrix);
     m.def("reconcile", &reconcile);
