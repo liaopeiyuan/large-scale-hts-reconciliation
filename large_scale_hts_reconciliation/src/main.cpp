@@ -35,9 +35,13 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
             if (ro == -1) {
+                if (i < num_base) {
+                    throw std::invalid_argument("Make sure that the frist num_base rows of S_compact contain only leaf-level nodes.");
+                }
                 break;
             } else {
-                if (co < num_base) S(ro, co) = 1;
+                //if (co < num_base)
+                S(ro, co) = 1;
             }
         }
     }
