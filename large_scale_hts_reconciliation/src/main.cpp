@@ -40,7 +40,9 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
                 }
                 break;
             } else {
-                //if (co < num_base)
+                if (co >= num_base) {
+                    throw std::invalid_argument("Make sure that the all leaf-level nodes have index < num_base.");
+                }
                 S(ro, co) = 1;
             }
         }
@@ -215,28 +217,35 @@ Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXf yhat,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
+
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     // std::stringstream ss;
     // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
     // printf("S: %s\n", ss.str().c_str());
 
-    Eigen::MatrixXf G;
+    Eigen::MatrixXf G, res;
     
     if (method == "bottom_up") {
-        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+        // G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+        res = S;
+        yhat = yhat(Eigen::seqN(0, num_base), Eigen::all);    
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
+        res = S.cast<float>() * G;
     }
     else if (method == "middle_out") {
         G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
+        res = S.cast<float>() * G;
     }
     else if (method == "OLS") {
         G = construct_G_OLS(S);
+        res = S.cast<float>() * G;
     }
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
+        res = S.cast<float>() * G;
     }
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
@@ -246,9 +255,6 @@ Eigen::MatrixXf reconcile(const std::string method,
     //ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
     //printf("G: %s\n", G.str().c_str());
     
-    
-    Eigen::MatrixXf res = S.cast<float>() * G;
-
     res = res * yhat;
 
     //std::stringstream ss3;
