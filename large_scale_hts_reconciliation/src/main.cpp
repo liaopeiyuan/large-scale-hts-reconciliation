@@ -310,8 +310,8 @@ Eigen::MatrixXf reconcile(const std::string method,
         y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
-        G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
+        res = S.cast<float>();
+        y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base, num_total, num_levels);
     }
     else if (method == "OLS") {
         G = construct_G_OLS(S);
