@@ -23,7 +23,7 @@ def main():
     start = timer()
     #if (rank == 0):
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))
+    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     #else:
     #    S_compact, top_down_p = np.array([]), np.array([])
     

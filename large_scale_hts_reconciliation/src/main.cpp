@@ -98,6 +98,37 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
     return G;
 }
 
+Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact, 
+                const Eigen::MatrixXf P, const Eigen::MatrixXf yhat, 
+                int num_base, int num_total, int num_levels) {
+    
+    Eigen::MatrixXf y = Eigen::MatrixXf::Zero(num_base, yhat.cols());
+    
+    assert(S_compact.rows() == num_total);
+    assert(S_compact.cols() == num_levels);
+    assert(num_levels > 1);
+
+    #pragma omp parallel for 
+    for (int i = 0; i < num_total; i++) {
+        int co = S_compact(i, 0);
+        int max_id = -1;
+        bool is_base = true;
+        for (int j = 1; j < num_levels; j++) {
+            int ro = S_compact(i, j);
+            if (ro == -1) {
+                is_base = false;
+                break;
+            }
+            max_id = ro;
+        }
+        if (is_base) {
+            y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(co, 1);
+        }
+    }
+
+    return y;
+}
+
 Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact, 
                 const Eigen::MatrixXf P, 
                 int num_base, int num_total, int num_levels) {
@@ -218,7 +249,7 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
 
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    Eigen::MatrixXf S = construct_S(S_compact, num_base, num_total, num_levels).cast<float>();
     
     // std::stringstream ss;
     // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
@@ -228,24 +259,24 @@ Eigen::MatrixXf reconcile(const std::string method,
     y = yhat;
     
     if (method == "bottom_up") {
-        res = S.cast<float>();
+        res = S;
         y = yhat.topRows(num_base).eval();    
     }
     else if (method == "top_down") {
-        G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
+        res = S;
+        y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
         G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else if (method == "OLS") {
         G = construct_G_OLS(S);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
