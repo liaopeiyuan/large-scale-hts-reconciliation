@@ -263,9 +263,9 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    Eigen::MatrixXi S_slice = S.middleRows(slice_start, slice_length).eval();
+    Eigen::MatrixXi S_slice = S.middleRows(0, slice_length).eval();
     //std::move(S(Eigen::seqN(slice_start, slice_length), Eigen::all));
-    Eigen::MatrixXf G_slice = G.middleCols(slice_start, slice_length).eval();
+    Eigen::MatrixXf G_slice = G.middleCols(0, slice_length).eval();
     //std::move(G(Eigen::all, Eigen::seqN(slice_start, slice_length)));
     
     //Eigen::MatrixXf G_slice = Eigen::MatrixXf::Zero(num_base, slice_length);
@@ -566,9 +566,9 @@ public:
     
         y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
 
-        std::stringstream ss;
-        ss << y_reconciled(Eigen::seqN(0, 5), Eigen::all);
-        printf("y_return: %s\n", ss.str().c_str());
+        // std::stringstream ss;
+        // ss << y_reconciled(Eigen::seqN(0, 5), Eigen::all);
+        // printf("y_return: %s\n", ss.str().c_str());
 
         int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
