@@ -129,12 +129,14 @@ Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact,
 }
 
 Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_base, num_total);
+    Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_total, num_base);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+	
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
@@ -147,10 +149,10 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
             }
         }
         if (is_base) {
-            G(i, i) = 1;
+            G(i) = S(i);
         }
     }
-
+    G.transposeInPlace();
     return G;
 }
 
