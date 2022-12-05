@@ -473,7 +473,7 @@ public:
     MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, comm_global);
     MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, comm_global);
 
-    int slice_start, slice_length;
+    int slice_start = 0, slice_length = 0;
     int curr_row = rows[0];
     for (int i = 0; i < world_size; i++) {
         if (i == world_rank) {
@@ -486,9 +486,7 @@ public:
 
     MPI_Barrier(comm_global);
 
-    for (int i = 0; i < world_size; i++) {
-        printf("rank %d: %d %d\n", world_rank, rows[i], cols[i]);
-    }
+    printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
 
     MPI_Barrier(comm_global);
 
