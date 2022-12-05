@@ -185,7 +185,7 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
-        int max_id = -1;
+        int max_id = co;
         bool is_base = true;
         int lvl = num_levels - level;
         for (int j = 1; j < num_levels; j++) {
@@ -393,7 +393,7 @@ Eigen::MatrixXf reconcile(const std::string method,
     return res;
 }
 
-float RMSE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
+float rmse(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
     float sum = 0;
     for (int i = 0; i < res.rows(); i ++) {
         for (int j = 0; j < res.cols(); j ++) {
@@ -404,7 +404,7 @@ float RMSE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
     return rmse;
 }
 
-float MAE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
+float mae(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
     float sum = 0;
     for (int i = 0; i < res.rows(); i ++) {
         for (int j = 0; j < res.cols(); j ++) {
@@ -415,7 +415,7 @@ float MAE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
     return mae;
 }
 
-float SMAPE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
+float smape(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
     float sum = 0;
     for (int i = 0; i < res.rows(); i ++) {
         for (int j = 0; j < res.cols(); j ++) {
@@ -678,9 +678,9 @@ PYBIND11_MODULE(lhts, m) {
         Some other explanation about the subtract function.
     )pbdoc");
 
-    m.def("rmse", &RMSE);
-    m.def("mae", &MAE);
-    m.def("smape", &SMAPE);
+    m.def("rmse", &rmse);
+    m.def("mae", &mae);
+    m.def("smape", &smape);
 
     m.def("reconcile_matrix", &reconcile_matrix);
     m.def("reconcile", &reconcile);
