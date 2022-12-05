@@ -110,6 +110,7 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
 
     Eigen::MatrixXf root = Eigen::MatrixXf::Zero(num_base, 1);
 
+    /*
     for (int i = num_base; i < num_total; i++) {
         int co = S_compact(i, 0);
         bool is_root = true;
@@ -124,7 +125,8 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
             root = yhat.middleRows(co, 1);
         }
     }
-
+    */
+   
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
@@ -139,7 +141,7 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
             max_id = ro;
         }
         if (is_base) {
-            y.middleRows(co, 1) = P(co, 0) * root.topRows(1);
+            y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(max_id, 1);
         }
     }
 
