@@ -20,8 +20,15 @@ def main():
     rec = lhts.reconcile("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Bottom up (optimized): ", str(elapsed), " ", lhts.smape(rec, gt))
     print(rec)
+
+    start = timer()
+    rec2 = lhts.reconcile_matrix("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    end = timer()
+    elapsed = round(end - start, 4)
+    print("Bottom up (matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print((rec - rec2).abs())
 
     start = timer()
     rec = lhts.reconcile("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
