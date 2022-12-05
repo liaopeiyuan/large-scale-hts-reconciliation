@@ -503,7 +503,7 @@ public:
         yhat_total.topRows(rows[0]) = yhat;
 
         for (int i = 1; i < world_size; i++) {
-            yhat_total.middleRows(curr_row, rows[i]) = yhats[i];
+            yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
             curr_row += rows[i];
         }
 
