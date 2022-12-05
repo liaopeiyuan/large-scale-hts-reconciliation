@@ -27,7 +27,7 @@ def main():
     rec2 = lhts.reconcile_matrix("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Bottom up (matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Bottom up (matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
     print(np.abs(rec - rec2).sum())
 
     start = timer()
@@ -41,7 +41,7 @@ def main():
     rec2 = lhts.reconcile_matrix("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Top down (matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Top down (matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
     print(np.abs(rec - rec2).sum())
 
     start = timer()
@@ -55,7 +55,7 @@ def main():
     rec2 = lhts.reconcile_matrix("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Middle out (matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Middle out (matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
     print(np.abs(rec - rec2).sum())
 
     start = timer()
