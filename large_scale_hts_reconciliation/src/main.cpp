@@ -346,16 +346,6 @@ Eigen::MatrixXf reconcile(const std::string method,
     return res;
 }
 
-Eigen::MatrixXd inv(const Eigen::MatrixXd &xs)
-{
-  return xs.inverse();
-}
-
-double det(const Eigen::MatrixXd &xs)
-{
-  return xs.determinant();
-}
-
 float RMSE(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
     float sum = 0;
     for (int i = 0; i < res.rows(); i ++) {
@@ -641,8 +631,6 @@ PYBIND11_MODULE(lhts, m) {
         Some other explanation about the subtract function.
     )pbdoc");
 
-    m.def("inv", &inv);
-    m.def("det", &det);
     m.def("rmse", &RMSE);
     m.def("mae", &MAE);
     m.def("smape", &SMAPE);
