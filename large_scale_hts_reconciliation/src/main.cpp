@@ -108,7 +108,7 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    Eigen::Matrixf root = Eigen::MatrixXf::Zero(num_base, 1);
+    Eigen::MatrixXf root = Eigen::MatrixXf::Zero(num_base, 1);
 
     for (int i = num_base; i < num_total; i++) {
         int co = S_compact(i, 0);
