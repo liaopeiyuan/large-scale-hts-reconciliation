@@ -450,9 +450,7 @@ public:
         curr_row += rows[i];
     }
 
-    MPI_Barrier(comm_global);
-
-    printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
+    //printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
 
     MPI_Barrier(comm_global);
 
