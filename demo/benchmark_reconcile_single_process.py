@@ -28,7 +28,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     print("Bottom up (matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
-    print(np.abs(rec - rec2))
+    print(np.abs(rec - rec2).sum())
 
     start = timer()
     rec = lhts.reconcile("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
