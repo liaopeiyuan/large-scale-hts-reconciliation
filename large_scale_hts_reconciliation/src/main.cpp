@@ -264,33 +264,11 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     }
 
     Eigen::MatrixXi S_slice = S.middleRows(slice_start, slice_length).eval();
-    //std::move(S(Eigen::seqN(slice_start, slice_length), Eigen::all));
     Eigen::MatrixXf G_slice = G.middleCols(slice_start, slice_length).eval();
-    //std::move(G(Eigen::all, Eigen::seqN(slice_start, slice_length)));
-    
-    //Eigen::MatrixXf G_slice = Eigen::MatrixXf::Zero(num_base, slice_length);
-    //Eigen::MatrixXi S_slice = Eigen::MatrixXi::Zero(slice_length, num_base);
-
-    // G_slice << G.middleCols(slice_start, slice_length);
-    // Eigen::MatrixXf S_slice = S.middleRows(slice_start, slice_length).cast<float>();
-
-    //printf("G_slice: %d x %d\n", G_slice.rows(), G_slice.cols());
-    //printf("S_slice: %d x %d\n", S_slice.rows(), S_slice.cols());
-    //printf("%d - %d\n", slice_start, slice_length);
 
     Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice);
 
     return res;
-
-    //S = S(Eigen::all, Eigen::seqN(slice_start, slice_length));
-
-    //printf("G: %d x %d", G.rows(), G.cols());
-    //printf("S: %d x %d", S.rows(), S.cols());
-
-    //Eigen::MatrixXf res = S.cast<float>() * G;
-
-    // return G;
-    //return res;
 }
 
 
@@ -375,20 +353,8 @@ Eigen::MatrixXf reconcile(const std::string method,
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
-
-    //std::stringstream ss2;
-    //ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    //printf("G: %s\n", G.str().c_str());
     
     res = res * y;
-
-    //std::stringstream ss3;
-    //ss3 << yhat.rows() << " " << yhat.cols() << " " << yhat(Eigen::seqN(0, 10), Eigen::all);
-    //printf("yhat: %s\n", ss3.str().c_str());
-
-    //std::stringstream ss4;
-    //ss4 << ret.rows() << " " << ret.cols() << " " << ret(Eigen::seqN(0, 10), Eigen::all);
-    //printf("ret: %s\n", ss4.str().c_str());
 
     return res;
 }
@@ -491,8 +457,8 @@ public:
     MPI_Barrier(comm_global);
 
     Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
-    // return reconciliation_matrix * yhat;
-    return yhat;
+    
+    return reconciliation_matrix * yhat;
 
   }
 
