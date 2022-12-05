@@ -54,7 +54,7 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
 Eigen::MatrixXf construct_G_OLS(const Eigen::MatrixXi S) {
     Eigen::MatrixXf Sp = S.cast<float>().eval();
     Eigen::MatrixXf St = Sp.transpose().eval();
-    return ((St * Sp).inverse() * St).eval();
+    return ((St * Sp).matrixLU() * St).eval();
 }
 
 Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, float w) {
@@ -65,7 +65,7 @@ Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, float w) {
     }
     Eigen::MatrixXf Sp = S.cast<float>();
     Eigen::MatrixXf St = Sp.transpose();
-    return (St * W * Sp).inverse() * St * W;
+    return (St * W * Sp).matrixLU() * St * W;
 }
 
 Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact, 
