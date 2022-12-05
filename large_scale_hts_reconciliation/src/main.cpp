@@ -67,35 +67,6 @@ Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, float w) {
     return lu.matrixLU() * St * W;
 }
 
-Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact, 
-                const Eigen::MatrixXf P, int level, 
-                int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
-    
-    assert(S_compact.rows() == num_total);
-    assert(S_compact.cols() == num_levels);
-    assert(num_levels > 1);
-
-    #pragma omp parallel for 
-    for (int i = 0; i < num_total; i++) {
-        int co = S_compact(i, 0);
-        int max_id = -1;
-        bool is_base = true;
-        int _level = 1;
-        for (int j = 1; j < num_levels; j++) {
-            int ro = S_compact(i, j);
-            if (ro != -1) {
-                level++;
-                max_id = ro;
-            }
-        }
-        if (_level == level) {
-            G(co, max_id) = P(co, 0);
-        }
-    }
-
-    return G;
-}
 
 Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact, 
                 const Eigen::MatrixXf P, const Eigen::MatrixXf yhat, 
@@ -200,6 +171,42 @@ Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact,
 
     return G;
 }
+
+
+Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact, 
+                const Eigen::MatrixXf P, int level, 
+                int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
+    
+    assert(S_compact.rows() == num_total);
+    assert(S_compact.cols() == num_levels);
+    assert(num_levels > 1);
+
+    #pragma omp parallel for 
+    for (int i = 0; i < num_total; i++) {
+        int co = S_compact(i, 0);
+        int max_id = -1;
+        bool is_base = true;
+        int lvl = num_levels - level;
+        for (int j = 1; j < num_levels; j++) {
+            int ro = S_compact(i, j);
+            if (ro != -1) {
+                is_base = false;
+                break;
+            }
+            if (lvl > 0) {
+                max_id = ro;
+                lvl--;
+            }
+        }
+        if (is_base) {
+            G(co, max_id) = P(co, 0);
+        }
+    }
+
+    return G;
+}
+
 
 Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
     Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_base, num_total);
