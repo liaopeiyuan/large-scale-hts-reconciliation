@@ -16,62 +16,6 @@
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-Eigen::MatrixXf reconcile(const std::string method,
-                          const Eigen::MatrixXi S_compact,
-                          const Eigen::MatrixXf P,
-                          const Eigen::MatrixXf yhat,
-                          int level, float w,
-                          int num_base, int num_total, int num_levels) {
-
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-    
-    // std::stringstream ss;
-    // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    // printf("S: %s\n", ss.str().c_str());
-
-    Eigen::MatrixXf G, res, y;
-    y = yhat;
-    
-    if (method == "bottom_up") {
-        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
-        res = S.cast<float>() * G;
-    }
-    else if (method == "top_down") {
-        G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
-    }
-    else if (method == "middle_out") {
-        G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
-    }
-    else if (method == "OLS") {
-        G = construct_G_OLS(S);
-        res = S.cast<float>() * G;
-    }
-    else if (method == "WLS") {
-        G = construct_G_WLS(S, w);
-        res = S.cast<float>() * G;
-    }
-    else {
-        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
-    }
-
-    //std::stringstream ss2;
-    //ss2 << G.rows() << " " << G.cols() << " " << G(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    //printf("G: %s\n", G.str().c_str());
-    
-    res = res * y;
-
-    //std::stringstream ss3;
-    //ss3 << yhat.rows() << " " << yhat.cols() << " " << yhat(Eigen::seqN(0, 10), Eigen::all);
-    //printf("yhat: %s\n", ss3.str().c_str());
-
-    //std::stringstream ss4;
-    //ss4 << ret.rows() << " " << ret.cols() << " " << ret(Eigen::seqN(0, 10), Eigen::all);
-    //printf("ret: %s\n", ss4.str().c_str());
-
-    return res;
-}
 
 Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
     Eigen::MatrixXi S = Eigen::MatrixXi::Zero(num_total, num_base);
@@ -341,6 +285,49 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     // return G;
     //return res;
 }
+
+
+Eigen::MatrixXf reconcile_matrix(const std::string method,
+                          const Eigen::MatrixXi S_compact,
+                          const Eigen::MatrixXf P,
+                          const Eigen::MatrixXf yhat,
+                          int level, float w,
+                          int num_base, int num_total, int num_levels) {
+
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+
+    Eigen::MatrixXf G, res, y;
+    y = yhat;
+    
+    if (method == "bottom_up") {
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+        res = S.cast<float>() * G;
+    }
+    else if (method == "top_down") {
+        G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
+        res = S.cast<float>() * G;
+    }
+    else if (method == "middle_out") {
+        G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
+        res = S.cast<float>() * G;
+    }
+    else if (method == "OLS") {
+        G = construct_G_OLS(S);
+        res = S.cast<float>() * G;
+    }
+    else if (method == "WLS") {
+        G = construct_G_WLS(S, w);
+        res = S.cast<float>() * G;
+    }
+    else {
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
+    }
+
+    res = res * y;
+
+    return res;
+}
+
 
 Eigen::MatrixXf reconcile(const std::string method,
                           const Eigen::MatrixXi S_compact,
