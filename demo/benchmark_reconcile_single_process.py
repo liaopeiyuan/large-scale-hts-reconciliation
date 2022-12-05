@@ -52,7 +52,7 @@ def main():
     print(rec)
 
     start = timer()
-    rec2 = lhts.reconcile_matrix("middle out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec2 = lhts.reconcile_matrix("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("Middle out (matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
