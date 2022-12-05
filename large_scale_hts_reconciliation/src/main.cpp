@@ -186,11 +186,11 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         int max_id = co;
-        bool is_base = true;
         int lvl = num_levels - level;
+        bool is_base = true;
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
-            if (ro != -1) {
+            if (ro == -1) {
                 is_base = false;
                 break;
             }
