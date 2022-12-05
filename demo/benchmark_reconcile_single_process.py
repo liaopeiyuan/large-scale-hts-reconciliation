@@ -10,6 +10,7 @@ def main():
     y_hat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+    level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     print(y_hat.shape)
 
     print(gt)
@@ -30,7 +31,7 @@ def main():
     print(rec)
 
     start = timer()
-    rec = lhts.reconcile("middle_out", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = lhts.reconcile("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
