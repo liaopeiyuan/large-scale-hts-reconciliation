@@ -116,7 +116,7 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
             if (ro != -1) {
-                is_base = false;
+                is_root = false;
                 break;
             }
         }
