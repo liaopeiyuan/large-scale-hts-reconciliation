@@ -249,7 +249,7 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
 
-    Eigen::MatrixXf S = construct_S(S_compact, num_base, num_total, num_levels).cast<float>();
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
     
     // std::stringstream ss;
     // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
@@ -259,24 +259,24 @@ Eigen::MatrixXf reconcile(const std::string method,
     y = yhat;
     
     if (method == "bottom_up") {
-        res = S;
+        res = S.cast<float>();
         y = yhat.topRows(num_base).eval();    
     }
     else if (method == "top_down") {
-        res = S;
+        res = S.cast<float>();
         y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
         G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
-        res = S * G;
+        res = S.cast<float>() * G;
     }
     else if (method == "OLS") {
         G = construct_G_OLS(S);
-        res = S * G;
+        res = S.cast<float>() * G;
     }
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
-        res = S * G;
+        res = S.cast<float>() * G;
     }
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
