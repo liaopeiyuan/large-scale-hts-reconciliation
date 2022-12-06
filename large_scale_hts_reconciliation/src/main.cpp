@@ -440,7 +440,9 @@ public:
         int n_cols = cols[0];
         for (int i = 1; i < world_size; i++) {
             if (cols[i] != n_cols) {
-                throw std::invalid_argument("Error: cols[%d] != cols[0]\n", i);
+                char buffer[200];
+                sprintf("Error: cols[%d] != cols[0]\n", i);
+                throw std::invalid_argument(buffer);
             }
         }
     }
