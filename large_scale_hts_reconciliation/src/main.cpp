@@ -426,13 +426,11 @@ public:
     int world_rank;
     MPI_Comm_rank(comm_global, &world_rank);
 
-    // printf("%d %d\n", world_size, world_rank);
-
     int ro = yhat.rows();
     int co = yhat.cols();
 
-    std::vector<int> rows(world_size, 0);
-    std::vector<int> cols(world_size, 0);
+    std::vector<int> rows(world_size);
+    std::vector<int> cols(world_size);
 
     std::vector<MPI_Request> reqs(world_size);
     std::vector<MPI_Status> stats(world_size);

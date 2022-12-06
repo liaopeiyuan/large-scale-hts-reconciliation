@@ -69,7 +69,7 @@ def main():
     rec = distrib.reconcile_naive("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0):
+    if (rank == size - 1):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
@@ -77,7 +77,7 @@ def main():
     rec = distrib.reconcile_naive("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0):
+    if (rank == size - 1):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
