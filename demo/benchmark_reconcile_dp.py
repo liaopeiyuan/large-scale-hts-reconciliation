@@ -38,18 +38,6 @@ def main():
         print("Load: " + str(elapsed))
         print(gt[-5:, :])
 
-    #if (rank == size - 1): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
-    """
-    start = timer()
-    rec = distrib.reconcile_dp("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1): 
-        print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
-    """
-
-    #if (rank == size - 1): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
     rec = distrib.reconcile_dp("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
@@ -58,7 +46,13 @@ def main():
         print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
-    return 
+    start = timer()
+    rec = distrib.reconcile_dp("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    end = timer()
+    elapsed = round(end - start, 4)
+    if (rank == size - 1): 
+        print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
+        print(rec[-5:, :])
     
     start = timer()
     rec = distrib.reconcile_dp("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
