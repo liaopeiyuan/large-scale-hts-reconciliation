@@ -264,8 +264,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    Eigen::MatrixXi S_slice = S.middleRows(slice_start, slice_length).eval();
-    Eigen::MatrixXf G_slice = G.middleCols(slice_start, slice_length).eval();
+    Eigen::MatrixXi S_slice = S.middleCols(slice_start, slice_length).eval();
+    Eigen::MatrixXf G_slice = G.middleRows(slice_start, slice_length).eval();
 
     Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice).eval();
 
@@ -455,13 +455,16 @@ public:
 
     Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
 
+    /*
     if (world_rank == world_size - 1) {
         std::stringstream ss;
         ss << reconciliation_matrix; //(Eigen::seqN(0, 5), Eigen::all);
         printf("y_return: %s\n", ss.str().c_str());
     }
+    */
 
-    return reconciliation_matrix * yhat;
+    return yhat;
+    //return reconciliation_matrix * yhat;
 
   }
 
