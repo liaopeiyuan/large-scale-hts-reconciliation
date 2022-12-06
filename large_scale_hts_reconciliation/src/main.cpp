@@ -450,8 +450,6 @@ public:
                                            cols[0]);
     std::vector<Eigen::MatrixXf> yhats(world_size);
 
-    yhats[world_rank] = yhat.eval();
-
     int slice_start = 0, slice_length = 0;
     int curr_row = 0;
     
@@ -459,6 +457,8 @@ public:
 
         if (i != world_rank) {
             yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+        } else {
+            yhats[i] = yhat;
         }
         MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
         yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
