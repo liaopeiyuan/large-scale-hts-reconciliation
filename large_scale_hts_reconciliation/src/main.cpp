@@ -441,7 +441,7 @@ public:
         for (int i = 1; i < world_size; i++) {
             if (cols[i] != n_cols) {
                 char buffer[200];
-                sprintf("Error: cols[%d] != cols[0]\n", i);
+                sprintf(buffer, "Error: cols[%d] != cols[0]\n", i);
                 throw std::invalid_argument(buffer);
             }
         }
@@ -523,7 +523,7 @@ public:
         for (int i = 1; i < world_size; i++) {
             if (cols[i] != n_cols) {
                 char buffer[200];
-                sprintf("Error: cols[%d] != cols[0]\n", i);
+                sprintf(buffer, "Error: cols[%d] != cols[0]\n", i);
                 throw std::invalid_argument(buffer);
             }
         }
