@@ -48,7 +48,7 @@ def main():
         print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
     """
-    
+
     #if (rank == size - 1): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
     rec = distrib.reconcile_dp("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
@@ -58,7 +58,8 @@ def main():
         print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
-
+    return 
+    
     start = timer()
     rec = distrib.reconcile_dp("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
