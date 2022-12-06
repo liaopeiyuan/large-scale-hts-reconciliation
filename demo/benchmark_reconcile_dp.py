@@ -21,7 +21,7 @@ def main():
     distrib = MPI_Utils()
 
     start = timer()
-    #if (rank == 0):
+    #if (rank == size - 1):
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
     top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
@@ -34,51 +34,51 @@ def main():
     
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): 
+    if (rank == size - 1): 
         print("Load: " + str(elapsed))
 
-    #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
+    #if (rank == size - 1): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
     rec = distrib.reconcile_dp("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): 
+    if (rank == size - 1): 
         print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[:5, :], gt[:5, :])
+        print(rec)
 
-    #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
+    #if (rank == size - 1): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
     rec = distrib.reconcile_dp("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0): 
+    if (rank == size - 1): 
         print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[:5, :], gt[:5, :])
+        print(rec)
 
 
     start = timer()
     rec = distrib.reconcile_dp("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0):
+    if (rank == size - 1):
         print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[:5, :], gt[:5, :])
+        print(rec)
 
     start = timer()
     rec = distrib.reconcile_dp("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0):
+    if (rank == size - 1):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[:5, :], gt[:5, :])
+        print(rec)
 
     start = timer()
     rec = distrib.reconcile_dp("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == 0):
+    if (rank == size - 1):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[:5, :], gt[:5, :])
+        print(rec)
     
 
 if __name__ == "__main__":
