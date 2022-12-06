@@ -245,6 +245,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     Eigen::MatrixXf G;
     
     if (method == "bottom_up") {
+        printf("constructing bottom up reconciliation matrix \n");
         G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
     }
     else if (method == "top_down") {
