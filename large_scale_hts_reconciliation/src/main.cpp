@@ -454,9 +454,12 @@ public:
 
     int slice_start = 0, slice_length = 0;
     int curr_row = 0;
+    
     for (int i = 0; i < world_size; i++) {
 
-        yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+        if (i != world_rank) {
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+        }
         MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
         yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
 
