@@ -454,7 +454,7 @@ public:
     for (int i = 0; i < world_size; i++) {
 
         yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
-        MPI_Allgather(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, comm_global);
+        MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
         yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
 
         if (i == world_rank) {
