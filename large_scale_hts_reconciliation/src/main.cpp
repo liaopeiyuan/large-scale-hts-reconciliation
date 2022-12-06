@@ -266,7 +266,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     Eigen::MatrixXi S_slice = S.middleRows(slice_start, slice_length).eval();
     Eigen::MatrixXf G_slice = G.middleCols(slice_start, slice_length).eval();
 
-    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice);
+    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice).eval();
 
     return res;
 }
