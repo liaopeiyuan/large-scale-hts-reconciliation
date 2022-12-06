@@ -215,7 +215,7 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    // #pragma omp parallel for 
+    #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         bool is_base = true;
@@ -454,7 +454,13 @@ public:
     MPI_Barrier(comm_global);
 
     Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
-    
+
+    if (rank == world_size - 1) {
+        std::stringstream ss;
+        ss << reconciliation_matrix; //(Eigen::seqN(0, 5), Eigen::all);
+        printf("y_return: %s\n", ss.str().c_str());
+    }
+
     return reconciliation_matrix * yhat;
 
   }
