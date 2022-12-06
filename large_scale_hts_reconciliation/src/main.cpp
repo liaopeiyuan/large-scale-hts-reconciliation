@@ -215,7 +215,7 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    #pragma omp parallel for 
+    // #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         bool is_base = true;
