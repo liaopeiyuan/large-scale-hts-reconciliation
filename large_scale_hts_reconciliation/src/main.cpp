@@ -412,7 +412,7 @@ public:
   
   ~MPI_Utils() {}
   
-  Eigen::MatrixXf reconcile_dp(const std::string method,
+  Eigen::MatrixXf reconcile_dp_matrix(const std::string method,
                                 const Eigen::MatrixXi S_compact,
                                 const Eigen::MatrixXf P,
                                 const Eigen::MatrixXf yhat,
@@ -492,7 +492,7 @@ public:
 
   }
 
-  Eigen::MatrixXf reconcile_naive(const std::string method,
+  Eigen::MatrixXf reconcile_gather(const std::string method,
                                     const Eigen::MatrixXi S_compact,
                                     const Eigen::MatrixXf P,
                                     const Eigen::MatrixXf yhat,
@@ -695,8 +695,8 @@ PYBIND11_MODULE(lhts, m) {
 
     py::class_<MPI_Utils>(m, "MPI_Utils")    
         .def(py::init<>())
-        .def("reconcile_naive", &MPI_Utils::reconcile_naive, "reconcile_naive")
-        .def("reconcile_dp", &MPI_Utils::reconcile_dp, "reconcile_dp");
+        .def("reconcile_gather", &MPI_Utils::reconcile_gather, "reconcile_gather")
+        .def("reconcile_dp_matrix", &MPI_Utils::reconcile_dp_matrix, "reconcile_dp_matrix");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

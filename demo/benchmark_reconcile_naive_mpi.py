@@ -40,7 +40,7 @@ def main():
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
-    rec = distrib.reconcile_naive("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
@@ -49,7 +49,7 @@ def main():
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
-    rec = distrib.reconcile_naive("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
@@ -58,7 +58,7 @@ def main():
 
 
     start = timer()
-    rec = distrib.reconcile_naive("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
@@ -66,7 +66,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_naive("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
@@ -74,7 +74,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_naive("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):

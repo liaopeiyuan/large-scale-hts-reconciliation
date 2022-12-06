@@ -39,7 +39,7 @@ def main():
         print(gt[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_dp("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_dp_matrix("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
@@ -47,7 +47,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_dp("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_dp_matrix("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
@@ -55,7 +55,7 @@ def main():
         print(rec[-5:, :])
     
     start = timer()
-    rec = distrib.reconcile_dp("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_dp_matrix("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
@@ -63,7 +63,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_dp("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_dp_matrix("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
@@ -71,7 +71,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_dp("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
+    rec = distrib.reconcile_dp_matrix("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
