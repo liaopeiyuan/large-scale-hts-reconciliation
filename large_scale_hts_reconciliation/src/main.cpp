@@ -450,6 +450,8 @@ public:
                                            cols[0]);
     std::vector<Eigen::MatrixXf> yhats(world_size);
 
+    yhats[world_rank] = yhat.eval();
+
     int slice_start = 0, slice_length = 0;
     int curr_row = 0;
     for (int i = 0; i < world_size; i++) {
@@ -462,6 +464,7 @@ public:
             slice_start = curr_row;
             slice_length = rows[i];
         }
+
         curr_row += rows[i];
     }
 
