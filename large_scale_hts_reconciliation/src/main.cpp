@@ -208,8 +208,8 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
 }
 
 
-Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXi G = Eigen::MatrixXi::Zero(num_base, num_total);
+Eigen::MatrixXf construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
+    Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
@@ -227,7 +227,7 @@ Eigen::MatrixXi construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
             }
         }
         if (is_base) {
-            G(i, i) = 1;
+            G(i, i) = 1.0;
         }
     }
 
@@ -245,7 +245,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     Eigen::MatrixXf G;
     
     if (method == "bottom_up") {
-        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>().eval();
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
@@ -283,7 +283,7 @@ Eigen::MatrixXf reconcile_matrix(const std::string method,
     y = yhat;
     
     if (method == "bottom_up") {
-        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
         res = S.cast<float>() * G;
     }
     else if (method == "top_down") {
