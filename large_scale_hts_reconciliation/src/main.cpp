@@ -264,10 +264,8 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    Eigen::MatrixXi S_slice = S.middleCols(slice_start, slice_length).eval();
-    Eigen::MatrixXf G_slice = G.middleRows(slice_start, slice_length).eval();
-
-    Eigen::MatrixXf res = (S_slice.cast<float>() * G_slice).eval();
+    Eigen::MatrixXi S_slice = S.middleRows(slice_start, slice_length).eval();
+    Eigen::MatrixXf res = (S_slice.cast<float>() * G).eval();
 
     return res;
 }
@@ -438,13 +436,30 @@ public:
     MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, comm_global);
     MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, comm_global);
 
+    if (world_rank == 0) {
+        int n_cols = cols[0];
+        for (int i = 1; i < world_size; i++) {
+            if (cols[i] != n_cols) {
+                throw std::invalid_argument("Error: cols[%d] != cols[0]\n", i);
+            }
+        }
+    }
+
+    Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
+                                           cols[0]);
+    std::vector<Eigen::MatrixXf> yhats(world_size);
+
     int slice_start = 0, slice_length = 0;
     int curr_row = 0;
     for (int i = 0; i < world_size; i++) {
+
+        yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+        MPI_Allgather(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, comm_global);
+        yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
+
         if (i == world_rank) {
             slice_start = curr_row;
             slice_length = rows[i];
-            break;
         }
         curr_row += rows[i];
     }
@@ -463,7 +478,7 @@ public:
     }
     */
 
-    return yhat;
+    return reconciliation_matrix * yhat_total;
     //return reconciliation_matrix * yhat;
 
   }
@@ -501,6 +516,13 @@ public:
         // for (int i = 0; i < world_size; i++) {
         //    printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
         // }
+
+        int n_cols = cols[0];
+        for (int i = 1; i < world_size; i++) {
+            if (cols[i] != n_cols) {
+                throw std::invalid_argument("Error: cols[%d] != cols[0]\n", i);
+            }
+        }
         
 
         yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
@@ -558,6 +580,7 @@ public:
         MPI_Barrier(comm_global);
         return y_return;
     }
+
   }
   
   void test(const Eigen::MatrixXd &xs) {
