@@ -234,7 +234,7 @@ Eigen::MatrixXf construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     return G;
 }
 
-Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
+Eigen::MatrixXf construct_dp_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
                           int level, float w,
@@ -411,7 +411,78 @@ public:
   }
   
   ~MPI_Utils() {}
-  
+
+  Eigen::MatrixXf reconcile_dp_optimized(const std::string method,
+                                const Eigen::MatrixXi S_compact,
+                                const Eigen::MatrixXf P,
+                                const Eigen::MatrixXf yhat,
+                                int level, float w,
+                                int num_base, int num_total, int num_levels) {
+    int world_size;
+    MPI_Comm_size(comm_global, &world_size);
+    int world_rank;
+    MPI_Comm_rank(comm_global, &world_rank);
+
+    int ro = yhat.rows();
+    int co = yhat.cols();
+
+    std::vector<int> rows(world_size);
+    std::vector<int> cols(world_size);
+
+    std::vector<MPI_Request> reqs(world_size);
+    std::vector<MPI_Status> stats(world_size);
+
+    MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, comm_global);
+    MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, comm_global);
+
+    if (world_rank == 0) {
+        int n_cols = cols[0];
+        for (int i = 1; i < world_size; i++) {
+            if (cols[i] != n_cols) {
+                char buffer[200];
+                sprintf(buffer, "Error: cols[%d] != cols[0]\n", i);
+                throw std::invalid_argument(buffer);
+            }
+        }
+    }
+
+    Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
+                                           cols[0]);
+    std::vector<Eigen::MatrixXf> yhats(world_size);
+
+    int slice_start = 0, slice_length = 0;
+    int curr_row = 0;
+    
+    for (int i = 0; i < world_size; i++) {
+
+        if (i != world_rank) {
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+        } else {
+            yhats[i] = yhat;
+        }
+        MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+        yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
+
+        if (i == world_rank) {
+            slice_start = curr_row;
+            slice_length = rows[i];
+        }
+
+        curr_row += rows[i];
+    }
+
+    MPI_Barrier(comm_global);
+
+    Eigen::MatrixXf reconciliation_matrix = 
+        construct_dp_reconciliation_matrix(method, 
+            S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+
+
+    return reconciliation_matrix * yhat_total;
+
+  }
+
+
   Eigen::MatrixXf reconcile_dp_matrix(const std::string method,
                                 const Eigen::MatrixXi S_compact,
                                 const Eigen::MatrixXf P,
@@ -476,7 +547,7 @@ public:
     MPI_Barrier(comm_global);
 
     Eigen::MatrixXf reconciliation_matrix = 
-        construct_reconciliation_matrix(method, 
+        construct_dp_reconciliation_matrix(method, 
             S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
 
     /*
@@ -488,7 +559,6 @@ public:
     */
 
     return reconciliation_matrix * yhat_total;
-    //return reconciliation_matrix * yhat;
 
   }
 
