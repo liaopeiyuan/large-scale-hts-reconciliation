@@ -245,7 +245,7 @@ Eigen::MatrixXf construct_reconciliation_matrix(const std::string method,
     Eigen::MatrixXf G;
     
     if (method == "bottom_up") {
-        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>();
+        G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels).cast<float>().eval();
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
@@ -475,7 +475,9 @@ public:
 
     MPI_Barrier(comm_global);
 
-    Eigen::MatrixXf reconciliation_matrix = construct_reconciliation_matrix(method, S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+    Eigen::MatrixXf reconciliation_matrix = 
+        construct_reconciliation_matrix(method, 
+            S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
 
     /*
     if (world_rank == world_size - 1) {
