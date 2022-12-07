@@ -482,13 +482,14 @@ public:
         for (int i = 0; i < world_size; i++) {
 
             int color = (i == world_rank) || (slice_start >= num_base);
-            if (color == 1) {
+            if (true) {//if (color == 1) {
                 if (i != world_rank) {
                     yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
                 } else {
                     yhats[i] = yhat;
                 }
-                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, root_communicators[i]);
+                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+                // MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, root_communicators[i]);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
             }
 
