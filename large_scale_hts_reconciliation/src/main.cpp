@@ -462,7 +462,7 @@ public:
     std::vector<MPI_Comm> root_communicators(world_size);
 
     for (int i = 0; i < world_size; i++) {
-        int color = (i == world_rank) || (slice_start + slice_length >= num_base);
+        int color = (i == world_rank) || (slice_start >= num_base);
         MPI_Comm_split(comm_global, color, world_rank, &root_communicators[i]);
     }
 
@@ -477,7 +477,7 @@ public:
         curr_row = 0;
         for (int i = 0; i < world_size; i++) {
 
-            int color = (i == world_rank) || (slice_start + slice_length >= num_base);
+            int color = (i == world_rank) || (slice_start >= num_base);
             if (color == 1) {
                 if (i != world_rank) {
                     yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
@@ -485,7 +485,7 @@ public:
                     yhats[i] = yhat;
                 }
                 MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, root_communicators[i]);
-                if (slice_start + slice_length >= num_base) {
+                if (slice_start >= num_base) {
                     yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
                 }
             }
@@ -495,7 +495,7 @@ public:
 
         MPI_Barrier(comm_global);
 
-        if (slice_start + slice_length >= num_base) {
+        if (slice_start >= num_base) {
             Eigen::MatrixXf reconciliation_matrix = 
                 construct_dp_reconciliation_matrix(method, 
                     S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
@@ -504,6 +504,7 @@ public:
         } else {
             result = yhat;
         }
+        
     }
     else if (method == "top_down") {
         result = yhat;
