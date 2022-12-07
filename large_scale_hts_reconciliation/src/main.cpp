@@ -543,7 +543,8 @@ public:
     else if (method == "top_down") {
 
         std::vector<int> slice_starts(world_size);
-        std::vector<std::set<int>> communication_map(world_size, std::set<int>()); 
+        std::vector<std::set<int>> recvs(world_size, std::set<int>()); 
+        std::vector<std::set<int>> sends(world_size, std::set<int>()); 
 
         int curr_row = 0;
         
@@ -589,8 +590,9 @@ public:
                     }
                 }
                 
-                if (world_rank == 0) printf("%d %d %d %d %d %d\n", root_process, leaf_process, slice_starts[root_process], slice_starts[leaf_process], root, co);
-                communication_map[leaf_process].insert(root_process);
+                // if (world_rank == 0) printf("%d %d %d %d %d %d\n", root_process, leaf_process, slice_starts[root_process], slice_starts[leaf_process], root, co);
+                recvs[leaf_process].insert(root_process);
+                sends[root_process].insert(leaf_process);
                 
             }
         }
@@ -600,7 +602,7 @@ public:
         if (world_rank == 0) {
             for (int i = 0; i < world_size; i++) {
                 printf("Rank %d needs ", i);
-                for (int k: communication_map[i]) {
+                for (int k: recvs[i]) {
                     printf("%d, ", k);
                 }
                 printf("\n");
