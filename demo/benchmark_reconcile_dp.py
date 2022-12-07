@@ -52,7 +52,6 @@ def main():
     elapsed = round(end - start, 4)
     #if (rank == size - 1): 
     print("Bottom up (dp matrix): ", rank, " ", str(elapsed), " ", lhts.smape(rec, gt))
-    #print(rec[-5:, :])
 
     start = timer()
     rec2 = distrib.reconcile_dp_optimized("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
@@ -60,7 +59,7 @@ def main():
     elapsed = round(end - start, 4)
     #if (rank == size - 1): 
     print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
-    #print(rec[-5:, :])
+    if (rank == size - 1): print(rec[-10:, :], rec2[-10:, :])
     
     start = timer()
     rec = distrib.reconcile_dp_matrix("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
