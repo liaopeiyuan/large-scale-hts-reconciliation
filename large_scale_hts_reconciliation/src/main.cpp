@@ -488,7 +488,7 @@ public:
                 }
                 printf("rank %d @ %d\n", world_rank, i);
                 // MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
-                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, &comm);
+                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
             }
 
