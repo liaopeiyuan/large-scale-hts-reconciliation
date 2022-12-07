@@ -11,7 +11,7 @@ import lhts
 import numpy as np
 from timeit import default_timer as timer
 
-RANK_TO_TEST = 1
+RANK_TO_TEST = 0
 
 def main():
     ROOT = "/data/cmu/large-scale-hts-reconciliation/"
@@ -38,6 +38,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
         print("Original: ", str(elapsed), " ", lhts.smape(y_hat, gt))
+        print(y_hat[-5:, :])
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
