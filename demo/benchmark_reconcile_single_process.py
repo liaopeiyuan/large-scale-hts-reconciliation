@@ -22,7 +22,8 @@ def main():
     elapsed = round(end - start, 4)
     print("Bottom up (optimized): ", str(elapsed), " ", lhts.smape(rec, gt))
     print(rec)
-    print(np.abs(y_hat[:5000,:] - rec[:5000,:]).sum())
+    print(np.abs(y_hat[:5650,:] - rec[:5650,:]).sum())
+    print(np.abs(y_hat[5650:,:] - rec[5650:,:]).sum())
 
     start = timer()
     rec2 = lhts.reconcile_matrix("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
