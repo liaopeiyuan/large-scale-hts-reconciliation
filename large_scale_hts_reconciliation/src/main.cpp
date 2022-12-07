@@ -538,16 +538,12 @@ public:
                 MPI_Comm_free(&leaf_comm);
             }
 
-            // MPI_Barrier(comm_global);
             curr_row += rows[i];
         }
 
-        // MPI_Barrier(comm_global);
-
         if (slice_start + slice_length >= num_base) {
-            result = 
-                dp_reconcile_optimized(method, 
-                    S_compact, P, yhat_total, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+            result = dp_reconcile_optimized(method, S_compact, P, yhat_total, level, w, 
+                        num_base, num_total, num_levels, slice_start, slice_length);
         } else {
             result = yhat.eval();
         }
