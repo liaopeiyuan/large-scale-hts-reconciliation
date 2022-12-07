@@ -4,6 +4,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <vector>
+#include <set>
 #include <stdexcept>
 
 #ifdef _OPENMP
