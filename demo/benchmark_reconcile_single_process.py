@@ -13,7 +13,7 @@ def main():
     level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     print(y_hat.shape)
 
-    print(gt)
+    print(y_hat)
     print("Before Reconciliation: ", lhts.smape(y_hat, gt))
 
     start = timer()
