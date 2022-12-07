@@ -480,7 +480,7 @@ public:
             int color = (i == world_rank) | (slice_start >= num_base);
             MPI_Comm_split(comm_global, color, world_rank, &comm);
             
-            if (color == 1) {
+            //if (color == 1) {
                 if (i != world_rank) {
                     yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
                 } else {
@@ -490,7 +490,7 @@ public:
                 // MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
                 MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
-            }
+            //}
 
             MPI_Barrier(comm_global);
             curr_row += rows[i];
