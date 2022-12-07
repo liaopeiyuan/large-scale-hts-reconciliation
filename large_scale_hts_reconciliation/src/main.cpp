@@ -85,7 +85,7 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
-        int max_id = -1;
+        int root = -1;
         bool is_base = true;
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
@@ -93,10 +93,10 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
                 is_base = false;
                 break;
             }
-            max_id = ro;
+            root = ro;
         }
         if (is_base) {
-            y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(max_id, 1);
+            y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
         }
     }
 
@@ -117,7 +117,7 @@ Eigen::MatrixXf distribute_forecast_middle_out(const Eigen::MatrixXi S_compact,
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
-        int max_id = co;
+        int root = co;
         int lvl = num_levels - level;
         bool is_base = true;
         for (int j = 1; j < num_levels; j++) {
@@ -127,12 +127,12 @@ Eigen::MatrixXf distribute_forecast_middle_out(const Eigen::MatrixXi S_compact,
                 break;
             }
             if (lvl > 0) {
-                max_id = ro;
+                root = ro;
                 lvl--;
             }
         }
         if (is_base) {
-            y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(max_id, 1);
+            y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
         }
     }
 
@@ -152,7 +152,7 @@ Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact,
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
-        int max_id = -1;
+        int root = -1;
         bool is_base = true;
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
@@ -160,10 +160,10 @@ Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact,
                 is_base = false;
                 break;
             }
-            max_id = ro;
+            root = ro;
         }
         if (is_base) {
-            G(co, max_id) = P(co, 0);
+            G(co, root) = P(co, 0);
         }
     }
 
@@ -183,7 +183,7 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
-        int max_id = co;
+        int root = co;
         int lvl = num_levels - level;
         bool is_base = true;
         for (int j = 1; j < num_levels; j++) {
@@ -193,12 +193,12 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
                 break;
             }
             if (lvl > 0) {
-                max_id = ro;
+                root = ro;
                 lvl--;
             }
         }
         if (is_base) {
-            G(co, max_id) = P(co, 0);
+            G(co, root) = P(co, 0);
         }
     }
 
@@ -213,7 +213,7 @@ Eigen::MatrixXf construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    // #pragma omp parallel for 
+    #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         bool is_base = true;
@@ -485,22 +485,23 @@ public:
         }
     }
 
-    int slice_start = 0, slice_length = 0;
-    int curr_row = 0;
-    
-    for (int i = 0; i < world_size; i++) {
-
-        if (i == world_rank) {
-            slice_start = curr_row;
-            slice_length = rows[i];
-        }
-
-        curr_row += rows[i];
-    }
-
     Eigen::MatrixXf result;
 
     if (method == "bottom_up") {
+        
+        int slice_start = 0, slice_length = 0;
+        int curr_row = 0;
+        
+        for (int i = 0; i < world_size; i++) {
+
+            if (i == world_rank) {
+                slice_start = curr_row;
+                slice_length = rows[i];
+                break;
+            }
+
+            curr_row += rows[i];
+        }
         
         Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
                                             cols[0]);
@@ -539,6 +540,49 @@ public:
         
     }
     else if (method == "top_down") {
+
+        std::vector<int> slice_starts;
+        std::vector<std::set<int>> communication_map(world_size, std::set<int>()); 
+
+        int curr_row = 0;
+        
+        for (int i = 0; i < world_size; i++) {
+            slice_start[i] = curr_row;
+            curr_row += rows[i];
+        }
+
+        for (int i = 0; i < num_total; i++) {
+            int co = S_compact(i, 0);
+            int root = -1;
+            bool is_base = true;
+            for (int j = 1; j < num_levels; j++) {
+                int ro = S_compact(i, j);
+                if (ro == -1) {
+                    is_base = false;
+                    break;
+                }
+                root = ro;
+            }
+            if (is_base) {
+                int root_process = 0;
+                for (int i = 0; i < world_size; i++) {
+                    if (slice_starts[i] > root) {
+                        root_process = i;
+                        break;
+                    }
+                }
+                communication_map[i].insert(root_process);
+            }
+        }
+
+        for (int i = 0; i < world_size; i++) {
+            printf("Rank %d needs ", i);
+            for (int k: communication_map[i]) {
+                printf("%d, ", k);
+            }
+            printf("\n");
+        }
+
         result = yhat;
     }
     else if (method == "middle_out") {
