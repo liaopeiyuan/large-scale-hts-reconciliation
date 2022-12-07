@@ -477,7 +477,7 @@ public:
         for (int i = 0; i < world_size; i++) {
             MPI_Comm comm;
 
-            int color = (i == world_rank) | (slice_start + slice_length >= num_base);
+            int color = 1; //(i == world_rank) | (slice_start + slice_length >= num_base);
             MPI_Comm_split(comm_global, color, world_rank, &comm);
             
             if (color == 1) {
