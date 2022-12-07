@@ -484,10 +484,8 @@ public:
                 } else {
                     yhats[i] = yhat;
                 }
-                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, root_communicators[i]);
-                if (slice_start >= num_base) {
-                    yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
-                }
+                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+                yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
             }
 
             curr_row += rows[i];
@@ -502,6 +500,7 @@ public:
 
             result = reconciliation_matrix * yhat_total;
         } else {
+            printf("Rank: %d no computation needed\n", world_rank);
             result = yhat;
         }
         
