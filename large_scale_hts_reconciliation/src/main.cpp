@@ -803,7 +803,8 @@ PYBIND11_MODULE(lhts, m) {
     py::class_<MPI_Utils>(m, "MPI_Utils")    
         .def(py::init<>())
         .def("reconcile_gather", &MPI_Utils::reconcile_gather, "reconcile_gather")
-        .def("reconcile_dp_matrix", &MPI_Utils::reconcile_dp_matrix, "reconcile_dp_matrix");
+        .def("reconcile_dp_matrix", &MPI_Utils::reconcile_dp_matrix, "reconcile_dp_matrix")
+        .def("reconcile_dp_optimized", &MPI_Utils::reconcile_dp_optimized, "reconcile_dp_matrix");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
