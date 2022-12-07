@@ -446,22 +446,10 @@ public:
         }
     }
 
-    Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
-                                           cols[0]);
-    std::vector<Eigen::MatrixXf> yhats(world_size);
-
     int slice_start = 0, slice_length = 0;
     int curr_row = 0;
     
     for (int i = 0; i < world_size; i++) {
-
-        if (i != world_rank) {
-            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
-        } else {
-            yhats[i] = yhat;
-        }
-        MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
-        yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
 
         if (i == world_rank) {
             slice_start = curr_row;
@@ -471,14 +459,69 @@ public:
         curr_row += rows[i];
     }
 
-    MPI_Barrier(comm_global);
+    std::vector<MPI_Comm> root_communicators(world_size);
 
-    Eigen::MatrixXf reconciliation_matrix = 
-        construct_dp_reconciliation_matrix(method, 
-            S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+    for (int i = 0; i < world_size; i++) {
+        int color = (i == world_rank) || (slice_start + slice_length >= num_base);
+        MPI_Comm_split(comm_global, color, world_rank, &root_communicators[i]);
+    }
 
+    Eigen::MatrixXf result;
 
-    return reconciliation_matrix * yhat_total;
+    if (method == "bottom_up") {
+        
+        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), 
+                                            cols[0]);
+        std::vector<Eigen::MatrixXf> yhats(world_size);
+
+        curr_row = 0;
+        for (int i = 0; i < world_size; i++) {
+
+            int color = (i == world_rank) || (slice_start + slice_length >= num_base);
+            if (color == 1) {
+                if (i != world_rank) {
+                    yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+                } else {
+                    yhats[i] = yhat;
+                }
+                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, root_communicators[i]);
+                if (slice_start + slice_length >= num_base) {
+                    yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
+                }
+            }
+
+            curr_row += rows[i];
+        }
+
+        MPI_Barrier(comm_global);
+
+        if (slice_start + slice_length >= num_base) {
+            Eigen::MatrixXf reconciliation_matrix = 
+                construct_dp_reconciliation_matrix(method, 
+                    S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+
+            result = reconciliation_matrix * yhat_total;
+        } else {
+            result = yhat;
+        }
+    }
+    else if (method == "top_down") {
+        result = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
+    }
+    else if (method == "middle_out") {
+        result = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
+    }
+    else if (method == "OLS") {
+        result = construct_G_OLS(S);
+    }
+    else if (method == "WLS") {
+        result = construct_G_WLS(S, w);
+    }
+    else {
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
+    }
+
+    return result;
 
   }
 
@@ -590,12 +633,6 @@ public:
     std::vector<Eigen::MatrixXf> yhats(world_size);
 
     if (world_rank == 0) {
-        int nthreads = omp_get_num_threads();
-        // printf("nthreads: %d\n", nthreads);
-        // for (int i = 0; i < world_size; i++) {
-        //    printf("rows[%d]: %d, cols[%d]: %d\n", i, rows[i], i, cols[i]);
-        // }
-
         int n_cols = cols[0];
         for (int i = 1; i < world_size; i++) {
             if (cols[i] != n_cols) {
