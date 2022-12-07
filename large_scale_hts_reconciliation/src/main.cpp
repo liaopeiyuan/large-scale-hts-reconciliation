@@ -238,6 +238,52 @@ Eigen::MatrixXf construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
     return G;
 }
 
+Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
+                          const Eigen::MatrixXi S_compact,
+                          const Eigen::MatrixXf P,
+                          const Eigen::MatrixXf yhat,
+                          int level, float w,
+                          int num_base, int num_total, int num_levels,
+                          int slice_start, int slice_length) {
+    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
+    
+    // std::stringstream ss;
+    // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
+    // printf("S: %s\n", ss.str().c_str());
+
+    Eigen::MatrixXf G, res, y;
+    y = yhat;
+    
+    if (method == "bottom_up") {
+        res = S.cast<float>();
+        y = yhat.topRows(num_base).eval();    
+    }
+    else if (method == "top_down") {
+        res = S.cast<float>();
+        y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total, num_levels);
+    }
+    else if (method == "middle_out") {
+        res = S.cast<float>();
+        y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base, num_total, num_levels);
+    }
+    else if (method == "OLS") {
+        G = construct_G_OLS(S);
+        res = S.cast<float>() * G;
+    }
+    else if (method == "WLS") {
+        G = construct_G_WLS(S, w);
+        res = S.cast<float>() * G;
+    }
+    else {
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
+    }
+
+    res = res * y;
+
+    return res;
+}
+
+
 Eigen::MatrixXf construct_dp_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
@@ -499,11 +545,9 @@ public:
         // MPI_Barrier(comm_global);
 
         if (slice_start + slice_length >= num_base) {
-            Eigen::MatrixXf reconciliation_matrix = 
-                construct_dp_reconciliation_matrix(method, 
-                    S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
-
-            result = (reconciliation_matrix * yhat_total).eval();
+            result = 
+                dp_reconcile_optimized(method, 
+                    S_compact, P, yhat_total, level, w, num_base, num_total, num_levels, slice_start, slice_length);
         } else {
             result = yhat.eval();
         }
