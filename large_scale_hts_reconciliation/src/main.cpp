@@ -27,6 +27,9 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
     //#pragma omp parallel for 
     for (int i = 0; i < num_base; i++) {
         int co = S_compact(i, 0);
+        if (co >= num_base) {
+            throw std::invalid_argument("Make sure that the frist num_base rows of S_compact contain only leaf-level nodes.");
+        }
         S(co, co) = 1;
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
@@ -675,15 +678,15 @@ public:
         
         Eigen::MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
     
-        y_return = y_reconciled(Eigen::seqN(0, rows[0]), Eigen::all);
+        y_return = y_reconciled.topRows(rows[0]).eval();
 
         // std::stringstream ss;
         // ss << y_reconciled(Eigen::seqN(0, 5), Eigen::all);
         // printf("y_return: %s\n", ss.str().c_str());
 
-        int curr_row = rows[0];
+        int curr_row = 0;
         for (int i = 1; i < world_size; i++) {
-            yhats[i] = y_reconciled(Eigen::seqN(curr_row, rows[i]), Eigen::all);
+            yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
             MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
             curr_row += rows[i];
         }
