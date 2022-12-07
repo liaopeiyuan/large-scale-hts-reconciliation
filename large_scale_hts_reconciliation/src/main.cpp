@@ -578,6 +578,8 @@ public:
             }
         }
 
+        printf("insert\n");
+
         for (int i = 0; i < world_size; i++) {
             printf("Rank %d needs ", i);
             for (int k: communication_map[i]) {
