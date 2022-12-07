@@ -659,7 +659,7 @@ public:
 
         int curr_row = rows[0];
 
-        yhat_total.topRows(rows[0]) = yhat;
+        yhat_total.topRows(rows[0]) = yhat.eval();
 
         for (int i = 1; i < world_size; i++) {
             yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
