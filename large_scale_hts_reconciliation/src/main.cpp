@@ -597,7 +597,7 @@ public:
             }
         }
 
-        std::vector<MPI_Request> reqs();
+        std::vector<MPI_Request> reqs(0);
         std::vector<Eigen::MatrixXf> yhats(world_size);
 
         for (int i : recvs[world_rank]) {
@@ -613,7 +613,7 @@ public:
 
         std::vector<MPI_Status> stats(reqs.size());
         MPI_Waitall(reqs.size(), reqs.data(), stats.data());
-        
+
         //printf("insert\n");
 
         /*
