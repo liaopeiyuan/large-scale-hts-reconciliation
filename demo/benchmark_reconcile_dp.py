@@ -57,9 +57,9 @@ def main():
     rec2 = distrib.reconcile_dp_optimized("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    #if (rank == size - 1): 
-    print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
-    print("Bottom up (original): ", rank, " ", str(elapsed), " ", lhts.smape(y_hat, gt))
+    if (rank == size - 1): 
+        print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
+        print("Bottom up (original): ", rank, " ", str(elapsed), " ", lhts.smape(y_hat, gt))
     if (rank == size - 1): print(rank, rec[-10:, :].reshape(-1), rec2[-10:, :].reshape(-1), y_hat[-10:, :].reshape(-1), "\n")
     
     start = timer()
