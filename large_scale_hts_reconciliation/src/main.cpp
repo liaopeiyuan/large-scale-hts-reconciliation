@@ -567,27 +567,37 @@ public:
                 root = ro;
             }
             if (is_base) {
-                int root_process = 0;
-                /*
+                int root_process = 0, leaf_process = 0;
+    
                 for (int j = 0; j < world_size; j++) {
                     if (slice_starts[j] > root) {
-                        root_process = i;
+                        root_process = j;
                         break;
                     }
                 }
-                communication_map[i].insert(root_process);
-                */
+
+                for (int j = 0; j < world_size; j++) {
+                    if (slice_starts[j] > co) {
+                        leaf_process = j;
+                        break;
+                    }
+                }
+
+                communication_map[leaf_process].insert(root_process);
+                
             }
         }
 
         printf("insert\n");
 
-        for (int i = 0; i < world_size; i++) {
-            printf("Rank %d needs ", i);
-            for (int k: communication_map[i]) {
-                printf("%d, ", k);
+        if (world_rank == 0) {
+            for (int i = 0; i < world_size; i++) {
+                printf("Rank %d needs ", i);
+                for (int k: communication_map[i]) {
+                    printf("%d, ", k);
+                }
+                printf("\n");
             }
-            printf("\n");
         }
 
         result = yhat;
