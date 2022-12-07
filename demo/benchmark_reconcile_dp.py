@@ -59,7 +59,6 @@ def main():
     elapsed = round(end - start, 4)
     if (rank >= 10): 
         print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
-        print("Bottom up (original): ", rank, " ", str(elapsed), " ", lhts.smape(y_hat, gt))
         print(rank, np.abs(rec[:, :] - rec2[:, :]).sum(), np.abs(y_hat[:, :] - rec2[:, :]).sum(), "\n")
     
     start = timer()

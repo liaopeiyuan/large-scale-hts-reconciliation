@@ -82,9 +82,6 @@ Eigen::MatrixXf distribute_forecast_top_down(const Eigen::MatrixXi S_compact,
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    Eigen::MatrixXf root = Eigen::MatrixXf::Zero(num_base, 1);
-
-
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
@@ -116,9 +113,6 @@ Eigen::MatrixXf distribute_forecast_middle_out(const Eigen::MatrixXi S_compact,
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
-
-    Eigen::MatrixXf root = Eigen::MatrixXf::Zero(num_base, 1);
-
 
     #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
@@ -246,11 +240,6 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
                           int num_base, int num_total, int num_levels,
                           int slice_start, int slice_length) {
     Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
-    
-    // std::stringstream ss;
-    // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
-    // printf("S: %s\n", ss.str().c_str());
-
     Eigen::MatrixXf G, res, y;
     y = yhat;
     
@@ -631,21 +620,27 @@ public:
 
     //printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
 
+    return dp_reconcile_optimized(method, S_compact, P, yhat_total, level, w, 
+                        num_base, num_total, num_levels, slice_start, slice_length);
+    
+    /*
     MPI_Barrier(comm_global);
 
     Eigen::MatrixXf reconciliation_matrix = 
         construct_dp_reconciliation_matrix(method, 
             S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
 
-    /*
+
+    return reconciliation_matrix * yhat_total;
+    */
+
+   /*
     if (world_rank == world_size - 1) {
         std::stringstream ss;
         ss << reconciliation_matrix; //(Eigen::seqN(0, 5), Eigen::all);
         printf("y_return: %s\n", ss.str().c_str());
     }
     */
-
-    return reconciliation_matrix * yhat_total;
 
   }
 
