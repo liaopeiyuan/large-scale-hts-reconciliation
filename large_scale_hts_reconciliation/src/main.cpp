@@ -597,6 +597,23 @@ public:
             }
         }
 
+        std::vector<MPI_Request> reqs();
+        std::vector<Eigen::MatrixXf> yhats(world_size);
+
+        for (int i : recvs[world_rank]) {
+            reqs.push_back(MPI_Request());
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[reqs.size() - 1]);
+        }
+
+        for (int i : sends[world_rank]) {
+            reqs.push_back(MPI_Request());
+            MPI_Isend(yhat.data(), rows[world_rank] * cols[world_rank], MPI_FLOAT, i, 0, comm_global, &reqs[reqs.size() - 1]);
+        }
+
+        std::vector<MPI_Status> stats(reqs.size());
+        MPI_Waitall(reqs.size(), reqs.data(), stats.data());
+        
         //printf("insert\n");
 
         /*
@@ -611,9 +628,61 @@ public:
         }
         */
 
+
+
         result = yhat;
     }
     else if (method == "middle_out") {
+
+        std::vector<int> slice_starts(world_size);
+        std::vector<std::set<int>> recvs(world_size, std::set<int>()); 
+        std::vector<std::set<int>> sends(world_size, std::set<int>()); 
+
+        int curr_row = 0;
+        
+        for (int i = 0; i < world_size; i++) {
+            slice_starts[i] = curr_row;
+            curr_row += rows[i];
+        }
+
+
+        for (int i = 0; i < num_base; i++) {
+            int co = S_compact(i, 0);
+            int root = co;
+            int lvl = num_levels - level;
+            bool is_base = true;
+            for (int j = 1; j < num_levels; j++) {
+                int ro = S_compact(i, j);
+                if (ro == -1) {
+                    is_base = false;
+                    break;
+                }
+                if (lvl > 0) {
+                    root = ro;
+                    lvl--;
+                }
+            }
+            if (is_base) {
+                int root_process = 0, leaf_process = 0;
+                for (int j = 0; j < world_size; j++) {
+                    if (slice_starts[j] + rows[j] > root) {
+                        root_process = j;
+                        break;
+                    }
+                }
+
+                for (int j = 0; j < world_size; j++) {
+                    if (slice_starts[j] + rows[j] > co) {
+                        leaf_process = j;
+                        break;
+                    }
+                }
+                
+                recvs[leaf_process].insert(root_process);
+                sends[root_process].insert(leaf_process);
+            }
+        }
+
         result = yhat;
     }
     else if (method == "OLS") {
