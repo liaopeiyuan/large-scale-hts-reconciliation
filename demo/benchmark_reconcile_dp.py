@@ -59,6 +59,7 @@ def main():
     elapsed = round(end - start, 4)
     #if (rank == size - 1): 
     print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
+    print("Bottom up (original): ", rank, " ", str(elapsed), " ", lhts.smape(y_hat, gt))
     if (rank == 1): print(rank, rec[-10:, :].reshape(-1), rec2[-10:, :].reshape(-1), y_hat[-10:, :].reshape(-1), "\n")
     
     start = timer()
