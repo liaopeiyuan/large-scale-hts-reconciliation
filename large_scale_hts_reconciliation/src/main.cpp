@@ -506,16 +506,16 @@ public:
         }
     }
     else if (method == "top_down") {
-        result = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
+        result = yhat;
     }
     else if (method == "middle_out") {
-        result = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
+        result = yhat;
     }
     else if (method == "OLS") {
-        result = construct_G_OLS(S);
+        result = yhat;
     }
     else if (method == "WLS") {
-        result = construct_G_WLS(S, w);
+        result = yhat;
     }
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
