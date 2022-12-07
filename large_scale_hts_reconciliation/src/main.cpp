@@ -486,12 +486,13 @@ public:
                 } else {
                     yhats[i] = yhat;
                 }
-                printf("rank %d @ %d\n", world_rank, i);
+                printf("rank %d @ %d, c %d\n", world_rank, i, color);
                 // MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
                 MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
             }
 
+            MPI_Barrier(comm_global);
             curr_row += rows[i];
         }
 
