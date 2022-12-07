@@ -552,6 +552,8 @@ public:
             curr_row += rows[i];
         }
 
+        printf("strides\n");
+
         for (int i = 0; i < num_total; i++) {
             int co = S_compact(i, 0);
             int root = -1;
