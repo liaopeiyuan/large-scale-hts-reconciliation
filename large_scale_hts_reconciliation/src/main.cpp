@@ -477,7 +477,7 @@ public:
         for (int i = 0; i < world_size; i++) {
             MPI_Comm comm;
 
-            int color = (i == world_rank) | (slice_start >= num_base);
+            int color = (i == world_rank) | (slice_start + slice_length >= num_base);
             MPI_Comm_split(comm_global, color, world_rank, &comm);
             
             if (color == 1) {
@@ -498,7 +498,7 @@ public:
 
         MPI_Barrier(comm_global);
 
-        if (slice_start >= num_base) {
+        if (slice_start + slice_length >= num_base) {
             Eigen::MatrixXf reconciliation_matrix = 
                 construct_dp_reconciliation_matrix(method, 
                     S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
