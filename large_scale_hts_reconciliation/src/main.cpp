@@ -498,10 +498,10 @@ public:
                 construct_dp_reconciliation_matrix(method, 
                     S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
 
-            result = reconciliation_matrix * yhat_total;
+            result = (reconciliation_matrix * yhat_total).eval();
         } else {
             printf("Rank: %d no computation needed\n", world_rank);
-            result = yhat;
+            result = yhat.eval();
         }
         
     }
