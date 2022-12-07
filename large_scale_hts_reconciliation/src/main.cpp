@@ -484,7 +484,7 @@ public:
                 } else {
                     yhats[i] = yhat;
                 }
-                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, root_communicators[i]);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
             }
 
