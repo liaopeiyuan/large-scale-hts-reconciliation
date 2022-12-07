@@ -542,7 +542,7 @@ public:
     }
     else if (method == "top_down") {
 
-        std::vector<int> slice_starts;
+        std::vector<int> slice_starts(world_size);
         std::vector<std::set<int>> communication_map(world_size, std::set<int>()); 
 
         int curr_row = 0;
