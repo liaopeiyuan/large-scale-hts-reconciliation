@@ -548,7 +548,7 @@ public:
         int curr_row = 0;
         
         for (int i = 0; i < world_size; i++) {
-            slice_start[i] = curr_row;
+            slice_starts[i] = curr_row;
             curr_row += rows[i];
         }
 
