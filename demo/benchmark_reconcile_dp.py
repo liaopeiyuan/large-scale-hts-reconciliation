@@ -60,7 +60,7 @@ def main():
     if (rank >= 10): 
         print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
         print("Bottom up (original): ", rank, " ", str(elapsed), " ", lhts.smape(y_hat, gt))
-        print(rank, (rec[-20:, :] - rec2[-20:, :]).reshape(-1), (y_hat[-20:, :] - rec2[-20:, :]).reshape(-1), "\n")
+        print(rank, (rec[-20:, :] - rec2[-20:, :]).reshape(-1).round(3), (y_hat[-20:, :] - rec2[-20:, :]).reshape(-1).round(3), "\n")
     
     start = timer()
     rec = distrib.reconcile_dp_matrix("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
