@@ -478,7 +478,7 @@ public:
             MPI_Comm leaf_comm;
 
             int color = (i == world_rank) | (slice_start + slice_length >= num_base);
-            MPI_Comm_split(comm_global, color, (i == world_rank) ? -1 : world_rank, &leaf_comm);
+            MPI_Comm_split(comm_global, color, (i == world_rank) ? world_size + 1 : world_rank, &leaf_comm);
             
             if (color == 1) {
                 if (i != world_rank) {
