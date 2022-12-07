@@ -568,13 +568,15 @@ public:
             }
             if (is_base) {
                 int root_process = 0;
-                for (int i = 0; i < world_size; i++) {
-                    if (slice_starts[i] > root) {
+                /*
+                for (int j = 0; j < world_size; j++) {
+                    if (slice_starts[j] > root) {
                         root_process = i;
                         break;
                     }
                 }
                 communication_map[i].insert(root_process);
+                */
             }
         }
 
