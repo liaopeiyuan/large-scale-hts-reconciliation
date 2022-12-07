@@ -504,7 +504,7 @@ public:
 
             result = (reconciliation_matrix * yhat_total).eval();
         } else {
-            printf("Rank: %d no computation needed\n", world_rank);
+            // printf("Rank: %d no computation needed\n", world_rank);
             result = yhat.eval();
         }
         
