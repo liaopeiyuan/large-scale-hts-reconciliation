@@ -575,7 +575,7 @@ public:
             }
             if (is_base) {
                 int root_process = 0, leaf_process = 0;
-                if (world_rank == 0) printf("%d %d\n", root, co);
+                // if (world_rank == 0) printf("%d %d\n", root, co);
                 for (int j = 0; j < world_size; j++) {
                     if (slice_starts[j] + rows[j] > root) {
                         root_process = j;
@@ -599,6 +599,7 @@ public:
 
         //printf("insert\n");
 
+        /*
         if (world_rank == 0) {
             for (int i = 0; i < world_size; i++) {
                 printf("Rank %d needs ", i);
@@ -608,6 +609,7 @@ public:
                 printf("\n");
             }
         }
+        */
 
         result = yhat;
     }
