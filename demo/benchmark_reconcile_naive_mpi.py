@@ -11,6 +11,8 @@ import lhts
 import numpy as np
 from timeit import default_timer as timer
 
+RANK_TO_TEST = 1
+
 def main():
     ROOT = "/data/cmu/large-scale-hts-reconciliation/"
     data_dir = ROOT + "notebooks/"
@@ -34,8 +36,7 @@ def main():
     
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1): 
-        print("Load: " + str(elapsed))
+    if (rank == RANK_TO_TEST): 
         print("Original: ", str(elapsed), " ", lhts.smape(y_hat, gt))
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
@@ -43,7 +44,7 @@ def main():
     rec = distrib.reconcile_gather("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1): 
+    if (rank == RANK_TO_TEST): 
         print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
@@ -52,7 +53,7 @@ def main():
     rec = distrib.reconcile_gather("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1): 
+    if (rank == RANK_TO_TEST): 
         print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
@@ -61,7 +62,7 @@ def main():
     rec = distrib.reconcile_gather("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1):
+    if (rank == RANK_TO_TEST):
         print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
@@ -69,7 +70,7 @@ def main():
     rec = distrib.reconcile_gather("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1):
+    if (rank == RANK_TO_TEST):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
@@ -77,7 +78,7 @@ def main():
     rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1):
+    if (rank == RANK_TO_TEST):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
