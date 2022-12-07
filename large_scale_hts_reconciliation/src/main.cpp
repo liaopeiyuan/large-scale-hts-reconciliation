@@ -463,8 +463,6 @@ public:
         curr_row += rows[i];
     }
 
-    std::vector<MPI_Comm> root_communicators(world_size);
-
     Eigen::MatrixXf result;
 
     if (method == "bottom_up") {
@@ -494,14 +492,18 @@ public:
                 MPI_Comm_free(&leaf_comm);
             }
 
-            MPI_Barrier(comm_global);
+            // MPI_Barrier(comm_global);
             curr_row += rows[i];
         }
 
-        MPI_Barrier(comm_global);
+        // MPI_Barrier(comm_global);
 
         if (slice_start + slice_length >= num_base) {
-            result = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
+            Eigen::MatrixXf reconciliation_matrix = 
+                construct_dp_reconciliation_matrix(method, 
+                    S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
+
+            result = (reconciliation_matrix * yhat_total).eval();
         } else {
             result = yhat.eval();
         }
