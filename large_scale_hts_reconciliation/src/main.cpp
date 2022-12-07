@@ -552,7 +552,11 @@ public:
             curr_row += rows[i];
         }
 
-        //printf("strides\n");
+        if (world_rank == 0) {
+            for (int i = 0; i < world_size; i++) {
+                printf("%d \n", slice_starts[i]);
+            }
+        }
 
         for (int i = 0; i < num_base; i++) {
             int co = S_compact(i, 0);
@@ -583,7 +587,7 @@ public:
                     }
                 }
                 
-                if (world_rank == 0) printf("%d %d\n", root_process, leaf_process);
+                // if (world_rank == 0) printf("%d %d\n", root_process, leaf_process);
                 communication_map[leaf_process].insert(root_process);
                 
             }
