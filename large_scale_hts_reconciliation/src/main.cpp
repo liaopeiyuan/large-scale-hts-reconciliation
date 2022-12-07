@@ -554,7 +554,7 @@ public:
 
         printf("strides\n");
 
-        for (int i = 0; i < num_total; i++) {
+        for (int i = 0; i < num_base; i++) {
             int co = S_compact(i, 0);
             int root = -1;
             bool is_base = true;
