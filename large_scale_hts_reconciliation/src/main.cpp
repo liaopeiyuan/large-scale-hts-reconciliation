@@ -552,11 +552,13 @@ public:
             curr_row += rows[i];
         }
 
+        /*
         if (world_rank == 0) {
             for (int i = 0; i < world_size; i++) {
                 printf("%d \n", slice_starts[i]);
             }
         }
+        */
 
         for (int i = 0; i < num_base; i++) {
             int co = S_compact(i, 0);
@@ -572,7 +574,7 @@ public:
             }
             if (is_base) {
                 int root_process = 0, leaf_process = 0;
-                // if (world_rank == 0) printf("%d %d\n", root, co);
+                if (world_rank == 0) printf("%d %d\n", root, co);
                 for (int j = 0; j < world_size; j++) {
                     if (slice_starts[j] > root) {
                         root_process = j;
@@ -587,7 +589,7 @@ public:
                     }
                 }
                 
-                // if (world_rank == 0) printf("%d %d\n", root_process, leaf_process);
+                if (world_rank == 0) printf("%d %d\n", root_process, leaf_process);
                 communication_map[leaf_process].insert(root_process);
                 
             }
