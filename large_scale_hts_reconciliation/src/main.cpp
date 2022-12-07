@@ -475,10 +475,10 @@ public:
 
         curr_row = 0;
         for (int i = 0; i < world_size; i++) {
-            MPI_Comm comm;
+            MPI_Comm leaf_comm;
 
-            int color = 1; //(i == world_rank) | (slice_start + slice_length >= num_base);
-            MPI_Comm_split(comm_global, color, world_rank, &comm);
+            int color = (i == world_rank) | (slice_start + slice_length >= num_base);
+            MPI_Comm_split(comm_global, color, (i == world_rank) ? -1 : world_rank, &leaf_comm);
             
             if (color == 1) {
                 if (i != world_rank) {
@@ -488,8 +488,11 @@ public:
                 }
                 printf("rank %d @ %d, %d-%d\n", world_rank, i, slice_start, slice_length);
                 // MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
-                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm);
+
+                MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, 0, leaf_comm);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
+
+                MPI_Comm_free(&leaf_comm);
             }
 
             MPI_Barrier(comm_global);
