@@ -486,8 +486,7 @@ public:
                 } else {
                     yhats[i] = yhat;
                 }
-                printf("rank %d @ %d, %d-%d\n", world_rank, i, slice_start, slice_length);
-                // MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+                // printf("rank %d @ %d, %d-%d\n", world_rank, i, slice_start, slice_length);
 
                 MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, 0, leaf_comm);
                 yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
@@ -502,13 +501,8 @@ public:
         MPI_Barrier(comm_global);
 
         if (slice_start + slice_length >= num_base) {
-            Eigen::MatrixXf reconciliation_matrix = 
-                construct_dp_reconciliation_matrix(method, 
-                    S_compact, P, level, w, num_base, num_total, num_levels, slice_start, slice_length);
-
-            result = (reconciliation_matrix * yhat_total).eval();
+            result = reconcile(method, S_compact, P, yhat_total, level, w, num_base, num_total, num_levels);
         } else {
-            // printf("Rank: %d no computation needed\n", world_rank);
             result = yhat.eval();
         }
         

@@ -11,7 +11,6 @@ import lhts
 import numpy as np
 from timeit import default_timer as timer
 
-RANK_TO_TEST = 3
 
 def main():
     ROOT = "/data/cmu/large-scale-hts-reconciliation/"
@@ -21,6 +20,8 @@ def main():
     rank = comm.Get_rank()
     size = comm.Get_size()
     distrib = MPI_Utils()
+
+    RANK_TO_TEST = size - 1
 
     start = timer()
     #if (rank == 0):
