@@ -684,7 +684,7 @@ public:
         // ss << y_reconciled(Eigen::seqN(0, 5), Eigen::all);
         // printf("y_return: %s\n", ss.str().c_str());
 
-        int curr_row = 0;
+        int curr_row = rows[0];
         for (int i = 1; i < world_size; i++) {
             yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
             MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[i]);
