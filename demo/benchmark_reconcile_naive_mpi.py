@@ -36,7 +36,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
         print("Load: " + str(elapsed))
-        print(gt[-5:, :])
+        print("Original: ", str(elapsed), " ", lhts.smape(y_hat, gt))
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
     start = timer()
