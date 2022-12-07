@@ -11,7 +11,7 @@ import lhts
 import numpy as np
 from timeit import default_timer as timer
 
-RANK_TO_TEST = 1
+RANK_TO_TEST = 3
 
 def main():
     ROOT = "/data/cmu/large-scale-hts-reconciliation/"
