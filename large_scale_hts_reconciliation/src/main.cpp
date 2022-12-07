@@ -589,7 +589,7 @@ public:
                     }
                 }
                 
-                if (world_rank == 0) printf("%d %d\n", root_process, leaf_process);
+                if (world_rank == 0) printf("%d %d %d %d\n", root_process, leaf_process, slice_starts[root_process], slice_starts[leaf_process]);
                 communication_map[leaf_process].insert(root_process);
                 
             }
