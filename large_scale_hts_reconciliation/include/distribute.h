@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <vector>
+#include <iostream>
 
 #ifdef _OPENMP
 #include <omp.h>
