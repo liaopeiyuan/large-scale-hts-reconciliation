@@ -25,7 +25,7 @@ typedef SparseMatrix<float, ColMajor> SpMat;
 typedef Triplet<float> T;
 
 namespace lhts {
-    class MPI_utils {
+class MPI_utils {
  public:
   MPI_utils() : comm_global(MPI_COMM_WORLD) { initParallel(); }
 
@@ -35,20 +35,20 @@ namespace lhts {
                                   const MatrixXi S_compact, const MatrixXf P,
                                   const MatrixXf yhat, int level, float w,
                                   int num_base, int num_total, int num_levels);
-                                  
- MatrixXf reconcile_dp_matrix(const std::string method,
+
+  MatrixXf reconcile_dp_matrix(const std::string method,
                                const MatrixXi S_compact, const MatrixXf P,
                                const MatrixXf yhat, int level, float w,
                                int num_base, int num_total, int num_levels);
-                               
-MatrixXf reconcile_gather(const std::string method, const MatrixXi S_compact,
+
+  MatrixXf reconcile_gather(const std::string method, const MatrixXi S_compact,
                             const MatrixXf P, const MatrixXf yhat, int level,
                             float w, int num_base, int num_total,
                             int num_levels);
-                            
-                            
-void test(const MatrixXd& xs);
+
+  void test(const MatrixXd& xs);
+
  private:
   MPI_Comm comm_global;
 };
-}
+}  // namespace lhts

@@ -1,7 +1,7 @@
 #include "reconcile.h"
 
 namespace lhts {
-    namespace reconcile {
+namespace reconcile {
 MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
                           const MatrixXf P, const MatrixXf yhat, int level,
                           float w, int num_base, int num_total,
@@ -84,4 +84,5 @@ else if (method == "WLS") {
 
   return result;
 }
-    }}
+}  // namespace reconcile
+}  // namespace lhts

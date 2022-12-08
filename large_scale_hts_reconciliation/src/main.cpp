@@ -19,10 +19,10 @@
 #include <Eigen/SparseQR>
 
 #include "G.h"
+#include "MPI_utils.h"
 #include "S.h"
 #include "distribute.h"
 #include "reconcile.h"
-#include "MPI_utils.h"
 
 using namespace lhts;
 using namespace Eigen;
@@ -32,7 +32,6 @@ using namespace Eigen;
 
 typedef SparseMatrix<float, ColMajor> SpMat;
 typedef Triplet<float> T;
-
 
 float rmse(const MatrixXf res, const MatrixXf gt) {
   float sum = 0;
@@ -78,7 +77,6 @@ float smape(const MatrixXf res, const MatrixXf gt) {
 
 namespace py = pybind11;
 using pymod = pybind11::module;
-
 
 PYBIND11_MODULE(lhts, m) {
   m.doc() = R"pbdoc(
