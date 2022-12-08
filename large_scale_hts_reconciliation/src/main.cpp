@@ -21,6 +21,8 @@
 
 #include "S.h"
 
+using namespace lhts;
+
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
