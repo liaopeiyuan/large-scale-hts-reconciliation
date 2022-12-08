@@ -7,8 +7,8 @@ def main():
     data_dir = ROOT + "notebooks/"
 
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-    yhat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-    gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+    yhat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
+    gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))
     top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     print(yhat.shape)
