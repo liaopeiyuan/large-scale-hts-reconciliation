@@ -20,6 +20,7 @@ SpMat build_sparse_WLS(SpMat S, float w) {
   SpMat W(S.rows(), S.cols());
   W.setFromTriplets(tripletList.begin(), tripletList.end());
 
+  SpMat St = S.transpose();
   SpMat M = St * W * S;
   SimplicialLDLT<SpMat> solver;
   solver.compute(M);
