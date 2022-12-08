@@ -614,6 +614,50 @@ public:
         std::vector<MPI_Status> stats(reqs.size());
         MPI_Waitall(reqs.size(), reqs.data(), stats.data());
 
+        /* assume this performs distribution
+        Eigen::MatrixXf y = Eigen::MatrixXf::Zero(num_base, yhat.cols());
+    
+        #pragma omp parallel for 
+        for (int i = 0; i < num_total; i++) {
+            int co = S_compact(i, 0);
+            int root = -1;
+            bool is_base = true;
+            for (int j = 1; j < num_levels; j++) {
+                int ro = S_compact(i, j);
+                if (ro == -1) {
+                    is_base = false;
+                    break;
+                }
+                root = ro;
+            }
+            if (is_base) {
+                y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
+            }
+        }
+        */
+
+        curr_row = 0;
+        for (int i = 0; i < world_size; i++) {
+
+            if (i != world_rank) {
+                yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            } else {
+                yhats[i] = yhat;
+            }
+            MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+            yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
+
+            if (i == world_rank) {
+                slice_start = curr_row;
+                slice_length = rows[i];
+            }
+
+            curr_row += rows[i];
+        }
+
+        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
+
+
         //printf("insert\n");
 
         /*
@@ -628,9 +672,9 @@ public:
         }
         */
 
-
-
-        result = yhat;
+        res = S.cast<float>();
+        y = yhat.topRows(num_base).eval(); 
+        result = res * y;
     }
     else if (method == "middle_out") {
 
