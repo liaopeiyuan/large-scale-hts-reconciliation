@@ -20,7 +20,6 @@
 #include "G.h"
 #include "S.h"
 #include "distribute.h"
-#include "MPI_utils.h"
 
 using namespace Eigen;
 
