@@ -14,7 +14,6 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <Eigen/LU>
-#include <Eigen/Sparse>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -1031,7 +1030,7 @@ private:
 
 PYBIND11_MODULE(lhts, m) {
     m.doc() = R"pbdoc(
-        LHTS
+        Pybind11 example plugin
         -----------------------
         .. currentmodule:: lhts
         .. autosummary::
