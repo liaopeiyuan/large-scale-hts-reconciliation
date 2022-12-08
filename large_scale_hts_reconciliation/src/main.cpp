@@ -636,6 +636,8 @@ public:
         }
         */
 
+        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_base, yhat.cols());
+
         curr_row = 0;
         for (int i = 0; i < world_size; i++) {
 
@@ -651,7 +653,6 @@ public:
         }
 
         Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
-
 
         //printf("insert\n");
 
