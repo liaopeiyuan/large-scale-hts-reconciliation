@@ -68,6 +68,7 @@ def main():
         print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
+    """
     start = timer()
     rec = distrib.reconcile_gather("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
     end = timer()
@@ -75,9 +76,10 @@ def main():
     if (rank == RANK_TO_TEST):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
+    """
 
     start = timer()
-    rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, y_hat, 2, 0.5, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, y_hat, 2, 1.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):

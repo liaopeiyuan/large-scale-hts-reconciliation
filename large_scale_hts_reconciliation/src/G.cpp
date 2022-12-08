@@ -11,7 +11,7 @@ SpMat build_sparse_OLS(SpMat S) {
 }
 
 SpMat build_sparse_WLS(SpMat S, float w) {
-  std::vector<T> tripletList;
+  std::vector<T> tripletList(0);
 
   for (int i = 0; (i < S.rows()) && (i < S.cols()); i++) {
     tripletList.push_back(T(i, i, w));
@@ -25,19 +25,6 @@ SpMat build_sparse_WLS(SpMat S, float w) {
   SparseQR<SpMat, COLAMDOrdering<int>> solver;
   solver.compute(M);
   return solver.solve(St * W);
-}
-
-MatrixXf build_dense_WLS(const MatrixXi S, float w) {
-  MatrixXf W = MatrixXf::Zero(S.rows(), S.cols());
-#pragma omp parallel for
-  for (int i = 0; i < S.rows(); i++) {
-    W(i, i) = w;
-  }
-  MatrixXf Sp = S.cast<float>();
-  MatrixXf St = Sp.transpose();
-  MatrixXf M = St * W * Sp;
-  FullPivLU<MatrixXf> lu(M);
-  return lu.matrixLU() * St * W;
 }
 
 SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
@@ -138,6 +125,20 @@ SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_base,
 
   return G;
 }
+
+MatrixXf build_dense_WLS(const MatrixXi S, float w) {
+  MatrixXf W = MatrixXf::Zero(S.rows(), S.cols());
+#pragma omp parallel for
+  for (int i = 0; i < S.rows(); i++) {
+    W(i, i) = w;
+  }
+  MatrixXf Sp = S.cast<float>();
+  MatrixXf St = Sp.transpose();
+  MatrixXf M = St * W * Sp;
+  FullPivLU<MatrixXf> lu(M);
+  return lu.matrixLU() * St * W;
+}
+
 
 }  // namespace G
 }  // namespace lhts
