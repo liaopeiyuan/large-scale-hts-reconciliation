@@ -21,7 +21,7 @@ SpMat build_sparse_WLS(SpMat S, float w) {
   W.setFromTriplets(tripletList.begin(), tripletList.end());
 
   SpMat St = S.transpose();
-  SpMat M = St * W * S;
+  SpMat M = St * S;
 
   return M;
   //SparseQR<SpMat, COLAMDOrdering<int>> solver;
