@@ -29,7 +29,7 @@ def main():
     rec2 = lhts.reconcile_sparse_matrix("bottom_up", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Bottom up (matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
+    print("Bottom up (sparse matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
     print(np.abs(rec - rec2).sum())
 
     start = timer()
@@ -43,7 +43,7 @@ def main():
     rec2 = lhts.reconcile_sparse_matrix("top_down", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Top down (matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
+    print("Top down (sparse matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
     print(np.abs(rec - rec2).sum())
 
     start = timer()
@@ -57,7 +57,7 @@ def main():
     rec2 = lhts.reconcile_sparse_matrix("middle_out", S_compact, level_2_p, yhat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Middle out (matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
+    print("Middle out (sparse matrix): ", str(elapsed), " ", lhts.smape(rec2, gt))
     print(np.abs(rec - rec2).sum())
 
     """
