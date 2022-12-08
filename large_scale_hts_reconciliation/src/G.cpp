@@ -17,8 +17,10 @@
 #include<Eigen/SparseQR>
 #include<Eigen/SparseLU>
 
+using namespace Eigen;
 namespace lhts {
     namespace G {
+        
 MatrixXf build_sparse_OLS(SpMat Sp) {
     SpMat St = Sp.transpose().eval();
     MatrixXf M = MatrixXf(St * Sp);
