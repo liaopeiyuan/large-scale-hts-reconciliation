@@ -1,5 +1,4 @@
 #include "MPI_utils.h"
-#include "reconcile.h"
 
 MatrixXf dp_reconcile_optimized(const std::string method,
                                 const MatrixXi S_compact, const MatrixXf P,
@@ -81,13 +80,7 @@ else if (method == "WLS") {
   return res;
 }
 
-class MPI_utils {
- public:
-  MPI_utils() : comm_global(MPI_COMM_WORLD) { initParallel(); }
-
-  ~MPI_utils() {}
-
-  MatrixXf reconcile_dp_optimized(const std::string method,
+  MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
                                   const MatrixXi S_compact, const MatrixXf P,
                                   const MatrixXf yhat, int level, float w,
                                   int num_base, int num_total, int num_levels) {
@@ -425,7 +418,7 @@ else if (method == "WLS") {
     return result;
   }
 
-  MatrixXf reconcile_dp_matrix(const std::string method,
+  MatrixXf  MPI_utils::reconcile_dp_matrix(const std::string method,
                                const MatrixXi S_compact, const MatrixXf P,
                                const MatrixXf yhat, int level, float w,
                                int num_base, int num_total, int num_levels) {
@@ -508,7 +501,7 @@ return reconciliation_matrix * yhat_total;
  */
   }
 
-  MatrixXf reconcile_gather(const std::string method, const MatrixXi S_compact,
+  MatrixXf  MPI_utils::reconcile_gather(const std::string method, const MatrixXi S_compact,
                             const MatrixXf P, const MatrixXf yhat, int level,
                             float w, int num_base, int num_total,
                             int num_levels) {
@@ -602,7 +595,7 @@ return reconciliation_matrix * yhat_total;
     }
   }
 
-  void test(const MatrixXd& xs) {
+  void  MPI_utils::test(const MatrixXd& xs) {
     int world_size;
     MPI_Comm_size(comm_global, &world_size);
     int world_rank;
@@ -661,7 +654,3 @@ return reconciliation_matrix * yhat_total;
       }
     }
   }
-
- private:
-  MPI_Comm comm_global;
-};
