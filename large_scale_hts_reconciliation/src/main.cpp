@@ -654,8 +654,6 @@ public:
 
         Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
-        //printf("insert\n");
-
         /*
         if (world_rank == 0) {
             for (int i = 0; i < world_size; i++) {
@@ -667,10 +665,8 @@ public:
             }
         }
         */
-
-        res = S.cast<float>();
-        y = yhat.topRows(num_base).eval(); 
-        result = res * y;
+ 
+        result = (S.cast<float>() * yhat.topRows(num_base)).eval();
     }
     else if (method == "middle_out") {
 
