@@ -13,15 +13,15 @@ SpMat build_sparse_OLS(SpMat S) {
 SpMat build_sparse_WLS(SpMat S, float w) {
   std::vector<T> tripletList(0);
 
-  for (int i = 0; (i < S.rows()) && (i < S.cols()); i++) {
+  for (int i = 0; i < S.rows(); i++) {
     tripletList.push_back(T(i, i, w));
   }
 
-  SpMat W(S.rows(), S.cols());
+  SpMat W(S.rows(), S.rows());
   W.setFromTriplets(tripletList.begin(), tripletList.end());
 
   SpMat St = S.transpose();
-  SpMat M = St * S;
+  SpMat M = St * W * S;
 
   return M;
   //SparseQR<SpMat, COLAMDOrdering<int>> solver;
