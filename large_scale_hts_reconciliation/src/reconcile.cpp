@@ -53,10 +53,10 @@ Eigen::MatrixXd dense_matrix(const std::string method,
     G = G::build_dense_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
     res = S.cast<float>() * G;
   } else if (method == "top_down") {
-    G = G::build_dense_top_down(S_compact, P, num_base, num_total, num_levels);
+    G = G::build_dense_top_down(S_compact, P,  num_leaves, num_nodes, num_levels);
     res = S.cast<float>() * G;
   } else if (method == "middle_out") {
-    G = G::build_dense_middle_out(S_compact, P, level, num_base, num_total,
+    G = G::build_dense_middle_out(S_compact, P, level,  num_leaves, num_nodes,
                                num_levels);
     res = S.cast<float>() * G;
   } else if (method == "OLS") {
