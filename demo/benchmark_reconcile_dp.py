@@ -51,7 +51,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
-        print("Top down (dp optimized): ", str(elapsed), " ", lhts.smape(rec2, gt))
+        print("Top down (dp algo): ", str(elapsed), " ", lhts.smape(rec2, gt))
 
     start = timer()
     rec = distrib.reconcile_dp_matrix("bottom_up", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
@@ -65,7 +65,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     if (rank >= 10): 
-        print("Bottom up (dp optimized): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
+        print("Bottom up (dp algo): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
         print(rank, np.abs(rec[:, :] - rec2[:, :]).sum(), np.abs(yhat[:, :] - rec2[:, :]).sum(), "\n")
     
     start = timer()
@@ -81,7 +81,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
-        print("Middle out (dp optimized): ", str(elapsed), " ", lhts.smape(rec2, gt))
+        print("Middle out (dp algo): ", str(elapsed), " ", lhts.smape(rec2, gt))
 
     start = timer()
     rec = distrib.reconcile_dp_matrix("OLS", S_compact, top_down_p, yhat, 2, 0.0, 5650, 6218, 4)

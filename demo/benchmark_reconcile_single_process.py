@@ -20,7 +20,7 @@ def main():
     rec = lhts.reconcile("bottom_up", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Bottom up (optimized): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Bottom up (algo): ", str(elapsed), " ", lhts.smape(rec, gt))
     print(rec)
     print(np.abs(yhat[:5650,:] - rec[:5650,:]).sum())
     print(np.abs(yhat[5650:,:] - rec[5650:,:]).sum())
@@ -36,7 +36,7 @@ def main():
     rec = lhts.reconcile("top_down", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Top down (optimized): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Top down (algo): ", str(elapsed), " ", lhts.smape(rec, gt))
     print(rec)
 
     start = timer()
@@ -50,7 +50,7 @@ def main():
     rec = lhts.reconcile("middle_out", S_compact, level_2_p, yhat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
-    print("Middle out (optimized): ", str(elapsed), " ", lhts.smape(rec, gt))
+    print("Middle out (algo): ", str(elapsed), " ", lhts.smape(rec, gt))
     print(rec)
 
     start = timer()
