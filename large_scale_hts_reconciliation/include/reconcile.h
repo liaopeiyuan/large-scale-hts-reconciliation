@@ -32,5 +32,17 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
                    const MatrixXd P, const MatrixXd yhat, int level, double w,
                    int num_leaves, int num_nodes, int num_levels);
+
+MatrixXd dense_matrix(const std::string method,
+                                 const MatrixXi S_compact,
+                                 const MatrixXd P,
+                                 const MatrixXd yhat, int level, double w, int num_leaves, int num_nodes,
+                          int num_levels);
+                          
+MatrixXd dense_algo(const std::string method,
+                          const MatrixXi S_compact,
+                          const MatrixXd P, const MatrixXd yhat,
+                          int level, double w, int num_leaves, int num_nodes,
+                          int num_levels) ;
 }  // namespace reconcile
 }  // namespace lhts

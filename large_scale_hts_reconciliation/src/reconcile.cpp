@@ -39,14 +39,14 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
   return result;
 }
 
-Eigen::MatrixXd dense_matrix(const std::string method,
-                                 const Eigen::MatrixXi S_compact,
-                                 const Eigen::MatrixXd P,
-                                 const Eigen::MatrixXd yhat, int level, double w, int num_leaves, int num_nodes,
+MatrixXd dense_matrix(const std::string method,
+                                 const MatrixXi S_compact,
+                                 const MatrixXd P,
+                                 const MatrixXd yhat, int level, double w, int num_leaves, int num_nodes,
                           int num_levels) {
-  Eigen::MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
+  MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
 
-  Eigen::MatrixXd G, res, y;
+  MatrixXd G, res, y;
   y = yhat;
 
   if (method == "bottom_up") {
@@ -109,6 +109,45 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   }
 
   return result;
+}
+
+
+MatrixXd dense_algo(const std::string method,
+                          const MatrixXi S_compact,
+                          const MatrixXd P, const MatrixXd yhat,
+                          int level, double w, int num_leaves, int num_nodes,
+                          int num_levels) {
+  MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
+
+  MatrixXd G, res, y;
+  y = yhat;
+
+  if (method == "bottom_up") {
+    res = S.cast<double>();
+    y = yhat.topRows(num_leaves).eval();
+  } else if (method == "top_down") {
+    res = S.cast<double>();
+    y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
+                                     num_levels);
+  } else if (method == "middle_out") {
+    res = S.cast<double>();
+    y = distribute::middel_out(S_compact, P, yhat, level, num_leaves,
+                                       num_nodes, num_levels);
+  } else if (method == "OLS") {
+    G = G::build_dense_OLS(S);
+    res = S.cast<double>() * G;
+  } else if (method == "WLS") {
+    G = G::build_dense_WLS(S, w);
+    res = S.cast<double>() * G;
+  } else {
+    throw std::invalid_argument(
+        "invalid reconciliation method. Available options are: bottom_up, "
+        "top_down, middle_out, OLS, WLS");
+  }
+
+  res = res * y;
+
+  return res;
 }
 
 
