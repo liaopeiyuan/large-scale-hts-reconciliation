@@ -33,26 +33,26 @@ def main():
     #    S_compact, top_down_p = np.array([]), np.array([])
     
     gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
-    y_hat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
+    yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))[:, 0].reshape(-1, 1)
     
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
-        print("Original: ", str(elapsed), " ", lhts.smape(y_hat, gt))
-        print(y_hat[-5:, :])
+        print("Original: ", str(elapsed), " ", lhts.smape(yhat, gt))
+        print(yhat[-5:, :])
 
-    #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
+    #if (rank == 0): print(S_compact.shape, top_down_p.shape, yhat.shape)    
     start = timer()
-    rec = distrib.reconcile_gather("top_down", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("top_down", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
         print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
         print(rec[-5:, :])
 
-    #if (rank == 0): print(S_compact.shape, top_down_p.shape, y_hat.shape)    
+    #if (rank == 0): print(S_compact.shape, top_down_p.shape, yhat.shape)    
     start = timer()
-    rec = distrib.reconcile_gather("bottom_up", S_compact, top_down_p, y_hat, -1, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("bottom_up", S_compact, top_down_p, yhat, -1, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
@@ -61,7 +61,7 @@ def main():
 
 
     start = timer()
-    rec = distrib.reconcile_gather("middle_out", S_compact, level_2_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("middle_out", S_compact, level_2_p, yhat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
@@ -69,7 +69,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_gather("OLS", S_compact, top_down_p, y_hat, 2, 0.0, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("OLS", S_compact, top_down_p, yhat, 2, 0.0, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
@@ -77,7 +77,7 @@ def main():
         print(rec[-5:, :])
 
     start = timer()
-    rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, y_hat, 2, 1.5, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, yhat, 2, 1.5, 5650, 6218, 4)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
