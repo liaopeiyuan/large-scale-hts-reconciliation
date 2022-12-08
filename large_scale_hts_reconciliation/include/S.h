@@ -25,6 +25,6 @@ namespace S {
 SpMat build_sparse(const MatrixXi S_compact, int num_leaves, int num_nodes,
                    int num_levels);
 MatrixXi build_dense(const MatrixXi S_compact, int num_leaves, int num_nodes,
-                   int num_levels);
-}
+                     int num_levels);
+}  // namespace S
 }  // namespace lhts

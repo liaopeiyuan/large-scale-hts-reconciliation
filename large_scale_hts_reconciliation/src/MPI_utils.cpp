@@ -56,7 +56,8 @@ SpMat construct_dp_reconciliation_matrix(const std::string method,
   if (method == "bottom_up") {
     G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
   } else if (method == "top_down") {
-    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes, num_levels);
+    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes,
+                                 num_levels);
   } else if (method == "middle_out") {
     G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
                                    num_levels);
@@ -80,8 +81,8 @@ MatrixXd MPI_utils::reconcile_dp_optimized(const std::string method,
                                            const MatrixXi S_compact,
                                            const MatrixXd P,
                                            const MatrixXd yhat, int level,
-                                           double w, int num_leaves, int num_nodes,
-                                           int num_levels) {
+                                           double w, int num_leaves,
+                                           int num_nodes, int num_levels) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;
@@ -134,7 +135,8 @@ MatrixXd MPI_utils::reconcile_dp_optimized(const std::string method,
     for (int i = 0; i < world_size; i++) {
       MPI_Comm leaf_comm;
 
-      int color = (i == world_rank) | (slice_start + slice_length >= num_leaves);
+      int color =
+          (i == world_rank) | (slice_start + slice_length >= num_leaves);
       MPI_Comm_split(comm_global, color,
                      (i == world_rank) ? 0 : world_rank + world_size,
                      &leaf_comm);
@@ -563,7 +565,7 @@ MatrixXd MPI_utils::reconcile_gather(const std::string method,
 
     MatrixXd y_reconciled =
         reconcile::sparse_algo(method, S_compact, P, yhat_total, level, w,
-                             num_leaves, num_nodes, num_levels);
+                               num_leaves, num_nodes, num_levels);
 
     y_return = y_reconciled.topRows(rows[0]).eval();
 

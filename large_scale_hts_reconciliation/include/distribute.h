@@ -3,11 +3,11 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <iostream>
 #include <set>
 #include <stdexcept>
 #include <tuple>
 #include <vector>
-#include <iostream>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -30,7 +30,7 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
                   const MatrixXd yhat, int num_leaves, int num_nodes,
                   int num_levels);
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
-                    const MatrixXd yhat, int level, int num_leaves, int num_nodes,
-                    int num_levels);
+                    const MatrixXd yhat, int level, int num_leaves,
+                    int num_nodes, int num_levels);
 }  // namespace distribute
 }  // namespace lhts

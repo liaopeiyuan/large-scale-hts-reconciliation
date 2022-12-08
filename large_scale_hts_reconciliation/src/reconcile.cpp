@@ -4,9 +4,9 @@ namespace lhts {
 namespace reconcile {
 
 MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
-                          const MatrixXd P, const MatrixXd yhat, int level,
-                          double w, int num_leaves, int num_nodes,
-                          int num_levels) {
+                       const MatrixXd P, const MatrixXd yhat, int level,
+                       double w, int num_leaves, int num_nodes,
+                       int num_levels) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
   SpMat G, res;
   MatrixXd result, y;
@@ -16,7 +16,8 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
     G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
     res = S * G;
   } else if (method == "top_down") {
-    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes, num_levels);
+    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes,
+                                 num_levels);
     res = S * G;
   } else if (method == "middle_out") {
     G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
@@ -39,11 +40,9 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
   return result;
 }
 
-MatrixXd dense_matrix(const std::string method,
-                                 const MatrixXi S_compact,
-                                 const MatrixXd P,
-                                 const MatrixXd yhat, int level, double w, int num_leaves, int num_nodes,
-                          int num_levels) {
+MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
+                      const MatrixXd P, const MatrixXd yhat, int level,
+                      double w, int num_leaves, int num_nodes, int num_levels) {
   MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
 
   MatrixXd G, res, y;
@@ -53,11 +52,12 @@ MatrixXd dense_matrix(const std::string method,
     G = G::build_dense_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
     res = S.cast<double>() * G;
   } else if (method == "top_down") {
-    G = G::build_dense_top_down(S_compact, P,  num_leaves, num_nodes, num_levels);
+    G = G::build_dense_top_down(S_compact, P, num_leaves, num_nodes,
+                                num_levels);
     res = S.cast<double>() * G;
   } else if (method == "middle_out") {
-    G = G::build_dense_middle_out(S_compact, P, level,  num_leaves, num_nodes,
-                               num_levels);
+    G = G::build_dense_middle_out(S_compact, P, level, num_leaves, num_nodes,
+                                  num_levels);
     res = S.cast<double>() * G;
   } else if (method == "OLS") {
     G = G::build_dense_OLS(S);
@@ -77,8 +77,8 @@ MatrixXd dense_matrix(const std::string method,
 }
 
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
-                   const MatrixXd P, const MatrixXd yhat, int level, double w,
-                   int num_leaves, int num_nodes, int num_levels) {
+                     const MatrixXd P, const MatrixXd yhat, int level, double w,
+                     int num_leaves, int num_nodes, int num_levels) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   SpMat G;
@@ -111,12 +111,9 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   return result;
 }
 
-
-MatrixXd dense_algo(const std::string method,
-                          const MatrixXi S_compact,
-                          const MatrixXd P, const MatrixXd yhat,
-                          int level, double w, int num_leaves, int num_nodes,
-                          int num_levels) {
+MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
+                    const MatrixXd P, const MatrixXd yhat, int level, double w,
+                    int num_leaves, int num_nodes, int num_levels) {
   MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
 
   MatrixXd G, res, y;
@@ -128,11 +125,11 @@ MatrixXd dense_algo(const std::string method,
   } else if (method == "top_down") {
     res = S.cast<double>();
     y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
-                                     num_levels);
+                             num_levels);
   } else if (method == "middle_out") {
     res = S.cast<double>();
-    y = distribute::middel_out(S_compact, P, yhat, level, num_leaves,
-                                       num_nodes, num_levels);
+    y = distribute::middel_out(S_compact, P, yhat, level, num_leaves, num_nodes,
+                               num_levels);
   } else if (method == "OLS") {
     G = G::build_dense_OLS(S);
     res = S.cast<double>() * G;
@@ -149,8 +146,6 @@ MatrixXd dense_algo(const std::string method,
 
   return res;
 }
-
-
 
 }  // namespace reconcile
 }  // namespace lhts

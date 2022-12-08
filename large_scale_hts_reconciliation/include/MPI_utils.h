@@ -34,7 +34,8 @@ class MPI_utils {
   MatrixXd reconcile_dp_optimized(const std::string method,
                                   const MatrixXi S_compact, const MatrixXd P,
                                   const MatrixXd yhat, int level, double w,
-                                  int num_leaves, int num_nodes, int num_levels);
+                                  int num_leaves, int num_nodes,
+                                  int num_levels);
 
   MatrixXd reconcile_dp_matrix(const std::string method,
                                const MatrixXi S_compact, const MatrixXd P,

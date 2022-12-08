@@ -7,10 +7,16 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
                   int num_levels) {
   MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
 
-  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
-  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
-  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
-  if(P.cols() > 1) std::cerr << "[lhts] Warning: Only the first column of the proportions matrix will be used\n";
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (P.cols() > 1)
+    std::cerr << "[lhts] Warning: Only the first column of the proportions "
+                 "matrix will be used\n";
 
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {
@@ -34,14 +40,20 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
 }
 
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
-                    const MatrixXd yhat, int level, int num_leaves, int num_nodes,
-                    int num_levels) {
+                    const MatrixXd yhat, int level, int num_leaves,
+                    int num_nodes, int num_levels) {
   MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
 
-  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
-  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
-  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
-  if(P.cols() > 1) std::cerr << "[lhts] Warning: Only the first column of the proportions matrix will be used\n";
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (P.cols() > 1)
+    std::cerr << "[lhts] Warning: Only the first column of the proportions "
+                 "matrix will be used\n";
 
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {

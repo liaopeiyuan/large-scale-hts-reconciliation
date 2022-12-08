@@ -8,9 +8,13 @@ SpMat build_sparse(const MatrixXi S_compact, int num_leaves, int num_nodes,
 
   std::vector<T> tripletList;
 
-  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
-  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
-  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
 
   for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
@@ -32,7 +36,8 @@ SpMat build_sparse(const MatrixXi S_compact, int num_leaves, int num_nodes,
       } else {
         if (co >= num_leaves) {
           throw std::invalid_argument(
-              "Make sure that the all leaf-level nodes have index < num_leaves.");
+              "Make sure that the all leaf-level nodes have index < "
+              "num_leaves.");
         }
         tripletList.push_back(T(ro, co, 1));
       }
@@ -44,13 +49,17 @@ SpMat build_sparse(const MatrixXi S_compact, int num_leaves, int num_nodes,
   return S;
 }
 
-MatrixXi build_dense(const MatrixXi S_compact, int num_leaves,
-                            int num_nodes, int num_levels) {
+MatrixXi build_dense(const MatrixXi S_compact, int num_leaves, int num_nodes,
+                     int num_levels) {
   MatrixXi S = MatrixXi::Zero(num_nodes, num_leaves);
 
-  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
-  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
-  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
 
 #pragma omp parallel for
   for (int i = 0; i < num_leaves; i++) {
@@ -73,7 +82,8 @@ MatrixXi build_dense(const MatrixXi S_compact, int num_leaves,
       } else {
         if (co >= num_leaves) {
           throw std::invalid_argument(
-              "Make sure that the all leaf-level nodes have index < num_leaves.");
+              "Make sure that the all leaf-level nodes have index < "
+              "num_leaves.");
         }
         S(ro, co) = 1;
       }
