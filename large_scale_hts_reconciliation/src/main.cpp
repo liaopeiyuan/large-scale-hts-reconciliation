@@ -560,7 +560,7 @@ public:
             }
         }
         */
-        std::vector<std::tuple<int, int, int>> root_pairs();
+        std::vector<std::tuple<int, int, int>> root_triplets();
 
         for (int i = 0; i < num_base; i++) {
             int co = S_compact(i, 0);
@@ -592,7 +592,7 @@ public:
                 }
 
                 if (leaf_process == world_rank) {
-                    root_pairs.push_back(std::make_tuple(co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]));
+                    root_triplets.push_back(std::make_tuple(co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]));
                 }
                 
                 // if (world_rank == 0) printf("%d %d %d %d %d %d\n", root_process, leaf_process, slice_starts[root_process], slice_starts[leaf_process], root, co);
@@ -621,7 +621,7 @@ public:
 
         Eigen::MatrixXf y = Eigen::MatrixXf::Zero(ro, co);
     
-        for (std::tuple<int, int, int> p : root_pairs) {
+        for (std::tuple<int, int, int> p : root_triplets) {
             y.middleRows(std::get<0>(p), 1) = P(std::get<0>(p) + slice_starts[world_rank], 0) * yhats[std::get<1>(p)].middleRows(std::get<2>(p), 1);
         }
 
