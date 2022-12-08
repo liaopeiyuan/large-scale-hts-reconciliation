@@ -31,8 +31,8 @@ using namespace Eigen;
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
-typedef Eigen::Triplet<float> T;
+typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpMat;
+typedef Eigen::Triplet<double> T;
 
 namespace py = pybind11;
 using pymod = pybind11::module;

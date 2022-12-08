@@ -20,11 +20,11 @@ using namespace Eigen;
 
 namespace lhts {
 namespace metrics {
-float rmse(const MatrixXf res, const MatrixXf gt);
+double rmse(const MatrixXd res, const MatrixXd gt);
 
-float mae(const MatrixXf res, const MatrixXf gt);
+double mae(const MatrixXd res, const MatrixXd gt);
 
-float smape(const MatrixXf res, const MatrixXf gt);
+double smape(const MatrixXd res, const MatrixXd gt);
 
 }  // namespace metrics
 }  // namespace lhts

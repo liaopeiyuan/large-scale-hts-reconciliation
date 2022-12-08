@@ -2,10 +2,10 @@
 
 namespace lhts {
 namespace distribute {
-MatrixXf top_down(const MatrixXi S_compact, const MatrixXf P,
-                  const MatrixXf yhat, int num_leaves, int num_nodes,
+MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
+                  const MatrixXd yhat, int num_leaves, int num_nodes,
                   int num_levels) {
-  MatrixXf y = MatrixXf::Zero(num_leaves, yhat.cols());
+  MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
 
   if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
   if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
@@ -32,10 +32,10 @@ MatrixXf top_down(const MatrixXi S_compact, const MatrixXf P,
   return y;
 }
 
-MatrixXf middle_out(const MatrixXi S_compact, const MatrixXf P,
-                    const MatrixXf yhat, int level, int num_leaves, int num_nodes,
+MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
+                    const MatrixXd yhat, int level, int num_leaves, int num_nodes,
                     int num_levels) {
-  MatrixXf y = MatrixXf::Zero(num_leaves, yhat.cols());
+  MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
 
   if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
   if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");

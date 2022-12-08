@@ -3,13 +3,13 @@
 namespace lhts {
 namespace reconcile {
 
-MatrixXf sparse_matrix(const std::string method, const MatrixXi S_compact,
-                          const MatrixXf P, const MatrixXf yhat, int level,
-                          float w, int num_leaves, int num_nodes,
+MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
+                          const MatrixXd P, const MatrixXd yhat, int level,
+                          double w, int num_leaves, int num_nodes,
                           int num_levels) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
   SpMat G, res;
-  MatrixXf result, y;
+  MatrixXd result, y;
   y = yhat;
 
   if (method == "bottom_up") {
@@ -39,13 +39,13 @@ MatrixXf sparse_matrix(const std::string method, const MatrixXi S_compact,
   return result;
 }
 
-MatrixXf sparse_algo(const std::string method, const MatrixXi S_compact,
-                   const MatrixXf P, const MatrixXf yhat, int level, float w,
+MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
+                   const MatrixXd P, const MatrixXd yhat, int level, double w,
                    int num_leaves, int num_nodes, int num_levels) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   SpMat G;
-  MatrixXf result, y;
+  MatrixXd result, y;
   y = yhat;
 
   if (method == "bottom_up") {

@@ -21,8 +21,8 @@
 
 using namespace Eigen;
 
-typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
-typedef Eigen::Triplet<float> T;
+typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpMat;
+typedef Eigen::Triplet<double> T;
 
 namespace lhts {
 class MPI_utils {
@@ -31,19 +31,19 @@ class MPI_utils {
 
   ~MPI_utils() {}
 
-  MatrixXf reconcile_dp_optimized(const std::string method,
-                                  const MatrixXi S_compact, const MatrixXf P,
-                                  const MatrixXf yhat, int level, float w,
+  MatrixXd reconcile_dp_optimized(const std::string method,
+                                  const MatrixXi S_compact, const MatrixXd P,
+                                  const MatrixXd yhat, int level, double w,
                                   int num_leaves, int num_nodes, int num_levels);
 
-  MatrixXf reconcile_dp_matrix(const std::string method,
-                               const MatrixXi S_compact, const MatrixXf P,
-                               const MatrixXf yhat, int level, float w,
+  MatrixXd reconcile_dp_matrix(const std::string method,
+                               const MatrixXi S_compact, const MatrixXd P,
+                               const MatrixXd yhat, int level, double w,
                                int num_leaves, int num_nodes, int num_levels);
 
-  MatrixXf reconcile_gather(const std::string method, const MatrixXi S_compact,
-                            const MatrixXf P, const MatrixXf yhat, int level,
-                            float w, int num_leaves, int num_nodes,
+  MatrixXd reconcile_gather(const std::string method, const MatrixXi S_compact,
+                            const MatrixXd P, const MatrixXd yhat, int level,
+                            double w, int num_leaves, int num_nodes,
                             int num_levels);
 
   void test(const MatrixXd& xs);

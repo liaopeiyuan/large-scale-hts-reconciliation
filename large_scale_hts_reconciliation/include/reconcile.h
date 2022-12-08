@@ -25,12 +25,12 @@ using namespace Eigen;
 
 namespace lhts {
 namespace reconcile {
-MatrixXf sparse_matrix(const std::string method, const MatrixXi S_compact,
-                          const MatrixXf P, const MatrixXf yhat, int level,
-                          float w, int num_leaves, int num_nodes, int num_levels);
+MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
+                          const MatrixXd P, const MatrixXd yhat, int level,
+                          double w, int num_leaves, int num_nodes, int num_levels);
 
-MatrixXf sparse_algo(const std::string method, const MatrixXi S_compact,
-                   const MatrixXf P, const MatrixXf yhat, int level, float w,
+MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
+                   const MatrixXd P, const MatrixXd yhat, int level, double w,
                    int num_leaves, int num_nodes, int num_levels);
 }  // namespace reconcile
 }  // namespace lhts

@@ -10,7 +10,7 @@ SpMat build_sparse_OLS(SpMat S) {
   return solver.solve(St);
 }
 
-SpMat build_sparse_WLS(SpMat S, float w) {
+SpMat build_sparse_WLS(SpMat S, double w) {
   std::vector<T> tripletList(0);
 
   for (int i = 0; i < S.rows(); i++) {
@@ -28,7 +28,7 @@ SpMat build_sparse_WLS(SpMat S, float w) {
   return solver.solve(St) * W;
 }
 
-SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
+SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXd P,
                             int num_leaves, int num_nodes, int num_levels) {
   SpMat G(num_leaves, num_nodes);
 
@@ -60,7 +60,7 @@ SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
   return G;
 }
 
-SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXf P,
+SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXd P,
                               int level, int num_leaves, int num_nodes,
                               int num_levels) {
   SpMat G(num_leaves, num_nodes);
@@ -127,32 +127,32 @@ SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_leaves,
   return G;
 }
 
-MatrixXf build_dense_OLS(const MatrixXi S) {
-  MatrixXf Sp = S.cast<float>().eval();
-  MatrixXf St = Sp.transpose().eval();
-  MatrixXf M = St * Sp;
-  FullPivLU<MatrixXf> lu(M);
+MatrixXd build_dense_OLS(const MatrixXi S) {
+  MatrixXd Sp = S.cast<double>().eval();
+  MatrixXd St = Sp.transpose().eval();
+  MatrixXd M = St * Sp;
+  FullPivLU<MatrixXd> lu(M);
   return lu.matrixLU() * St;
 }
 
-MatrixXf build_dense_WLS(const MatrixXi S, float w) {
-  MatrixXf W = MatrixXf::Zero(S.rows(), S.cols());
+MatrixXd build_dense_WLS(const MatrixXi S, double w) {
+  MatrixXd W = MatrixXd::Zero(S.rows(), S.cols());
 #pragma omp parallel for
   for (int i = 0; i < S.rows(); i++) {
     W(i, i) = w;
   }
-  MatrixXf Sp = S.cast<float>();
-  MatrixXf St = Sp.transpose();
-  MatrixXf M = St * W * Sp;
-  FullPivLU<MatrixXf> lu(M);
+  MatrixXd Sp = S.cast<double>();
+  MatrixXd St = Sp.transpose();
+  MatrixXd M = St * W * Sp;
+  FullPivLU<MatrixXd> lu(M);
   return lu.matrixLU() * St * W;
 }
 
 
-MatrixXf build_dense_top_down(const MatrixXi S_compact,
-                                     const MatrixXf P, int num_leaves,
+MatrixXd build_dense_top_down(const MatrixXi S_compact,
+                                     const MatrixXd P, int num_leaves,
                                      int num_nodes, int num_levels) {
-  MatrixXf G = MatrixXf::Zero(num_leaves, num_nodes);
+  MatrixXd G = MatrixXd::Zero(num_leaves, num_nodes);
 
   assert(S_compact.rows() == num_nodes);
   assert(S_compact.cols() == num_levels);
@@ -179,11 +179,11 @@ MatrixXf build_dense_top_down(const MatrixXi S_compact,
   return G;
 }
 
-MatrixXf build_dense_middle_out(const MatrixXi S_compact,
-                                       const MatrixXf P, int level,
+MatrixXd build_dense_middle_out(const MatrixXi S_compact,
+                                       const MatrixXd P, int level,
                                        int num_leaves, int num_nodes,
                                        int num_levels) {
-  MatrixXf G = MatrixXf::Zero(num_leaves, num_nodes);
+  MatrixXd G = MatrixXd::Zero(num_leaves, num_nodes);
 
   assert(S_compact.rows() == num_nodes);
   assert(S_compact.cols() == num_levels);
@@ -214,10 +214,10 @@ MatrixXf build_dense_middle_out(const MatrixXi S_compact,
   return G;
 }
 
-MatrixXf build_dense_bottom_up(const MatrixXi S_compact,
+MatrixXd build_dense_bottom_up(const MatrixXi S_compact,
                                       int num_leaves, int num_nodes,
                                       int num_levels) {
-  MatrixXf G = MatrixXf::Zero(num_leaves, num_nodes);
+  MatrixXd G = MatrixXd::Zero(num_leaves, num_nodes);
 
   assert(S_compact.rows() == num_nodes);
   assert(S_compact.cols() == num_levels);

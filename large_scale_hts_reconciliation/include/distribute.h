@@ -18,18 +18,18 @@
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
-typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
-typedef Eigen::Triplet<float> T;
+typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpMat;
+typedef Eigen::Triplet<double> T;
 
 using namespace Eigen;
 
 namespace lhts {
 namespace distribute {
-MatrixXf top_down(const MatrixXi S_compact, const MatrixXf P,
-                  const MatrixXf yhat, int num_leaves, int num_nodes,
+MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
+                  const MatrixXd yhat, int num_leaves, int num_nodes,
                   int num_levels);
-MatrixXf middle_out(const MatrixXi S_compact, const MatrixXf P,
-                    const MatrixXf yhat, int level, int num_leaves, int num_nodes,
+MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
+                    const MatrixXd yhat, int level, int num_leaves, int num_nodes,
                     int num_levels);
 }  // namespace distribute
 }  // namespace lhts

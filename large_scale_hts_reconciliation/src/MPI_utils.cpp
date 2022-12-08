@@ -2,9 +2,9 @@
 
 using namespace lhts;
 
-MatrixXf dp_reconcile_optimized(const std::string method,
-                                const MatrixXi S_compact, const MatrixXf P,
-                                const MatrixXf yhat, int level, float w,
+MatrixXd dp_reconcile_optimized(const std::string method,
+                                const MatrixXi S_compact, const MatrixXd P,
+                                const MatrixXd yhat, int level, double w,
                                 int num_leaves, int num_nodes, int num_levels,
                                 int slice_start, int slice_length) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
@@ -12,7 +12,7 @@ MatrixXf dp_reconcile_optimized(const std::string method,
                 .eval();
   SpMat res, G;
 
-  MatrixXf result, y;
+  MatrixXd result, y;
   y = yhat;
 
   if (method == "bottom_up") {
@@ -45,7 +45,7 @@ MatrixXf dp_reconcile_optimized(const std::string method,
 
 SpMat construct_dp_reconciliation_matrix(const std::string method,
                                          const MatrixXi S_compact,
-                                         const MatrixXf P, int level, float w,
+                                         const MatrixXd P, int level, double w,
                                          int num_leaves, int num_nodes,
                                          int num_levels, int slice_start,
                                          int slice_length) {
@@ -76,11 +76,11 @@ SpMat construct_dp_reconciliation_matrix(const std::string method,
   return res;
 }
 
-MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
+MatrixXd MPI_utils::reconcile_dp_optimized(const std::string method,
                                            const MatrixXi S_compact,
-                                           const MatrixXf P,
-                                           const MatrixXf yhat, int level,
-                                           float w, int num_leaves, int num_nodes,
+                                           const MatrixXd P,
+                                           const MatrixXd yhat, int level,
+                                           double w, int num_leaves, int num_nodes,
                                            int num_levels) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -110,7 +110,7 @@ MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
     }
   }
 
-  MatrixXf result;
+  MatrixXd result;
 
   if (method == "bottom_up") {
     int slice_start = 0, slice_length = 0;
@@ -126,9 +126,9 @@ MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
       curr_row += rows[i];
     }
 
-    MatrixXf yhat_total =
-        MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
-    std::vector<MatrixXf> yhats(world_size);
+    MatrixXd yhat_total =
+        MatrixXd::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
+    std::vector<MatrixXd> yhats(world_size);
 
     curr_row = 0;
     for (int i = 0; i < world_size; i++) {
@@ -141,7 +141,7 @@ MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
 
       if (color == 1) {
         if (i != world_rank) {
-          yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+          yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
         } else {
           yhats[i] = yhat;
         }
@@ -230,11 +230,11 @@ if (world_rank == 0) {
     }
 
     std::vector<MPI_Request> reqs(0);
-    std::vector<MatrixXf> yhats(world_size);
+    std::vector<MatrixXd> yhats(world_size);
 
     for (int i : recvs[world_rank]) {
       reqs.push_back(MPI_Request());
-      yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+      yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
       MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0,
                 comm_global, &reqs[reqs.size() - 1]);
     }
@@ -248,7 +248,7 @@ if (world_rank == 0) {
     std::vector<MPI_Status> stats(reqs.size());
     MPI_Waitall(reqs.size(), reqs.data(), stats.data());
 
-    MatrixXf y = MatrixXf::Zero(ro, co);
+    MatrixXd y = MatrixXd::Zero(ro, co);
 
     for (auto&& p : root_triplets) {
       int leaf_index, root_process, root_index;
@@ -258,12 +258,12 @@ if (world_rank == 0) {
           yhats[root_process].middleRows(root_index, 1);
     }
 
-    MatrixXf yhat_total = MatrixXf::Zero(num_nodes, co);
+    MatrixXd yhat_total = MatrixXd::Zero(num_nodes, co);
 
     curr_row = 0;
     for (int i = 0; i < world_size; i++) {
       if (i != world_rank) {
-        yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+        yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
       } else {
         yhats[i] = y;
       }
@@ -348,11 +348,11 @@ if (world_rank == 0) {
     }
 
     std::vector<MPI_Request> reqs(0);
-    std::vector<MatrixXf> yhats(world_size);
+    std::vector<MatrixXd> yhats(world_size);
 
     for (int i : recvs[world_rank]) {
       reqs.push_back(MPI_Request());
-      yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+      yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
       MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0,
                 comm_global, &reqs[reqs.size() - 1]);
     }
@@ -366,7 +366,7 @@ if (world_rank == 0) {
     std::vector<MPI_Status> stats(reqs.size());
     MPI_Waitall(reqs.size(), reqs.data(), stats.data());
 
-    MatrixXf y = MatrixXf::Zero(ro, co);
+    MatrixXd y = MatrixXd::Zero(ro, co);
 
     for (auto&& p : root_triplets) {
       int leaf_index, root_process, root_index;
@@ -376,12 +376,12 @@ if (world_rank == 0) {
           yhats[root_process].middleRows(root_index, 1);
     }
 
-    MatrixXf yhat_total = MatrixXf::Zero(num_nodes, co);
+    MatrixXd yhat_total = MatrixXd::Zero(num_nodes, co);
 
     curr_row = 0;
     for (int i = 0; i < world_size; i++) {
       if (i != world_rank) {
-        yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+        yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
       } else {
         yhats[i] = y;
       }
@@ -412,10 +412,10 @@ else if (method == "WLS") {
   return result;
 }
 
-MatrixXf MPI_utils::reconcile_dp_matrix(const std::string method,
+MatrixXd MPI_utils::reconcile_dp_matrix(const std::string method,
                                         const MatrixXi S_compact,
-                                        const MatrixXf P, const MatrixXf yhat,
-                                        int level, float w, int num_leaves,
+                                        const MatrixXd P, const MatrixXd yhat,
+                                        int level, double w, int num_leaves,
                                         int num_nodes, int num_levels) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -445,16 +445,16 @@ MatrixXf MPI_utils::reconcile_dp_matrix(const std::string method,
     }
   }
 
-  MatrixXf yhat_total =
-      MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
-  std::vector<MatrixXf> yhats(world_size);
+  MatrixXd yhat_total =
+      MatrixXd::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
+  std::vector<MatrixXd> yhats(world_size);
 
   int slice_start = 0, slice_length = 0;
   int curr_row = 0;
 
   for (int i = 0; i < world_size; i++) {
     if (i != world_rank) {
-      yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+      yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
     } else {
       yhats[i] = yhat;
     }
@@ -478,7 +478,7 @@ MatrixXf MPI_utils::reconcile_dp_matrix(const std::string method,
   /*
 MPI_Barrier(comm_global);
 
-MatrixXf reconciliation_matrix =
+MatrixXd reconciliation_matrix =
   construct_dp_reconciliation_matrix(method,
       S_compact, P, level, w, num_leaves, num_nodes, num_levels,
 slice_start, slice_length);
@@ -496,9 +496,9 @@ if (world_rank == world_size - 1) {
 */
 }
 
-MatrixXf MPI_utils::reconcile_gather(const std::string method,
-                                     const MatrixXi S_compact, const MatrixXf P,
-                                     const MatrixXf yhat, int level, float w,
+MatrixXd MPI_utils::reconcile_gather(const std::string method,
+                                     const MatrixXi S_compact, const MatrixXd P,
+                                     const MatrixXd yhat, int level, double w,
                                      int num_leaves, int num_nodes,
                                      int num_levels) {
   int world_size;
@@ -518,8 +518,8 @@ MatrixXf MPI_utils::reconcile_gather(const std::string method,
   MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
   MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
-  MatrixXf yhat_total;
-  std::vector<MatrixXf> yhats(world_size);
+  MatrixXd yhat_total;
+  std::vector<MatrixXd> yhats(world_size);
 
   if (world_rank == 0) {
     int n_cols = cols[0];
@@ -532,10 +532,10 @@ MatrixXf MPI_utils::reconcile_gather(const std::string method,
     }
 
     yhat_total =
-        MatrixXf::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
+        MatrixXd::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
 
     for (int i = 1; i < world_size; i++) {
-      yhats[i] = MatrixXf::Zero(rows[i], cols[i]);
+      yhats[i] = MatrixXd::Zero(rows[i], cols[i]);
       MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0,
                 comm_global, &reqs[i]);
     }
@@ -556,12 +556,12 @@ MatrixXf MPI_utils::reconcile_gather(const std::string method,
     MPI_Wait(&reqs[0], &stats[0]);
   }
 
-  MatrixXf y_return;
+  MatrixXd y_return;
 
   if (world_rank == 0) {
     omp_set_num_threads(24);
 
-    MatrixXf y_reconciled =
+    MatrixXd y_reconciled =
         reconcile::sparse_algo(method, S_compact, P, yhat_total, level, w,
                              num_leaves, num_nodes, num_levels);
 
@@ -583,7 +583,7 @@ MatrixXf MPI_utils::reconcile_gather(const std::string method,
     MPI_Barrier(comm_global);
     return y_return;
   } else {
-    y_return = MatrixXf::Zero(ro, co);
+    y_return = MatrixXd::Zero(ro, co);
     MPI_Irecv(y_return.data(), ro * co, MPI_FLOAT, 0, 0, comm_global, &reqs[0]);
     MPI_Wait(&reqs[0], &stats[0]);
     MPI_Barrier(comm_global);
