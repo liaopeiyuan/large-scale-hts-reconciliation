@@ -1,10 +1,20 @@
+#include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <vector>
 #include <set>
 #include <tuple>
 #include <stdexcept>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+#include <mpi.h>
+#include <stdio.h>
 #include <Eigen/LU>
 #include <Eigen/Sparse>
+#include<Eigen/SparseQR>
+#include<Eigen/SparseLU>
 
 typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
 typedef Eigen::Triplet<float> T;
