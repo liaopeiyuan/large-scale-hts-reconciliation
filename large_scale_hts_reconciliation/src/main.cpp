@@ -18,7 +18,6 @@
 #include<Eigen/SparseQR>
 #include<Eigen/SparseLU>
 
-
 #include "S.h"
 
 using namespace lhts;
