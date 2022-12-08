@@ -18,48 +18,15 @@
 #include<Eigen/SparseQR>
 #include<Eigen/SparseLU>
 
+
+#include "S.h"
+
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
 typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
 typedef Eigen::Triplet<float> T;
 
-SpMat construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
-    SpMat S(num_total, num_base);
-    
-    std::vector<T> tripletList;
-
-    assert(S_compact.rows() == num_total);
-    assert(S_compact.cols() == num_levels);
-    assert(num_levels > 1);
-
-    // #pragma omp parallel for 
-    for (int i = 0; i < num_base; i++) {
-        int co = S_compact(i, 0);
-        if (co >= num_base) {
-            throw std::invalid_argument("Make sure that the frist num_base rows of S_compact contain only leaf-level nodes.");
-        }
-        tripletList.push_back(T(co, co, 1));
-        for (int j = 1; j < num_levels; j++) {
-            int ro = S_compact(i, j);
-            if (ro == -1) {
-                if (i < num_base) {
-                    throw std::invalid_argument("Make sure that the frist num_base rows of S_compact contain only leaf-level nodes.");
-                }
-                break;
-            } else {
-                if (co >= num_base) {
-                    throw std::invalid_argument("Make sure that the all leaf-level nodes have index < num_base.");
-                }
-                tripletList.push_back(T(ro, co, 1));
-            }
-        }
-    }
-
-    S.setFromTriplets(tripletList.begin(), tripletList.end());
-
-    return S;
-}
 
 Eigen::MatrixXf construct_G_OLS(SpMat Sp) {
     SpMat St = Sp.transpose().eval();
@@ -261,7 +228,7 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels,
                           int slice_start, int slice_length) {
-    SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
+    SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
     SpMat res, G;
 
     Eigen::MatrixXf result, y, _G;
@@ -304,7 +271,7 @@ SpMat construct_dp_reconciliation_matrix(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels,
                           int slice_start, int slice_length) {
-    SpMat S = construct_S(S_compact, num_base, num_total, num_levels);
+    SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels);
     
     SpMat G;
     
@@ -342,7 +309,7 @@ Eigen::MatrixXf reconcile_matrix(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
 
-    SpMat S = construct_S(S_compact, num_base, num_total, num_levels);
+    SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels);
     SpMat G, res;
     Eigen::MatrixXf result, y;
     y = yhat;
@@ -385,7 +352,7 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
 
-    SpMat S = construct_S(S_compact, num_base, num_total, num_levels);
+    SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels);
     
     // std::stringstream ss;
     // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
@@ -671,7 +638,7 @@ public:
             curr_row += rows[i];
         }
 
-        SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+        SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
         /*
         if (world_rank == 0) {
@@ -783,7 +750,7 @@ public:
             curr_row += rows[i];
         }
 
-        SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+        SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
         result = (S * yhat_total.topRows(num_base)).eval();
     }
@@ -1077,7 +1044,7 @@ PYBIND11_MODULE(lhts, m) {
 
     m.def("reconcile_matrix", &reconcile_matrix);
     m.def("reconcile", &reconcile);
-    m.def("construct_S", &construct_S);
+    m.def("construct_S", &S::build_sparse);
     m.def("construct_G_bottom_up", &construct_G_bottom_up);
     m.def("construct_G_top_down", &construct_G_top_down);
     m.def("construct_G_middle_out", &construct_G_middle_out);
