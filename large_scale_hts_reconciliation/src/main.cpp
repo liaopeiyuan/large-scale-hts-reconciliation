@@ -647,15 +647,10 @@ public:
             MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
             yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
 
-            if (i == world_rank) {
-                slice_start = curr_row;
-                slice_length = rows[i];
-            }
-
             curr_row += rows[i];
         }
 
-        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
+        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
 
         //printf("insert\n");
