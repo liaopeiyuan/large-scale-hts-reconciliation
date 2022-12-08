@@ -44,22 +44,17 @@ PYBIND11_MODULE(lhts, m) {
         .. currentmodule:: lhts
         .. autosummary::
            :toctree: _generate
-           add
-           subtract
+           reconcile
     )pbdoc";
-
-  
-  m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
-        Subtract two numbers
-        Some other explanation about the subtract function.
-    )pbdoc");
 
   m.def("rmse", &metrics::rmse);
   m.def("mae", &metrics::mae);
   m.def("smape", &metrics::smape);
 
   m.def("reconcile_matrix", &reconcile::reconcile_matrix);
-  m.def("reconcile", &reconcile::reconcile);
+  m.def("reconcile", &reconcile::reconcile, R"pbdoc(
+        Forecast reconciliation
+    )pbdoc");
   m.def("construct_S", &S::build_sparse);
   m.def("G::build_sparse_bottom_up", &G::build_sparse_bottom_up);
   m.def("G::build_sparse_top_down", &G::build_sparse_top_down);
