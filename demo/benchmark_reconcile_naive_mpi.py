@@ -39,7 +39,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
         print("Original: ", str(elapsed), " ", lhts.smape(yhat, gt))
-        print(yhat[-5:, :])
+        print(yhat[-5:, -1])
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, yhat.shape)    
     start = timer()
@@ -48,7 +48,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
         print("Top down: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, yhat.shape)    
     start = timer()
@@ -57,7 +57,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
         print("Bottom up: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
 
 
     start = timer()
@@ -66,7 +66,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
         print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
 
     start = timer()
     rec = distrib.reconcile_gather("OLS", S_compact, top_down_p, yhat, 2, 0.0, 5650, 6218, 4)
@@ -74,7 +74,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
 
     start = timer()
     rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, yhat, 2, 1.5, 5650, 6218, 4)
@@ -82,7 +82,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
 
     
 

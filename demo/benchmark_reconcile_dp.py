@@ -89,7 +89,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
 
     start = timer()
     rec = distrib.reconcile_dp_matrix("WLS", S_compact, top_down_p, yhat, 2, 0.5, 5650, 6218, 4)
@@ -97,7 +97,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, :])
+        print(rec[-5:, -1])
     
 
 if __name__ == "__main__":
