@@ -5,6 +5,7 @@
 #include <pybind11/numpy.h>
 #include <vector>
 #include <set>
+#include <tuple>
 #include <stdexcept>
 
 #ifdef _OPENMP
@@ -592,7 +593,7 @@ public:
                 }
 
                 if (leaf_process == world_rank) {
-                    root_triplets.push_back(std::make_tuple(co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]));
+                    root_triplets.push_back(std::tuple<int, int, int>(co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]));
                 }
                 
                 // if (world_rank == 0) printf("%d %d %d %d %d %d\n", root_process, leaf_process, slice_starts[root_process], slice_starts[leaf_process], root, co);
@@ -621,28 +622,11 @@ public:
 
         Eigen::MatrixXf y = Eigen::MatrixXf::Zero(ro, co);
     
-        for (std::tuple<int, int, int> p : root_triplets) {
-            y.middleRows(std::get<0>(p), 1) = P(std::get<0>(p) + slice_starts[world_rank], 0) * yhats[std::get<1>(p)].middleRows(std::get<2>(p), 1);
+        for (auto&& p : root_triplets) {
+            int leaf_index, root_process, root_index;
+            std::tie(leaf_index, root_process, root_index) = p;
+            y.middleRows(leaf_index, 1) = P(leaf_index + slice_starts[world_rank], 0) * yhats[root_process].middleRows(root_index, 1);
         }
-
-        /*
-        for (int i = 0; i < ro; i++) {
-            int co = S_compact(slice_starts[world_rank] + i, 0);
-            int root = -1;
-            bool is_base = true;
-            for (int j = 1; j < num_levels; j++) {
-                int ro = S_compact(slice_starts[world_rank] + i, j);
-                if (ro == -1) {
-                    is_base = false;
-                    break;
-                }
-                root = ro;
-            }
-            if (is_base) {
-                y.middleRows(co - , 1) = P(co, 0) * yhat.middleRows(root, 1);
-            }
-        }
-        */
 
         Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_total, co);
 
