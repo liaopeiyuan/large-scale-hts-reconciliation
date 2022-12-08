@@ -19,6 +19,7 @@
 typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
 typedef Eigen::Triplet<float> T;
 
+using namespace Eigen;
 namespace lhts {
     namespace S {
         SpMat build_sparse(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels);

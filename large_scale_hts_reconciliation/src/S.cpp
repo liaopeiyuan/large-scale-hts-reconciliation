@@ -2,7 +2,7 @@
 
 namespace lhts {
     namespace S {
-        SpMat build_sparse(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
+        SpMat build_sparse(const MatrixXi S_compact, int num_base, int num_total, int num_levels) {
             SpMat S(num_total, num_base);
             
             std::vector<T> tripletList;
