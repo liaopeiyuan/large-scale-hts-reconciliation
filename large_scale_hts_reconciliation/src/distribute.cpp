@@ -1,11 +1,10 @@
 #include "distribute.h"
 
 namespace lhts {
-    namespace distribute {
-MatrixXf top_down(const MatrixXi S_compact,
-                                      const MatrixXf P, const MatrixXf yhat,
-                                      int num_base, int num_total,
-                                      int num_levels) {
+namespace distribute {
+MatrixXf top_down(const MatrixXi S_compact, const MatrixXf P,
+                  const MatrixXf yhat, int num_base, int num_total,
+                  int num_levels) {
   MatrixXf y = MatrixXf::Zero(num_base, yhat.cols());
 
   assert(S_compact.rows() == num_total);
@@ -33,10 +32,9 @@ MatrixXf top_down(const MatrixXi S_compact,
   return y;
 }
 
-MatrixXf middle_out(const MatrixXi S_compact,
-                                        const MatrixXf P, const MatrixXf yhat,
-                                        int level, int num_base, int num_total,
-                                        int num_levels) {
+MatrixXf middle_out(const MatrixXi S_compact, const MatrixXf P,
+                    const MatrixXf yhat, int level, int num_base, int num_total,
+                    int num_levels) {
   MatrixXf y = MatrixXf::Zero(num_base, yhat.cols());
 
   assert(S_compact.rows() == num_total);
@@ -67,5 +65,5 @@ MatrixXf middle_out(const MatrixXi S_compact,
 
   return y;
 }
-    }
-}
+}  // namespace distribute
+}  // namespace lhts

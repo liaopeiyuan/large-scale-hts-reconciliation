@@ -50,11 +50,11 @@ MatrixXf dp_reconcile_optimized(const std::string method,
   } else if (method == "top_down") {
     res = S;
     y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
-                                     num_levels);
+                             num_levels);
   } else if (method == "middle_out") {
     res = S;
-    y = distribute::middle_out(S_compact, P, yhat, level, num_base,
-                                       num_total, num_levels);
+    y = distribute::middle_out(S_compact, P, yhat, level, num_base, num_total,
+                               num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S).sparseView();
     res = S * G;
@@ -169,11 +169,11 @@ MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
   } else if (method == "top_down") {
     res = S;
     y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
-                                     num_levels);
+                             num_levels);
   } else if (method == "middle_out") {
     res = S;
-    y = distribute::middle_out(S_compact, P, yhat, level, num_base,
-                                       num_total, num_levels);
+    y = distribute::middle_out(S_compact, P, yhat, level, num_base, num_total,
+                               num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S).sparseView();
     res = S * G;

@@ -24,14 +24,12 @@ typedef Eigen::Triplet<float> T;
 using namespace Eigen;
 
 namespace lhts {
-    namespace distribute {
-MatrixXf top_down(const MatrixXi S_compact,
-                                      const MatrixXf P, const MatrixXf yhat,
-                                      int num_base, int num_total,
-                                      int num_levels);
-MatrixXf middle_out(const MatrixXi S_compact,
-                                        const MatrixXf P, const MatrixXf yhat,
-                                        int level, int num_base, int num_total,
-                                        int num_levels);
-    }
-}
+namespace distribute {
+MatrixXf top_down(const MatrixXi S_compact, const MatrixXf P,
+                  const MatrixXf yhat, int num_base, int num_total,
+                  int num_levels);
+MatrixXf middle_out(const MatrixXi S_compact, const MatrixXf P,
+                    const MatrixXf yhat, int level, int num_base, int num_total,
+                    int num_levels);
+}  // namespace distribute
+}  // namespace lhts
