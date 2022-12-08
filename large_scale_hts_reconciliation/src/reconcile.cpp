@@ -51,20 +51,20 @@ Eigen::MatrixXd dense_matrix(const std::string method,
 
   if (method == "bottom_up") {
     G = G::build_dense_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
-    res = S.cast<float>() * G;
+    res = S.cast<double>() * G;
   } else if (method == "top_down") {
     G = G::build_dense_top_down(S_compact, P,  num_leaves, num_nodes, num_levels);
-    res = S.cast<float>() * G;
+    res = S.cast<double>() * G;
   } else if (method == "middle_out") {
     G = G::build_dense_middle_out(S_compact, P, level,  num_leaves, num_nodes,
                                num_levels);
-    res = S.cast<float>() * G;
+    res = S.cast<double>() * G;
   } else if (method == "OLS") {
     G = G::build_dense_OLS(S);
-    res = S.cast<float>() * G;
+    res = S.cast<double>() * G;
   } else if (method == "WLS") {
     G = G::build_dense_WLS(S, w);
-    res = S.cast<float>() * G;
+    res = S.cast<double>() * G;
   } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "

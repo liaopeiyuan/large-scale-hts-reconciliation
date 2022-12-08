@@ -131,8 +131,8 @@ MatrixXd build_dense_OLS(const MatrixXi S) {
   MatrixXd Sp = S.cast<double>().eval();
   MatrixXd St = Sp.transpose().eval();
   MatrixXd M = St * Sp;
-  FullPivLU<MatrixXd> lu(M);
-  return lu.matrixLU() * St;
+  HouseholderQR<MatrixXd> qr(M);
+  return qr.solve(St);
 }
 
 MatrixXd build_dense_WLS(const MatrixXi S, double w) {
@@ -144,8 +144,8 @@ MatrixXd build_dense_WLS(const MatrixXi S, double w) {
   MatrixXd Sp = S.cast<double>();
   MatrixXd St = Sp.transpose();
   MatrixXd M = St * W * Sp;
-  FullPivLU<MatrixXd> lu(M);
-  return lu.matrixLU() * St * W;
+  HouseholderQR<MatrixXd> qr(M);
+  return qr.solve(St) * W;
 }
 
 
