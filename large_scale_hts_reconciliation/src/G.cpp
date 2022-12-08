@@ -23,7 +23,7 @@ SpMat build_sparse_WLS(SpMat S, float w) {
   SpMat St = S.transpose();
   SpMat M = St * W * S;
 
-  return M
+  return M;
   //SparseQR<SpMat, COLAMDOrdering<int>> solver;
   //solver.compute(M);
   //return solver.solve(St) * W;
