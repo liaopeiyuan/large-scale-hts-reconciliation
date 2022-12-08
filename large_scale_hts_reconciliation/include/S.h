@@ -22,7 +22,9 @@ typedef Eigen::Triplet<float> T;
 using namespace Eigen;
 namespace lhts {
 namespace S {
-SpMat build_sparse(const Eigen::MatrixXi S_compact, int num_base, int num_total,
+SpMat build_sparse(const Eigen::MatrixXi S_compact, int num_leaves, int num_nodes,
+                   int num_levels);
+Eigen::MatrixXi build_dense(const Eigen::MatrixXi S_compact, int num_leaves, int num_nodes,
                    int num_levels);
 }
 }  // namespace lhts

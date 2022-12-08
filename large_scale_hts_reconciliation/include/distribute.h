@@ -26,10 +26,10 @@ using namespace Eigen;
 namespace lhts {
 namespace distribute {
 MatrixXf top_down(const MatrixXi S_compact, const MatrixXf P,
-                  const MatrixXf yhat, int num_base, int num_total,
+                  const MatrixXf yhat, int num_leaves, int num_nodes,
                   int num_levels);
 MatrixXf middle_out(const MatrixXi S_compact, const MatrixXf P,
-                    const MatrixXf yhat, int level, int num_base, int num_total,
+                    const MatrixXf yhat, int level, int num_leaves, int num_nodes,
                     int num_levels);
 }  // namespace distribute
 }  // namespace lhts

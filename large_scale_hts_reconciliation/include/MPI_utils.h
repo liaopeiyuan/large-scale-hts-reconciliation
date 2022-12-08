@@ -34,16 +34,16 @@ class MPI_utils {
   MatrixXf reconcile_dp_optimized(const std::string method,
                                   const MatrixXi S_compact, const MatrixXf P,
                                   const MatrixXf yhat, int level, float w,
-                                  int num_base, int num_total, int num_levels);
+                                  int num_leaves, int num_nodes, int num_levels);
 
   MatrixXf reconcile_dp_matrix(const std::string method,
                                const MatrixXi S_compact, const MatrixXf P,
                                const MatrixXf yhat, int level, float w,
-                               int num_base, int num_total, int num_levels);
+                               int num_leaves, int num_nodes, int num_levels);
 
   MatrixXf reconcile_gather(const std::string method, const MatrixXi S_compact,
                             const MatrixXf P, const MatrixXf yhat, int level,
-                            float w, int num_base, int num_total,
+                            float w, int num_leaves, int num_nodes,
                             int num_levels);
 
   void test(const MatrixXd& xs);

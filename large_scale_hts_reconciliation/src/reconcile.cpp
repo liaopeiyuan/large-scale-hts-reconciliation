@@ -4,21 +4,21 @@ namespace lhts {
 namespace reconcile {
 MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
                           const MatrixXf P, const MatrixXf yhat, int level,
-                          float w, int num_base, int num_total,
+                          float w, int num_leaves, int num_nodes,
                           int num_levels) {
-  SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels);
+  SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
   SpMat G, res;
   MatrixXf result, y;
   y = yhat;
 
   if (method == "bottom_up") {
-    G = G::build_sparse_bottom_up(S_compact, num_base, num_total, num_levels);
+    G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
     res = S * G;
   } else if (method == "top_down") {
-    G = G::build_sparse_top_down(S_compact, P, num_base, num_total, num_levels);
+    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes, num_levels);
     res = S * G;
   } else if (method == "middle_out") {
-    G = G::build_sparse_middle_out(S_compact, P, level, num_base, num_total,
+    G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
                                    num_levels);
     res = S * G;
   } else if (method == "OLS") {
@@ -40,8 +40,8 @@ MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
 
 MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
                    const MatrixXf P, const MatrixXf yhat, int level, float w,
-                   int num_base, int num_total, int num_levels) {
-  SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels);
+                   int num_leaves, int num_nodes, int num_levels) {
+  SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   // std::stringstream ss;
   // ss << S.rows() << " " << S.cols() << " " << S(seqN(0, 10), seqN(0, 10));
@@ -52,14 +52,14 @@ MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
   y = yhat;
 
   if (method == "bottom_up") {
-    y = yhat.topRows(num_base).eval();
+    y = yhat.topRows(num_leaves).eval();
     result = S * y;
   } else if (method == "top_down") {
-    y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
+    y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
     result = S * y;
   } else if (method == "middle_out") {
-    y = distribute::middle_out(S_compact, P, yhat, level, num_base, num_total,
+    y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
     result = S * y;
   } else if (method == "OLS") {

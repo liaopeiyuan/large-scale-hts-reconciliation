@@ -27,10 +27,10 @@ namespace lhts {
 namespace reconcile {
 MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
                           const MatrixXf P, const MatrixXf yhat, int level,
-                          float w, int num_base, int num_total, int num_levels);
+                          float w, int num_leaves, int num_nodes, int num_levels);
 
 MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
                    const MatrixXf P, const MatrixXf yhat, int level, float w,
-                   int num_base, int num_total, int num_levels);
+                   int num_leaves, int num_nodes, int num_levels);
 }  // namespace reconcile
 }  // namespace lhts

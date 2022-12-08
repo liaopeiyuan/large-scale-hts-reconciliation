@@ -5,9 +5,9 @@ using namespace lhts;
 MatrixXf dp_reconcile_optimized(const std::string method,
                                 const MatrixXi S_compact, const MatrixXf P,
                                 const MatrixXf yhat, int level, float w,
-                                int num_base, int num_total, int num_levels,
+                                int num_leaves, int num_nodes, int num_levels,
                                 int slice_start, int slice_length) {
-  SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels)
+  SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
                 .middleRows(slice_start, slice_length)
                 .eval();
   SpMat res, G;
@@ -17,14 +17,14 @@ MatrixXf dp_reconcile_optimized(const std::string method,
 
   if (method == "bottom_up") {
     res = S;
-    y = yhat.topRows(num_base).eval();
+    y = yhat.topRows(num_leaves).eval();
   } else if (method == "top_down") {
     res = S;
-    y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
+    y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
   } else if (method == "middle_out") {
     res = S;
-    y = distribute::middle_out(S_compact, P, yhat, level, num_base, num_total,
+    y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
@@ -46,19 +46,19 @@ MatrixXf dp_reconcile_optimized(const std::string method,
 SpMat construct_dp_reconciliation_matrix(const std::string method,
                                          const MatrixXi S_compact,
                                          const MatrixXf P, int level, float w,
-                                         int num_base, int num_total,
+                                         int num_leaves, int num_nodes,
                                          int num_levels, int slice_start,
                                          int slice_length) {
-  SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels);
+  SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   SpMat G;
 
   if (method == "bottom_up") {
-    G = G::build_sparse_bottom_up(S_compact, num_base, num_total, num_levels);
+    G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
   } else if (method == "top_down") {
-    G = G::build_sparse_top_down(S_compact, P, num_base, num_total, num_levels);
+    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes, num_levels);
   } else if (method == "middle_out") {
-    G = G::build_sparse_middle_out(S_compact, P, level, num_base, num_total,
+    G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
                                    num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
@@ -80,7 +80,7 @@ MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
                                            const MatrixXi S_compact,
                                            const MatrixXf P,
                                            const MatrixXf yhat, int level,
-                                           float w, int num_base, int num_total,
+                                           float w, int num_leaves, int num_nodes,
                                            int num_levels) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -134,7 +134,7 @@ MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
     for (int i = 0; i < world_size; i++) {
       MPI_Comm leaf_comm;
 
-      int color = (i == world_rank) | (slice_start + slice_length >= num_base);
+      int color = (i == world_rank) | (slice_start + slice_length >= num_leaves);
       MPI_Comm_split(comm_global, color,
                      (i == world_rank) ? 0 : world_rank + world_size,
                      &leaf_comm);
@@ -157,9 +157,9 @@ MatrixXf MPI_utils::reconcile_dp_optimized(const std::string method,
       curr_row += rows[i];
     }
 
-    if (slice_start + slice_length >= num_base) {
+    if (slice_start + slice_length >= num_leaves) {
       result = dp_reconcile_optimized(method, S_compact, P, yhat_total, level,
-                                      w, num_base, num_total, num_levels,
+                                      w, num_leaves, num_nodes, num_levels,
                                       slice_start, slice_length);
     } else {
       result = yhat.eval();
@@ -186,7 +186,7 @@ if (world_rank == 0) {
 */
     std::vector<std::tuple<int, int, int>> root_triplets(0);
 
-    for (int i = 0; i < num_base; i++) {
+    for (int i = 0; i < num_leaves; i++) {
       int co = S_compact(i, 0);
       int root = -1;
       bool is_base = true;
@@ -258,7 +258,7 @@ if (world_rank == 0) {
           yhats[root_process].middleRows(root_index, 1);
     }
 
-    MatrixXf yhat_total = MatrixXf::Zero(num_total, co);
+    MatrixXf yhat_total = MatrixXf::Zero(num_nodes, co);
 
     curr_row = 0;
     for (int i = 0; i < world_size; i++) {
@@ -273,7 +273,7 @@ if (world_rank == 0) {
       curr_row += rows[i];
     }
 
-    SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels)
+    SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
                   .middleRows(slice_starts[world_rank], rows[world_rank])
                   .eval();
 
@@ -289,7 +289,7 @@ if (world_rank == 0) {
 }
 */
 
-    result = (S * yhat_total.topRows(num_base)).eval();
+    result = (S * yhat_total.topRows(num_leaves)).eval();
 
   } else if (method == "middle_out") {
     std::vector<int> slice_starts(world_size);
@@ -304,7 +304,7 @@ if (world_rank == 0) {
     }
 
     std::vector<std::tuple<int, int, int>> root_triplets(0);
-    for (int i = 0; i < num_base; i++) {
+    for (int i = 0; i < num_leaves; i++) {
       int co = S_compact(i, 0);
       int root = co;
       int lvl = num_levels - level;
@@ -376,7 +376,7 @@ if (world_rank == 0) {
           yhats[root_process].middleRows(root_index, 1);
     }
 
-    MatrixXf yhat_total = MatrixXf::Zero(num_total, co);
+    MatrixXf yhat_total = MatrixXf::Zero(num_nodes, co);
 
     curr_row = 0;
     for (int i = 0; i < world_size; i++) {
@@ -391,11 +391,11 @@ if (world_rank == 0) {
       curr_row += rows[i];
     }
 
-    SpMat S = S::build_sparse(S_compact, num_base, num_total, num_levels)
+    SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
                   .middleRows(slice_starts[world_rank], rows[world_rank])
                   .eval();
 
-    result = (S * yhat_total.topRows(num_base)).eval();
+    result = (S * yhat_total.topRows(num_leaves)).eval();
   }
   /* else if (method == "OLS") {
   result = yhat;
@@ -415,8 +415,8 @@ else if (method == "WLS") {
 MatrixXf MPI_utils::reconcile_dp_matrix(const std::string method,
                                         const MatrixXi S_compact,
                                         const MatrixXf P, const MatrixXf yhat,
-                                        int level, float w, int num_base,
-                                        int num_total, int num_levels) {
+                                        int level, float w, int num_leaves,
+                                        int num_nodes, int num_levels) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;
@@ -472,7 +472,7 @@ MatrixXf MPI_utils::reconcile_dp_matrix(const std::string method,
   // printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
 
   return dp_reconcile_optimized(method, S_compact, P, yhat_total, level, w,
-                                num_base, num_total, num_levels, slice_start,
+                                num_leaves, num_nodes, num_levels, slice_start,
                                 slice_length);
 
   /*
@@ -480,7 +480,7 @@ MPI_Barrier(comm_global);
 
 MatrixXf reconciliation_matrix =
   construct_dp_reconciliation_matrix(method,
-      S_compact, P, level, w, num_base, num_total, num_levels,
+      S_compact, P, level, w, num_leaves, num_nodes, num_levels,
 slice_start, slice_length);
 
 
@@ -499,7 +499,7 @@ if (world_rank == world_size - 1) {
 MatrixXf MPI_utils::reconcile_gather(const std::string method,
                                      const MatrixXi S_compact, const MatrixXf P,
                                      const MatrixXf yhat, int level, float w,
-                                     int num_base, int num_total,
+                                     int num_leaves, int num_nodes,
                                      int num_levels) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -563,7 +563,7 @@ MatrixXf MPI_utils::reconcile_gather(const std::string method,
 
     MatrixXf y_reconciled =
         reconcile::reconcile(method, S_compact, P, yhat_total, level, w,
-                             num_base, num_total, num_levels);
+                             num_leaves, num_nodes, num_levels);
 
     y_return = y_reconciled.topRows(rows[0]).eval();
 

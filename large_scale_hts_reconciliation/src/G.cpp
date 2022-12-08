@@ -29,16 +29,16 @@ SpMat build_sparse_WLS(SpMat S, float w) {
 }
 
 SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
-                            int num_base, int num_total, int num_levels) {
-  SpMat G(num_base, num_total);
+                            int num_leaves, int num_nodes, int num_levels) {
+  SpMat G(num_leaves, num_nodes);
 
-  assert(S_compact.rows() == num_total);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
+  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
+  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
 
   std::vector<T> tripletList;
 
-  for (int i = 0; i < num_total; i++) {
+  for (int i = 0; i < num_nodes; i++) {
     int co = S_compact(i, 0);
     int root = -1;
     bool is_base = true;
@@ -61,17 +61,17 @@ SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
 }
 
 SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXf P,
-                              int level, int num_base, int num_total,
+                              int level, int num_leaves, int num_nodes,
                               int num_levels) {
-  SpMat G(num_base, num_total);
+  SpMat G(num_leaves, num_nodes);
 
-  assert(S_compact.rows() == num_total);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
+  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
+  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
 
   std::vector<T> tripletList;
 
-  for (int i = 0; i < num_total; i++) {
+  for (int i = 0; i < num_nodes; i++) {
     int co = S_compact(i, 0);
     int root = co;
     int lvl = num_levels - level;
@@ -97,17 +97,17 @@ SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXf P,
   return G;
 }
 
-SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_base,
-                             int num_total, int num_levels) {
-  SpMat G(num_base, num_total);
+SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_leaves,
+                             int num_nodes, int num_levels) {
+  SpMat G(num_leaves, num_nodes);
 
-  assert(S_compact.rows() == num_total);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
+  if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
+  if(num_levels <= 1) throw std::invalid_argument("No hierarchy (num_levels <=1).");
 
   std::vector<T> tripletList;
 
-  for (int i = 0; i < num_total; i++) {
+  for (int i = 0; i < num_nodes; i++) {
     int co = S_compact(i, 0);
     bool is_base = true;
     for (int j = 1; j < num_levels; j++) {
