@@ -760,14 +760,14 @@ public:
 
         result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
     }
-    else if (method == "OLS") {
+    /* else if (method == "OLS") {
         result = yhat;
     }
     else if (method == "WLS") {
         result = yhat;
-    }
+    } */
     else {
-        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
+        throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out"); //, OLS, WLS");
     }
 
     return result;
