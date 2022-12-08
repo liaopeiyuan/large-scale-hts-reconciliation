@@ -61,12 +61,11 @@ SpMat construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, 
     return S;
 }
 
-SpMat construct_G_OLS(SpMat Sp) {
+Eigen::MatrixXf construct_G_OLS(SpMat Sp) {
     SpMat St = Sp.transpose().eval();
-    SpMat M = St * Sp;
-    Eigen::SparseLU<Eigen::SparseMatrix<float>, Eigen::COLAMDOrdering<int>> solver; 
-    solver.compute(M);
-    return solver.solve(St);
+    Eigen::MatrixXf M = Eigen::MatrixXf(St * Sp);
+    Eigen::FullPivLU<Eigen::MatrixXf> lu(M);
+    return lu.matrixLU() * St;
 }
 
 Eigen::MatrixXf construct_G_WLS(const Eigen::MatrixXi S, float w) {
@@ -265,7 +264,7 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
     SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
     SpMat res, G;
 
-    Eigen::MatrixXf result, y;
+    Eigen::MatrixXf result, y, _G;
     y = yhat;
     
     if (method == "bottom_up") {
@@ -281,7 +280,7 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
         y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base, num_total, num_levels);
     }
     else if (method == "OLS") {
-        G = construct_G_OLS(S);
+        G = construct_G_OLS(S).sparseView();
         res = S * G;
     }
     /*
@@ -319,7 +318,7 @@ SpMat construct_dp_reconciliation_matrix(const std::string method,
         G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
     }
     else if (method == "OLS") {
-        G = construct_G_OLS(S);
+        G = construct_G_OLS(S).sparseView();
     }
     /*
     else if (method == "WLS") {
@@ -361,7 +360,7 @@ Eigen::MatrixXf reconcile_matrix(const std::string method,
         res = S * G;
     }
     else if (method == "OLS") {
-        G = construct_G_OLS(S);
+        G = construct_G_OLS(S).sparseView();
         res = S * G;
     }
     /*
@@ -409,7 +408,7 @@ Eigen::MatrixXf reconcile(const std::string method,
         y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base, num_total, num_levels);
     }
     else if (method == "OLS") {
-        G = construct_G_OLS(S);
+        G = construct_G_OLS(S).sparseView();
         res = S * G;
     }
     /*
