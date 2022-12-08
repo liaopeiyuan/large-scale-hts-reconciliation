@@ -636,7 +636,7 @@ public:
         }
         */
 
-        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_base, yhat.cols());
+        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_total, yhat.cols());
 
         curr_row = 0;
         for (int i = 0; i < world_size; i++) {
@@ -652,7 +652,7 @@ public:
             curr_row += rows[i];
         }
 
-        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+        // Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
         /*
         if (world_rank == 0) {
@@ -665,8 +665,10 @@ public:
             }
         }
         */
- 
-        result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
+
+        result = yhat;
+
+        // result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
 
     }
     else if (method == "middle_out") {
