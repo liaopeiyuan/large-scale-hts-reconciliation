@@ -20,6 +20,7 @@
 
 #include "G.h"
 #include "S.h"
+#include "distribute.h"
 
 using namespace lhts;
 using namespace Eigen;
@@ -29,72 +30,6 @@ using namespace Eigen;
 
 typedef SparseMatrix<float, ColMajor> SpMat;
 typedef Triplet<float> T;
-
-MatrixXf distribute_forecast_top_down(const MatrixXi S_compact,
-                                      const MatrixXf P, const MatrixXf yhat,
-                                      int num_base, int num_total,
-                                      int num_levels) {
-  MatrixXf y = MatrixXf::Zero(num_base, yhat.cols());
-
-  assert(S_compact.rows() == num_total);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
-
-#pragma omp parallel for
-  for (int i = 0; i < num_total; i++) {
-    int co = S_compact(i, 0);
-    int root = -1;
-    bool is_base = true;
-    for (int j = 1; j < num_levels; j++) {
-      int ro = S_compact(i, j);
-      if (ro == -1) {
-        is_base = false;
-        break;
-      }
-      root = ro;
-    }
-    if (is_base) {
-      y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
-    }
-  }
-
-  return y;
-}
-
-MatrixXf distribute_forecast_middle_out(const MatrixXi S_compact,
-                                        const MatrixXf P, const MatrixXf yhat,
-                                        int level, int num_base, int num_total,
-                                        int num_levels) {
-  MatrixXf y = MatrixXf::Zero(num_base, yhat.cols());
-
-  assert(S_compact.rows() == num_total);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
-
-#pragma omp parallel for
-  for (int i = 0; i < num_total; i++) {
-    int co = S_compact(i, 0);
-    int root = co;
-    int lvl = num_levels - level;
-    bool is_base = true;
-    for (int j = 1; j < num_levels; j++) {
-      int ro = S_compact(i, j);
-      if (ro == -1) {
-        is_base = false;
-        break;
-      }
-      if (lvl > 0) {
-        root = ro;
-        lvl--;
-      }
-    }
-    if (is_base) {
-      y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
-    }
-  }
-
-  return y;
-}
 
 MatrixXf dp_reconcile_optimized(const std::string method,
                                 const MatrixXi S_compact, const MatrixXf P,
@@ -106,7 +41,7 @@ MatrixXf dp_reconcile_optimized(const std::string method,
                 .eval();
   SpMat res, G;
 
-  MatrixXf result, y, _G;
+  MatrixXf result, y;
   y = yhat;
 
   if (method == "bottom_up") {
@@ -114,11 +49,11 @@ MatrixXf dp_reconcile_optimized(const std::string method,
     y = yhat.topRows(num_base).eval();
   } else if (method == "top_down") {
     res = S;
-    y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total,
+    y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
                                      num_levels);
   } else if (method == "middle_out") {
     res = S;
-    y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base,
+    y = distribute::middle_out(S_compact, P, yhat, level, num_base,
                                        num_total, num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S).sparseView();
@@ -233,11 +168,11 @@ MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
     y = yhat.topRows(num_base).eval();
   } else if (method == "top_down") {
     res = S;
-    y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total,
+    y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
                                      num_levels);
   } else if (method == "middle_out") {
     res = S;
-    y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base,
+    y = distribute::middle_out(S_compact, P, yhat, level, num_base,
                                        num_total, num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S).sparseView();
