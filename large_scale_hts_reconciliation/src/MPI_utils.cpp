@@ -1,5 +1,7 @@
 #include "MPI_utils.h"
 
+using namespace lhts;
+
 MatrixXf dp_reconcile_optimized(const std::string method,
                                 const MatrixXi S_compact, const MatrixXf P,
                                 const MatrixXf yhat, int level, float w,
