@@ -1,4 +1,5 @@
 #include "MPI_utils.h"
+#include "reconcile.h"
 
 MatrixXf dp_reconcile_optimized(const std::string method,
                                 const MatrixXi S_compact, const MatrixXf P,
@@ -571,7 +572,7 @@ return reconciliation_matrix * yhat_total;
     if (world_rank == 0) {
       omp_set_num_threads(24);
 
-      MatrixXf y_reconciled = reconcile(method, S_compact, P, yhat_total, level,
+      MatrixXf y_reconciled = reconcile::reconcile(method, S_compact, P, yhat_total, level,
                                         w, num_base, num_total, num_levels);
 
       y_return = y_reconciled.topRows(rows[0]).eval();
