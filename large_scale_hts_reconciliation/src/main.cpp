@@ -263,7 +263,7 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
     SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
     SpMat res, G;
 
-    Eigen::MatrixXf, result, y;
+    Eigen::MatrixXf result, y;
     y = yhat;
     
     if (method == "bottom_up") {
