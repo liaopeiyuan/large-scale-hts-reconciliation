@@ -9,7 +9,7 @@ def main():
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
 
     start = timer()
-    print(lhts.construct_S(S_compact, 5650, 6218, 4).shape)
+    print(lhts.build_S_sparse(S_compact, 5650, 6218, 4).shape)
     end = timer()
     print(end - start)
 

@@ -51,14 +51,14 @@ PYBIND11_MODULE(lhts, m) {
   m.def("mae", &metrics::mae);
   m.def("smape", &metrics::smape);
 
-  m.def("reconcile_matrix", &reconcile::reconcile_matrix);
-  m.def("reconcile", &reconcile::reconcile, R"pbdoc(
+  m.def("reconcile_sparse_matrix", &reconcile::sparse_matrix);
+  m.def("reconcile_sparse_algo", &reconcile::sparse_algo, R"pbdoc(
         Forecast reconciliation
     )pbdoc");
-  m.def("construct_S", &S::build_sparse);
-  m.def("G::build_sparse_bottom_up", &G::build_sparse_bottom_up);
-  m.def("G::build_sparse_top_down", &G::build_sparse_top_down);
-  m.def("G::build_sparse_middle_out", &G::build_sparse_middle_out);
+  m.def("build_S_sparse", &S::build_sparse);
+  m.def("build_G_sparse_bottom_up", &G::build_sparse_bottom_up);
+  m.def("build_G_sparse_top_down", &G::build_sparse_top_down);
+  m.def("build_G_sparse_middle_out", &G::build_sparse_middle_out);
 
   py::class_<MPI_utils>(m, "MPI_utils")
       .def(py::init<>())

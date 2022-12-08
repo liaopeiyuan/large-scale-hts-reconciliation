@@ -15,7 +15,7 @@ def main():
     data_dir = ROOT + "notebooks/"
 
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-    S = lhts.construct_S(S_compact, 5650, 6218, 4)
+    S = lhts.build_S_sparse(S_compact, 5650, 6218, 4)
     G = f(S)
     print(G)
     

@@ -2,7 +2,8 @@
 
 namespace lhts {
 namespace reconcile {
-MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
+
+MatrixXf sparse_matrix(const std::string method, const MatrixXi S_compact,
                           const MatrixXf P, const MatrixXf yhat, int level,
                           float w, int num_leaves, int num_nodes,
                           int num_levels) {
@@ -38,14 +39,10 @@ MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
   return result;
 }
 
-MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
+MatrixXf sparse_algo(const std::string method, const MatrixXi S_compact,
                    const MatrixXf P, const MatrixXf yhat, int level, float w,
                    int num_leaves, int num_nodes, int num_levels) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
-
-  // std::stringstream ss;
-  // ss << S.rows() << " " << S.cols() << " " << S(seqN(0, 10), seqN(0, 10));
-  // printf("S: %s\n", ss.str().c_str());
 
   SpMat G;
   MatrixXf result, y;
