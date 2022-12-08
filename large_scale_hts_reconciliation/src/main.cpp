@@ -673,7 +673,7 @@ public:
             curr_row += rows[i];
         }
 
-
+        std::vector<std::tuple<int, int, int>> root_triplets(0);
         for (int i = 0; i < num_base; i++) {
             int co = S_compact(i, 0);
             int root = co;
@@ -709,7 +709,7 @@ public:
                 if (leaf_process == world_rank) {
                     root_triplets.push_back(std::tuple<int, int, int>{co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]});
                 }
-                
+
                 recvs[leaf_process].insert(root_process);
                 sends[root_process].insert(leaf_process);
             }
