@@ -21,8 +21,8 @@
 
 using namespace Eigen;
 
-typedef SparseMatrix<float, ColMajor> SpMat;
-typedef Triplet<float> T;
+typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
+typedef Eigen::Triplet<float> T;
 
 namespace lhts {
 class MPI_utils {

@@ -15,7 +15,6 @@
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
-#include<Eigen/SparseCholesky>
 
 typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
 typedef Eigen::Triplet<float> T;
@@ -33,5 +32,17 @@ SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXf P,
 
 SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_leaves,
                              int num_nodes, int num_levels);
+MatrixXf build_dense_OLS(const MatrixXi S);
+MatrixXf build_dense_WLS(const MatrixXi S, float w);
+MatrixXf build_dense_top_down(const MatrixXi S_compact,
+                                     const MatrixXf P, int num_leaves,
+                                     int num_nodes, int num_levels);
+MatrixXf build_dense_middle_out(const MatrixXi S_compact,
+                                       const MatrixXf P, int level,
+                                       int num_leaves, int num_nodes,
+                                       int num_levels);
+MatrixXf build_dense_bottom_up(const MatrixXi S_compact,
+                                      int num_leaves, int num_nodes,
+                                      int num_levels);
 }  // namespace G
 }  // namespace lhts

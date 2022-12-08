@@ -127,6 +127,14 @@ SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_leaves,
   return G;
 }
 
+MatrixXf build_dense_OLS(const MatrixXi S) {
+  MatrixXf Sp = S.cast<float>().eval();
+  MatrixXf St = Sp.transpose().eval();
+  MatrixXf M = St * Sp;
+  FullPivLU<MatrixXf> lu(M);
+  return lu.matrixLU() * St;
+}
+
 MatrixXf build_dense_WLS(const MatrixXi S, float w) {
   MatrixXf W = MatrixXf::Zero(S.rows(), S.cols());
 #pragma omp parallel for
@@ -140,6 +148,99 @@ MatrixXf build_dense_WLS(const MatrixXi S, float w) {
   return lu.matrixLU() * St * W;
 }
 
+
+MatrixXf build_dense_top_down(const MatrixXi S_compact,
+                                     const MatrixXf P, int num_leaves,
+                                     int num_nodes, int num_levels) {
+  MatrixXf G = MatrixXf::Zero(num_leaves, num_nodes);
+
+  assert(S_compact.rows() == num_nodes);
+  assert(S_compact.cols() == num_levels);
+  assert(num_levels > 1);
+
+#pragma omp parallel for
+  for (int i = 0; i < num_nodes; i++) {
+    int co = S_compact(i, 0);
+    int root = -1;
+    bool is_base = true;
+    for (int j = 1; j < num_levels; j++) {
+      int ro = S_compact(i, j);
+      if (ro == -1) {
+        is_base = false;
+        break;
+      }
+      root = ro;
+    }
+    if (is_base) {
+      G(co, root) = P(co, 0);
+    }
+  }
+
+  return G;
+}
+
+MatrixXf build_dense_middle_out(const MatrixXi S_compact,
+                                       const MatrixXf P, int level,
+                                       int num_leaves, int num_nodes,
+                                       int num_levels) {
+  MatrixXf G = MatrixXf::Zero(num_leaves, num_nodes);
+
+  assert(S_compact.rows() == num_nodes);
+  assert(S_compact.cols() == num_levels);
+  assert(num_levels > 1);
+
+#pragma omp parallel for
+  for (int i = 0; i < num_nodes; i++) {
+    int co = S_compact(i, 0);
+    int root = co;
+    int lvl = num_levels - level;
+    bool is_base = true;
+    for (int j = 1; j < num_levels; j++) {
+      int ro = S_compact(i, j);
+      if (ro == -1) {
+        is_base = false;
+        break;
+      }
+      if (lvl > 0) {
+        root = ro;
+        lvl--;
+      }
+    }
+    if (is_base) {
+      G(co, root) = P(co, 0);
+    }
+  }
+
+  return G;
+}
+
+MatrixXf build_dense_bottom_up(const MatrixXi S_compact,
+                                      int num_leaves, int num_nodes,
+                                      int num_levels) {
+  MatrixXf G = MatrixXf::Zero(num_leaves, num_nodes);
+
+  assert(S_compact.rows() == num_nodes);
+  assert(S_compact.cols() == num_levels);
+  assert(num_levels > 1);
+
+#pragma omp parallel for
+  for (int i = 0; i < num_nodes; i++) {
+    int co = S_compact(i, 0);
+    bool is_base = true;
+    for (int j = 1; j < num_levels; j++) {
+      int ro = S_compact(i, j);
+      if (ro == -1) {
+        is_base = false;
+        break;
+      }
+    }
+    if (is_base) {
+      G(i, i) = 1.0;
+    }
+  }
+
+  return G;
+}
 
 }  // namespace G
 }  // namespace lhts

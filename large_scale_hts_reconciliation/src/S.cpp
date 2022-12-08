@@ -44,9 +44,9 @@ SpMat build_sparse(const MatrixXi S_compact, int num_leaves, int num_nodes,
   return S;
 }
 
-Eigen::MatrixXi build_dense(const Eigen::MatrixXi S_compact, int num_leaves,
+MatrixXi build_dense(const MatrixXi S_compact, int num_leaves,
                             int num_nodes, int num_levels) {
-  Eigen::MatrixXi S = Eigen::MatrixXi::Zero(num_nodes, num_leaves);
+  MatrixXi S = MatrixXi::Zero(num_nodes, num_leaves);
 
   if(S_compact.rows() != num_nodes) throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
   if(S_compact.cols() != num_levels) throw std::invalid_argument("Hierarchy does not correspond to all nodes' path to root.");
