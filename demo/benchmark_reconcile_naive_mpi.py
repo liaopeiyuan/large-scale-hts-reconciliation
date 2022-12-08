@@ -5,7 +5,7 @@ import mpi4py
 mpi4py.rc.threaded = True
 mpi4py.rc.thread_level = "funneled"
 from mpi4py import MPI
-from lhts import MPI_Utils
+from lhts import MPI_utils
 import lhts
 
 import numpy as np
@@ -19,7 +19,7 @@ def main():
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
-    distrib = MPI_Utils()
+    distrib = MPI_utils()
 
     RANK_TO_TEST = size - 1
 

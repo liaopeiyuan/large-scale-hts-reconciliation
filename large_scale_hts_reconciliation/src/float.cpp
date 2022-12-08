@@ -435,11 +435,11 @@ float smape(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
 namespace py = pybind11;
 using pymod = pybind11::module;
 
-class MPI_Utils {
+class MPI_utils {
  public:
-  MPI_Utils() : comm_global(MPI_COMM_WORLD) { Eigen::initParallel(); }
+  MPI_utils() : comm_global(MPI_COMM_WORLD) { Eigen::initParallel(); }
 
-  ~MPI_Utils() {}
+  ~MPI_utils() {}
 
   Eigen::MatrixXf reconcile_dp_optimized(const std::string method,
                                          const Eigen::MatrixXi S_compact,
@@ -1056,12 +1056,12 @@ PYBIND11_MODULE(lhts, m) {
   m.def("construct_G_top_down", &construct_G_top_down);
   m.def("construct_G_middle_out", &construct_G_middle_out);
 
-  py::class_<MPI_Utils>(m, "MPI_Utils")
+  py::class_<MPI_utils>(m, "MPI_utils")
       .def(py::init<>())
-      .def("reconcile_gather", &MPI_Utils::reconcile_gather, "reconcile_gather")
-      .def("reconcile_dp_matrix", &MPI_Utils::reconcile_dp_matrix,
+      .def("reconcile_gather", &MPI_utils::reconcile_gather, "reconcile_gather")
+      .def("reconcile_dp_matrix", &MPI_utils::reconcile_dp_matrix,
            "reconcile_dp_matrix")
-      .def("reconcile_dp_optimized", &MPI_Utils::reconcile_dp_optimized,
+      .def("reconcile_dp_optimized", &MPI_utils::reconcile_dp_optimized,
            "reconcile_dp_matrix");
 
 #ifdef VERSION_INFO
