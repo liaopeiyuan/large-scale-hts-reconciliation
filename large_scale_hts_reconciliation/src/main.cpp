@@ -666,7 +666,8 @@ public:
         }
         */
  
-        result = (S.cast<float>() * yhat.topRows(num_base)).eval();
+        result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
+
     }
     else if (method == "middle_out") {
 
