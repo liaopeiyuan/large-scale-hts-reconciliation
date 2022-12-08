@@ -18,6 +18,10 @@
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
+typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
+typedef Eigen::Triplet<float> T;
+
+using namespace Eigen;
 
 namespace lhts {
     namespace distribute {
