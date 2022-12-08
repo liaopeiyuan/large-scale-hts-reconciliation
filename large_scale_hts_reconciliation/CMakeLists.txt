@@ -19,7 +19,7 @@ set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 include_directories(${MPI_INCLUDE_PATH})
 
 add_subdirectory(pybind11)
-pybind11_add_module(lhts src/main.cpp src/S.cpp src/G.cpp src/distribute.cpp src/MPI_utils.cpp)
+pybind11_add_module(lhts src/main.cpp src/S.cpp src/G.cpp src/distribute.cpp src/MPI_utils.cpp src/reconcile.cpp)
 
 target_include_directories(lhts PRIVATE include)
 target_link_libraries(lhts PRIVATE mpi)
