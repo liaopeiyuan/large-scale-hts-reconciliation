@@ -95,7 +95,10 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   } else if (method == "middle_out") {
     y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
-    result = S * y;
+    MatrixXd ybot = y.bottomRows(num_nodes - num_leaves).eval();
+    MatrixXd Sbot = S.bottomCols(num_nodes - num_leaves).eval();
+    result = y;
+    result.bottomRows(num_nodes - num_leaves) = (Sbot * ybot).eval();
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     result = (S * G) * y;
