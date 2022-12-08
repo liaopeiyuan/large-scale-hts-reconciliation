@@ -22,8 +22,8 @@
 #include "MPI_utils.h"
 #include "S.h"
 #include "distribute.h"
-#include "reconcile.h"
 #include "metrics.h"
+#include "reconcile.h"
 
 using namespace lhts;
 using namespace Eigen;

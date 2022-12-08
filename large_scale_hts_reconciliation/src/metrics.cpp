@@ -1,7 +1,7 @@
 #include "metrics.h"
 
 namespace lhts {
-    namespace metrics {
+namespace metrics {
 float rmse(const MatrixXf res, const MatrixXf gt) {
   float sum = 0;
   for (int i = 0; i < res.rows(); i++) {
@@ -44,4 +44,5 @@ float smape(const MatrixXf res, const MatrixXf gt) {
   return smape;
 }
 
-    }}
+}  // namespace metrics
+}  // namespace lhts

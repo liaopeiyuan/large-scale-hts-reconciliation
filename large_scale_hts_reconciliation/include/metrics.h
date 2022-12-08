@@ -16,7 +16,6 @@
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
-
 using namespace Eigen;
 
 namespace lhts {
@@ -27,5 +26,5 @@ float mae(const MatrixXf res, const MatrixXf gt);
 
 float smape(const MatrixXf res, const MatrixXf gt);
 
-}  // namespace reconcile
+}  // namespace metrics
 }  // namespace lhts
