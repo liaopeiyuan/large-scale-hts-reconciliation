@@ -61,6 +61,7 @@ SpMat construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, 
 }
 
 SpMat construct_G_OLS(SpMat Sp) {
+    return Sp;
     SpMat St = Sp.transpose().eval();
     SpMat M = St * Sp;
     Eigen::SparseQR<Eigen::SparseMatrix<float>, Eigen::COLAMDOrdering<int>> solver; 
