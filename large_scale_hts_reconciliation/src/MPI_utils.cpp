@@ -31,7 +31,7 @@ MatrixXf dp_reconcile_optimized(const std::string method,
     res = S * G;
   } else if (method == "WLS") {
     G = G::build_sparse_WLS(S, w);
-    res = S.cast<float>() * G;
+    res = S * G;
   } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "

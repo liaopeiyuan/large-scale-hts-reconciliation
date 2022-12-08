@@ -67,7 +67,7 @@ MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
     result = (S * G) * y;
   } else if (method == "WLS") {
     G = G::build_sparse_WLS(S, w);
-    res = S * G;
+    result = (S * G) * y;
   } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
