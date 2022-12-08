@@ -560,6 +560,7 @@ public:
             }
         }
         */
+        std::vector<std::tuple<int, int, int>> root_pairs();
 
         for (int i = 0; i < num_base; i++) {
             int co = S_compact(i, 0);
@@ -589,6 +590,10 @@ public:
                         break;
                     }
                 }
+
+                if (leaf_process == world_rank) {
+                    root_pairs.push_back(std::make_tuple(co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]));
+                }
                 
                 // if (world_rank == 0) printf("%d %d %d %d %d %d\n", root_process, leaf_process, slice_starts[root_process], slice_starts[leaf_process], root, co);
                 recvs[leaf_process].insert(root_process);
@@ -614,16 +619,19 @@ public:
         std::vector<MPI_Status> stats(reqs.size());
         MPI_Waitall(reqs.size(), reqs.data(), stats.data());
 
-        /* assume this performs distribution
-        Eigen::MatrixXf y = Eigen::MatrixXf::Zero(num_base, yhat.cols());
+        Eigen::MatrixXf y = Eigen::MatrixXf::Zero(ro, co);
     
-        #pragma omp parallel for 
-        for (int i = 0; i < num_total; i++) {
-            int co = S_compact(i, 0);
+        for (std::tuple<int, int, int> p : root_pairs) {
+            y.middleRows(std::get<0>(p), 1) = P(std::get<0>(p) + slice_starts[world_rank], 0) * yhats[std::get<1>(p)].middleRows(std::get<2>(p), 1);
+        }
+
+        /*
+        for (int i = 0; i < ro; i++) {
+            int co = S_compact(slice_starts[world_rank] + i, 0);
             int root = -1;
             bool is_base = true;
             for (int j = 1; j < num_levels; j++) {
-                int ro = S_compact(i, j);
+                int ro = S_compact(slice_starts[world_rank] + i, j);
                 if (ro == -1) {
                     is_base = false;
                     break;
@@ -631,12 +639,12 @@ public:
                 root = ro;
             }
             if (is_base) {
-                y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
+                y.middleRows(co - , 1) = P(co, 0) * yhat.middleRows(root, 1);
             }
         }
         */
 
-        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_total, yhat.cols());
+        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_total, co);
 
         curr_row = 0;
         for (int i = 0; i < world_size; i++) {
@@ -644,7 +652,7 @@ public:
             if (i != world_rank) {
                 yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
             } else {
-                yhats[i] = yhat;
+                yhats[i] = y;
             }
             MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
             yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
@@ -666,12 +674,9 @@ public:
         }
         */
 
-        // result = yhat;
-
         result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
 
-    }
-    else if (method == "middle_out") {
+    } else if (method == "middle_out") {
 
         std::vector<int> slice_starts(world_size);
         std::vector<std::set<int>> recvs(world_size, std::set<int>()); 
