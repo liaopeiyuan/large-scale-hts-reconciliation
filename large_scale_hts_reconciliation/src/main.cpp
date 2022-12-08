@@ -48,12 +48,11 @@ PYBIND11_MODULE(lhts, m) {
            subtract
     )pbdoc";
 
-  /*
+  
   m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
         Subtract two numbers
         Some other explanation about the subtract function.
     )pbdoc");
-*/
 
   m.def("rmse", &metrics::rmse);
   m.def("mae", &metrics::mae);
