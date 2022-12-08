@@ -22,9 +22,11 @@ SpMat build_sparse_WLS(SpMat S, float w) {
 
   SpMat St = S.transpose();
   SpMat M = St * W * S;
-  SparseQR<SpMat, COLAMDOrdering<int>> solver;
-  solver.compute(M);
-  return solver.solve(St) * W;
+
+  return M
+  //SparseQR<SpMat, COLAMDOrdering<int>> solver;
+  //solver.compute(M);
+  //return solver.solve(St) * W;
 }
 
 SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
