@@ -19,21 +19,25 @@
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
+typedef Eigen::SparseMatrix<float> SpMat;
+typedef Eigen::Triplet<double> T;
 
-Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXi S = Eigen::MatrixXi::Zero(num_total, num_base);
+SpMat construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
+    SpMat S(num_total, num_base);
     
+    std::vector<T> tripletList;
+
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    #pragma omp parallel for 
+    // #pragma omp parallel for 
     for (int i = 0; i < num_base; i++) {
         int co = S_compact(i, 0);
         if (co >= num_base) {
             throw std::invalid_argument("Make sure that the frist num_base rows of S_compact contain only leaf-level nodes.");
         }
-        S(co, co) = 1;
+        tripletList.push_back(T(co, co, 1));
         for (int j = 1; j < num_levels; j++) {
             int ro = S_compact(i, j);
             if (ro == -1) {
@@ -45,10 +49,12 @@ Eigen::MatrixXi construct_S(const Eigen::MatrixXi S_compact, int num_base, int n
                 if (co >= num_base) {
                     throw std::invalid_argument("Make sure that the all leaf-level nodes have index < num_base.");
                 }
-                S(ro, co) = 1;
+                tripletList.push_back(T(ro, co, 1));
             }
         }
     }
+
+    S.setFromTriplets(tripletList.begin(), tripletList.end());
 
     return S;
 }
@@ -143,16 +149,18 @@ Eigen::MatrixXf distribute_forecast_middle_out(const Eigen::MatrixXi S_compact,
 }
 
 
-Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact, 
+SpMat construct_G_top_down(const Eigen::MatrixXi S_compact, 
                 const Eigen::MatrixXf P, 
                 int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
+    SpMat G(num_base, num_total);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    #pragma omp parallel for 
+    std::vector<T> tripletList;
+
+    // #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         int root = -1;
@@ -166,24 +174,28 @@ Eigen::MatrixXf construct_G_top_down(const Eigen::MatrixXi S_compact,
             root = ro;
         }
         if (is_base) {
-            G(co, root) = P(co, 0);
+            tripletList.push_back(T(co, root, P(co, 0)));
         }
     }
+
+    G.setFromTriplets(tripletList.begin(), tripletList.end());
 
     return G;
 }
 
 
-Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact, 
+SpMat construct_G_middle_out(const Eigen::MatrixXi S_compact, 
                 const Eigen::MatrixXf P, int level, 
                 int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
+    SpMat G(num_base, num_total);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    #pragma omp parallel for 
+    std::vector<T> tripletList;
+
+    // #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         int root = co;
@@ -201,22 +213,26 @@ Eigen::MatrixXf construct_G_middle_out(const Eigen::MatrixXi S_compact,
             }
         }
         if (is_base) {
-            G(co, root) = P(co, 0);
+            tripletList.push_back(T(co, root, P(co, 0)));
         }
     }
+
+    G.setFromTriplets(tripletList.begin(), tripletList.end());
 
     return G;
 }
 
 
-Eigen::MatrixXf construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
-    Eigen::MatrixXf G = Eigen::MatrixXf::Zero(num_base, num_total);
+SpMat construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
+    SpMat G(num_base, num_total);
     
     assert(S_compact.rows() == num_total);
     assert(S_compact.cols() == num_levels);
     assert(num_levels > 1);
 
-    #pragma omp parallel for 
+    std::vector<T> tripletList;
+
+    // #pragma omp parallel for 
     for (int i = 0; i < num_total; i++) {
         int co = S_compact(i, 0);
         bool is_base = true;
@@ -228,9 +244,11 @@ Eigen::MatrixXf construct_G_bottom_up(const Eigen::MatrixXi S_compact, int num_b
             }
         }
         if (is_base) {
-            G(i, i) = 1.0;
+            tripletList.push_back(T(co, i, 1.0));
         }
     }
+
+    G.setFromTriplets(tripletList.begin(), tripletList.end());
 
     return G;
 }
@@ -242,22 +260,24 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels,
                           int slice_start, int slice_length) {
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
-    Eigen::MatrixXf G, res, y;
+    SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_start, slice_length).eval();
+    SpMat res, G;
+
+    Eigen::MatrixXf, result, y;
     y = yhat;
     
     if (method == "bottom_up") {
-        res = S.cast<float>();
+        res = S;
         y = yhat.topRows(num_base).eval();    
     }
     else if (method == "top_down") {
-        res = S.cast<float>();
+        res = S;
         y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
-        res = S.cast<float>();
+        res = S;
         y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base, num_total, num_levels);
-    }
+    } /*
     else if (method == "OLS") {
         G = construct_G_OLS(S);
         res = S.cast<float>() * G;
@@ -265,26 +285,26 @@ Eigen::MatrixXf dp_reconcile_optimized(const std::string method,
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
         res = S.cast<float>() * G;
-    }
+    } */
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    res = res * y;
+    result = res * y;
 
-    return res;
+    return result;
 }
 
 
-Eigen::MatrixXf construct_dp_reconciliation_matrix(const std::string method,
+SpMat construct_dp_reconciliation_matrix(const std::string method,
                           const Eigen::MatrixXi S_compact,
                           const Eigen::MatrixXf P,
                           int level, float w,
                           int num_base, int num_total, int num_levels,
                           int slice_start, int slice_length) {
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    SpMat S = construct_S(S_compact, num_base, num_total, num_levels);
     
-    Eigen::MatrixXf G;
+    SpMat G;
     
     if (method == "bottom_up") {
         G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
@@ -294,19 +314,19 @@ Eigen::MatrixXf construct_dp_reconciliation_matrix(const std::string method,
     }
     else if (method == "middle_out") {
         G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
-    }
+    } /*
     else if (method == "OLS") {
         G = construct_G_OLS(S);
     }
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
-    }
+    } */
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    Eigen::MatrixXi S_slice = S.middleRows(slice_start, slice_length).eval();
-    Eigen::MatrixXf res = (S_slice.cast<float>() * G).eval();
+    SpMat S_slice = S.middleRows(slice_start, slice_length).eval();
+    SpMat res = (S_slice  * G).eval();
 
     return res;
 }
@@ -319,38 +339,38 @@ Eigen::MatrixXf reconcile_matrix(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
 
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
-
-    Eigen::MatrixXf G, res, y;
+    SpMat S = construct_S(S_compact, num_base, num_total, num_levels);
+    SpMat G, res;
+    Eigen::MatrixXf result, y;
     y = yhat;
     
     if (method == "bottom_up") {
         G = construct_G_bottom_up(S_compact, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else if (method == "top_down") {
         G = construct_G_top_down(S_compact, P, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else if (method == "middle_out") {
         G = construct_G_middle_out(S_compact, P, level, num_base, num_total, num_levels);
-        res = S.cast<float>() * G;
-    }
+        res = S * G;
+    } /*
     else if (method == "OLS") {
         G = construct_G_OLS(S);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
-        res = S.cast<float>() * G;
-    }
+        res = S * G;
+    } */
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
 
-    res = res * y;
+    result = res * y;
 
-    return res;
+    return result;
 }
 
 
@@ -361,42 +381,43 @@ Eigen::MatrixXf reconcile(const std::string method,
                           int level, float w,
                           int num_base, int num_total, int num_levels) {
 
-    Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels);
+    SpMat S = construct_S(S_compact, num_base, num_total, num_levels);
     
     // std::stringstream ss;
     // ss << S.rows() << " " << S.cols() << " " << S(Eigen::seqN(0, 10), Eigen::seqN(0, 10));
     // printf("S: %s\n", ss.str().c_str());
 
-    Eigen::MatrixXf G, res, y;
+    SpMat G, res;
+    Eigen::MatrixXf result, y;
     y = yhat;
     
     if (method == "bottom_up") {
-        res = S.cast<float>();
+        res = S;
         y = yhat.topRows(num_base).eval();    
     }
     else if (method == "top_down") {
-        res = S.cast<float>();
+        res = S;
         y = distribute_forecast_top_down(S_compact, P, yhat, num_base, num_total, num_levels);
     }
     else if (method == "middle_out") {
-        res = S.cast<float>();
+        res = S;
         y = distribute_forecast_middle_out(S_compact, P, yhat, level, num_base, num_total, num_levels);
-    }
+    } /*
     else if (method == "OLS") {
         G = construct_G_OLS(S);
-        res = S.cast<float>() * G;
+        res = S * G;
     }
     else if (method == "WLS") {
         G = construct_G_WLS(S, w);
-        res = S.cast<float>() * G;
-    }
+        res = S * G;
+    } */
     else {
         throw std::invalid_argument("invalid reconciliation method. Available options are: bottom_up, top_down, middle_out, OLS, WLS");
     }
     
-    res = res * y;
+    result = res * y;
 
-    return res;
+    return result;
 }
 
 float rmse(const Eigen::MatrixXf res, const Eigen::MatrixXf gt) {
@@ -645,7 +666,7 @@ public:
             curr_row += rows[i];
         }
 
-        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+        SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
         /*
         if (world_rank == 0) {
@@ -659,7 +680,7 @@ public:
         }
         */
 
-        result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
+        result = (S * yhat_total.topRows(num_base)).eval();
 
     } else if (method == "middle_out") {
 
@@ -757,9 +778,9 @@ public:
             curr_row += rows[i];
         }
 
-        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+        SpMat S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
-        result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
+        result = (S * yhat_total.topRows(num_base)).eval();
     }
     /* else if (method == "OLS") {
         result = yhat;
