@@ -39,6 +39,43 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
   return result;
 }
 
+Eigen::MatrixXd dense_matrix(const std::string method,
+                                 const Eigen::MatrixXi S_compact,
+                                 const Eigen::MatrixXd P,
+                                 const Eigen::MatrixXd yhat, int level, double w, int num_leaves, int num_nodes,
+                          int num_levels) {
+  Eigen::MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
+
+  Eigen::MatrixXd G, res, y;
+  y = yhat;
+
+  if (method == "bottom_up") {
+    G = G::build_dense_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
+    res = S.cast<float>() * G;
+  } else if (method == "top_down") {
+    G = G::build_dense_top_down(S_compact, P, num_base, num_total, num_levels);
+    res = S.cast<float>() * G;
+  } else if (method == "middle_out") {
+    G = G::build_dense_middle_out(S_compact, P, level, num_base, num_total,
+                               num_levels);
+    res = S.cast<float>() * G;
+  } else if (method == "OLS") {
+    G = G::build_dense_OLS(S);
+    res = S.cast<float>() * G;
+  } else if (method == "WLS") {
+    G = G::build_dense_WLS(S, w);
+    res = S.cast<float>() * G;
+  } else {
+    throw std::invalid_argument(
+        "invalid reconciliation method. Available options are: bottom_up, "
+        "top_down, middle_out, OLS, WLS");
+  }
+
+  res = res * y;
+
+  return res;
+}
+
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
                    const MatrixXd P, const MatrixXd yhat, int level, double w,
                    int num_leaves, int num_nodes, int num_levels) {
