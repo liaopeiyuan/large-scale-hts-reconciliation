@@ -29,13 +29,10 @@ MatrixXf dp_reconcile_optimized(const std::string method,
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     res = S * G;
-  }
-  /*
-else if (method == "WLS") {
+  } else if (method == "WLS") {
     G = G::build_sparse_WLS(S, w);
     res = S.cast<float>() * G;
-} */
-  else {
+  } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
         "top_down, middle_out, OLS, WLS");
@@ -65,12 +62,9 @@ SpMat construct_dp_reconciliation_matrix(const std::string method,
                                    num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
-  }
-  /*
-else if (method == "WLS") {
+  } else if (method == "WLS") {
     G = G::build_sparse_WLS(S, w);
-} */
-  else {
+  } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
         "top_down, middle_out, OLS, WLS");

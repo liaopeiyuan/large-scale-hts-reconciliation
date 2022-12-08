@@ -2,15 +2,31 @@
 namespace lhts {
 namespace G {
 
-SpMat build_sparse_OLS(SpMat Sp) {
-  SpMat St = Sp.transpose();
-  SpMat M = St * Sp;
+SpMat build_sparse_OLS(SpMat S) {
+  SpMat St = S.transpose();
+  SpMat M = St * S;
   SimplicialLDLT<SpMat> solver;
   solver.compute(M);
   return solver.solve(St);
 }
 
-MatrixXf build_sparse_WLS(const MatrixXi S, float w) {
+SpMat build_sparse_WLS(SpMat S, float w) {
+  std::vector<T> tripletList;
+
+  for (int i = 0; (i < S.rows()) && (i < S.cols()); i++) {
+    tripletList.push_back(T(i, i, w));
+  }
+
+  SpMat W(S.rows(), S.cols());
+  W.setFromTriplets(tripletList.begin(), tripletList.end());
+
+  SpMat M = St * W * S;
+  SimplicialLDLT<SpMat> solver;
+  solver.compute(M);
+  return solver.solve(St * W);
+}
+
+MatrixXf build_dense_WLS(const MatrixXi S, float w) {
   MatrixXf W = MatrixXf::Zero(S.rows(), S.cols());
 #pragma omp parallel for
   for (int i = 0; i < S.rows(); i++) {

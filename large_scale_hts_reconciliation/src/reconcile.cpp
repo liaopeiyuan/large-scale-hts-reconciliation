@@ -24,13 +24,10 @@ MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     res = S * G;
-  }
-  /*
-else if (method == "WLS") {
+  } else if (method == "WLS") {
     G = G::build_sparse_WLS(S, w);
     res = S * G;
-} */
-  else {
+  } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
         "top_down, middle_out, OLS, WLS");
@@ -68,13 +65,10 @@ MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     result = (S * G) * y;
-  }
-  /*
-else if (method == "WLS") {
+  } else if (method == "WLS") {
     G = G::build_sparse_WLS(S, w);
     res = S * G;
-} */
-  else {
+  } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
         "top_down, middle_out, OLS, WLS");
