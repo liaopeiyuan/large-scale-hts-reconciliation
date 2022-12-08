@@ -18,7 +18,6 @@
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
-using namespace lhts;
 using namespace Eigen;
 
 typedef SparseMatrix<float, ColMajor> SpMat;
