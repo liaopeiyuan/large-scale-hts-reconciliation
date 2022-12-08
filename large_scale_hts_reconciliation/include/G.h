@@ -12,8 +12,8 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <Eigen/LU>
+#include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
 typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpMat;
