@@ -652,7 +652,7 @@ public:
             curr_row += rows[i];
         }
 
-        // Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
 
         /*
         if (world_rank == 0) {
