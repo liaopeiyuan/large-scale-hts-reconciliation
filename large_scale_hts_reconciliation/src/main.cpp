@@ -706,12 +706,59 @@ public:
                     }
                 }
                 
+                if (leaf_process == world_rank) {
+                    root_triplets.push_back(std::tuple<int, int, int>{co - slice_starts[leaf_process], root_process, root - slice_starts[root_process]});
+                }
+                
                 recvs[leaf_process].insert(root_process);
                 sends[root_process].insert(leaf_process);
             }
         }
 
-        result = yhat;
+        std::vector<MPI_Request> reqs(0);
+        std::vector<Eigen::MatrixXf> yhats(world_size);
+
+        for (int i : recvs[world_rank]) {
+            reqs.push_back(MPI_Request());
+            yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            MPI_Irecv(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, 0, comm_global, &reqs[reqs.size() - 1]);
+        }
+
+        for (int i : sends[world_rank]) {
+            reqs.push_back(MPI_Request());
+            MPI_Isend(yhat.data(), rows[world_rank] * cols[world_rank], MPI_FLOAT, i, 0, comm_global, &reqs[reqs.size() - 1]);
+        }
+
+        std::vector<MPI_Status> stats(reqs.size());
+        MPI_Waitall(reqs.size(), reqs.data(), stats.data());
+
+        Eigen::MatrixXf y = Eigen::MatrixXf::Zero(ro, co);
+    
+        for (auto&& p : root_triplets) {
+            int leaf_index, root_process, root_index;
+            std::tie(leaf_index, root_process, root_index) = p;
+            y.middleRows(leaf_index, 1) = P(leaf_index + slice_starts[world_rank], 0) * yhats[root_process].middleRows(root_index, 1);
+        }
+
+        Eigen::MatrixXf yhat_total = Eigen::MatrixXf::Zero(num_total, co);
+
+        curr_row = 0;
+        for (int i = 0; i < world_size; i++) {
+
+            if (i != world_rank) {
+                yhats[i] = Eigen::MatrixXf::Zero(rows[i], cols[i]);
+            } else {
+                yhats[i] = y;
+            }
+            MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_FLOAT, i, comm_global);
+            yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
+
+            curr_row += rows[i];
+        }
+
+        Eigen::MatrixXi S = construct_S(S_compact, num_base, num_total, num_levels).middleRows(slice_starts[world_rank], rows[world_rank]).eval();
+
+        result = (S.cast<float>() * yhat_total.topRows(num_base)).eval();
     }
     else if (method == "OLS") {
         result = yhat;
