@@ -2,11 +2,12 @@
 namespace lhts {
 namespace G {
 
-MatrixXf build_sparse_OLS(SpMat Sp) {
-  SpMat St = Sp.transpose().eval();
-  MatrixXf M = MatrixXf(St * Sp);
-  FullPivLU<MatrixXf> lu(M);
-  return lu.matrixLU() * St;
+SpMat build_sparse_OLS(SpMat Sp) {
+  SpMat St = Sp.transpose();
+  SpMat M = St * Sp;
+  SimplicialLDLT<SpMat> solver;
+  solver.compute(M);
+  return solver.solve(St);
 }
 
 MatrixXf build_sparse_WLS(const MatrixXi S, float w) {
@@ -32,7 +33,6 @@ SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXf P,
 
   std::vector<T> tripletList;
 
-  // #pragma omp parallel for
   for (int i = 0; i < num_total; i++) {
     int co = S_compact(i, 0);
     int root = -1;
@@ -66,7 +66,6 @@ SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXf P,
 
   std::vector<T> tripletList;
 
-  // #pragma omp parallel for
   for (int i = 0; i < num_total; i++) {
     int co = S_compact(i, 0);
     int root = co;
@@ -103,7 +102,6 @@ SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_base,
 
   std::vector<T> tripletList;
 
-  // #pragma omp parallel for
   for (int i = 0; i < num_total; i++) {
     int co = S_compact(i, 0);
     bool is_base = true;
@@ -125,5 +123,4 @@ SpMat build_sparse_bottom_up(const MatrixXi S_compact, int num_base,
 }
 
 }  // namespace G
-
 }  // namespace lhts

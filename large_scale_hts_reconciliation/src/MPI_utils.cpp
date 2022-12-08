@@ -27,7 +27,7 @@ MatrixXf dp_reconcile_optimized(const std::string method,
     y = distribute::middle_out(S_compact, P, yhat, level, num_base, num_total,
                                num_levels);
   } else if (method == "OLS") {
-    G = G::build_sparse_OLS(S).sparseView();
+    G = G::build_sparse_OLS(S);
     res = S * G;
   }
   /*
@@ -64,7 +64,7 @@ SpMat construct_dp_reconciliation_matrix(const std::string method,
     G = G::build_sparse_middle_out(S_compact, P, level, num_base, num_total,
                                    num_levels);
   } else if (method == "OLS") {
-    G = G::build_sparse_OLS(S).sparseView();
+    G = G::build_sparse_OLS(S);
   }
   /*
 else if (method == "WLS") {

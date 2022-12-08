@@ -22,7 +22,7 @@ MatrixXf reconcile_matrix(const std::string method, const MatrixXi S_compact,
                                    num_levels);
     res = S * G;
   } else if (method == "OLS") {
-    G = G::build_sparse_OLS(S).sparseView();
+    G = G::build_sparse_OLS(S);
     res = S * G;
   }
   /*
@@ -50,24 +50,24 @@ MatrixXf reconcile(const std::string method, const MatrixXi S_compact,
   // ss << S.rows() << " " << S.cols() << " " << S(seqN(0, 10), seqN(0, 10));
   // printf("S: %s\n", ss.str().c_str());
 
-  SpMat G, res;
+  SpMat G;
   MatrixXf result, y;
   y = yhat;
 
   if (method == "bottom_up") {
-    res = S;
     y = yhat.topRows(num_base).eval();
+    result = S * y;
   } else if (method == "top_down") {
-    res = S;
     y = distribute::top_down(S_compact, P, yhat, num_base, num_total,
                              num_levels);
+    result = S * y;
   } else if (method == "middle_out") {
-    res = S;
     y = distribute::middle_out(S_compact, P, yhat, level, num_base, num_total,
                                num_levels);
+    result = S * y;
   } else if (method == "OLS") {
-    G = G::build_sparse_OLS(S).sparseView();
-    res = S * G;
+    G = G::build_sparse_OLS(S);
+    result = (S * G) * y;
   }
   /*
 else if (method == "WLS") {
@@ -79,8 +79,6 @@ else if (method == "WLS") {
         "invalid reconciliation method. Available options are: bottom_up, "
         "top_down, middle_out, OLS, WLS");
   }
-
-  result = res * y;
 
   return result;
 }
