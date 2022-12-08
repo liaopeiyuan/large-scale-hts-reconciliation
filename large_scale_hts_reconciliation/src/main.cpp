@@ -20,8 +20,8 @@
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-typedef Eigen::SparseMatrix<float, Eigen::ColumnMajor> SpMat;
-typedef Eigen::Triplet<double> T;
+typedef Eigen::SparseMatrix<float, Eigen::ColMajor> SpMat;
+typedef Eigen::Triplet<float> T;
 
 SpMat construct_S(const Eigen::MatrixXi S_compact, int num_base, int num_total, int num_levels) {
     SpMat S(num_total, num_base);
