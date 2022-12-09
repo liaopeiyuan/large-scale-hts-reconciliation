@@ -19,6 +19,9 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
 #pragma omp parallel for
   for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
+    int root = S_compact(i, num_levels - 1);
+    int is_base = root != -1;
+    /*
     int root = -1;
     bool is_base = true;
     for (int j = 1; j < num_levels; j++) {
@@ -28,7 +31,7 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
         break;
       }
       root = ro;
-    }
+    }*/
     if (is_base) {
       yhat.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
     }
