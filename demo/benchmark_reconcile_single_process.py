@@ -21,7 +21,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     print("Bottom up (sparse algo): ", str(elapsed), " ", lhts.smape(rec, gt))
-    print(rec)
+    #print(rec)
     print(np.abs(yhat[:5650,-1:] - rec[:5650,-1:]).sum())
     print(np.abs(yhat[5650:,-1:] - rec[5650:,-1:]).sum())
 
