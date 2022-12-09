@@ -113,7 +113,8 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   
   if (method == "bottom_up") {
     y = yhat.topRows(num_leaves).eval();
-    result = S * y;
+    result = y;
+    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "top_down") {
     y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
