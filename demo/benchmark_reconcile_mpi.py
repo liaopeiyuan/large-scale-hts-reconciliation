@@ -89,9 +89,9 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print("Middle out (gather): ", str(elapsed), " ", lhts.smape(rec3, gt))
-        print(np.abs(rec2[:5650,-1:] - rec[:5650,-1:]).sum())
-        print(np.abs(rec2[:5650,-1:] - rec3[:5650,-1:]).sum())
-        print(np.abs(rec[:5650,-1:] - rec3[:5650,-1:]).sum())
+        print("dp mat vs dp algo: ", np.abs(rec2 - rec).sum())
+        print("gather vs dp algo: ", np.abs(rec2- rec3).sum())
+        print("gather vs dp mat: ", np.abs(rec - rec3).sum())
 
     start = timer() 
     rec = distrib.reconcile_dp_matrix("OLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.0)
