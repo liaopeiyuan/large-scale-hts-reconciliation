@@ -121,7 +121,7 @@ MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
 
   if (method == "bottom_up") {
     res = S.cast<double>();
-    y = yhat.topRows(num_leaves).eval();
+    y = yhat.topRows(num_leaves);
   } else if (method == "top_down") {
     res = S.cast<double>();
     y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
