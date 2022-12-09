@@ -43,7 +43,7 @@ def main():
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, yhat.shape)    
     start = timer()
-    rec = distrib.reconcile_gather("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
+    rec = distrib.reconcile_gather("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
@@ -52,7 +52,7 @@ def main():
 
     #if (rank == 0): print(S_compact.shape, top_down_p.shape, yhat.shape)    
     start = timer()
-    rec = distrib.reconcile_gather("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
+    rec = distrib.reconcile_gather("bottom_up", S_compact, 5650, 6218, 4, yhat)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST): 
@@ -61,7 +61,7 @@ def main():
 
 
     start = timer()
-    rec = distrib.reconcile_gather("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
+    rec = distrib.reconcile_gather("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
@@ -69,7 +69,7 @@ def main():
         print(rec[-5:, -1])
 
     start = timer()
-    rec = distrib.reconcile_gather("OLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.0)
+    rec = distrib.reconcile_gather("OLS", S_compact, 5650, 6218, 4, yhat)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
@@ -77,7 +77,7 @@ def main():
         print(rec[-5:, -1])
 
     start = timer()
-    rec = distrib.reconcile_gather("WLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.0)
+    rec = distrib.reconcile_gather("WLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 1.5)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
