@@ -83,6 +83,8 @@ def main():
     if (rank == size - 1): 
         print("Middle out (dp algo): ", str(elapsed), " ", lhts.smape(rec2, gt))
         print(np.abs(rec2[:5650,-1:] - rec[:5650,-1:]).sum())
+        print(np.abs(rec2[:5650,-1:] - rec3[:5650,-1:]).sum())
+        print(np.abs(rec[:5650,-1:] - rec3[:5650,-1:]).sum())
 
     start = timer()
     rec3 = distrib.reconcile_gather("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
