@@ -36,7 +36,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
         print("Load: " + str(elapsed))
-        print(gt[-5:, :])
+        #print(gt[-5:, :])
 
     start = timer()
     rec = distrib.reconcile_dp_matrix("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
@@ -66,7 +66,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank >= 10): 
         print("Bottom up (dp algo): ", rank, " ", str(elapsed), " ", lhts.smape(rec2, gt))
-        print(rank, np.abs(rec[:, :] - rec2[:, :]).sum(), np.abs(yhat[:, :] - rec2[:, :]).sum(), "\n")
+        #print(rank, np.abs(rec[:, :] - rec2[:, :]).sum(), np.abs(yhat[:, :] - rec2[:, :]).sum(), "\n")
     
     start = timer()
     rec = distrib.reconcile_dp_matrix("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
@@ -89,7 +89,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, -1])
+        #print(rec[-5:, -1])
 
     start = timer()
     rec = distrib.reconcile_dp_matrix("WLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.5)
@@ -97,7 +97,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-        print(rec[-5:, -1])
+        #print(rec[-5:, -1])
     
 
 if __name__ == "__main__":
