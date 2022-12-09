@@ -33,7 +33,7 @@ d = defaultdict(dict)
 )
 def test_single_process(benchmark, mode, method):
     benchmark.group = method 
-    result = run(mode, method)
+    result = benchmark(run(mode, method))
     
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
