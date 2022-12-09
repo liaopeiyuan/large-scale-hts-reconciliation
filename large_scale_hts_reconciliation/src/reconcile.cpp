@@ -4,9 +4,8 @@ namespace lhts {
 namespace reconcile {
 
 MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
-                       const MatrixXd P, const MatrixXd yhat, int level,
-                       double w, int num_leaves, int num_nodes,
-                       int num_levels) {
+                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
+                       const MatrixXd P, int level, double w) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
   SpMat G, res;
   MatrixXd result, y;
@@ -41,8 +40,8 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
 }
 
 MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
-                      const MatrixXd P, const MatrixXd yhat, int level,
-                      double w, int num_leaves, int num_nodes, int num_levels) {
+                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
+                       const MatrixXd P, int level, double w) {
   MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
 
   MatrixXd G, res, y;
@@ -77,8 +76,8 @@ MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
 }
 
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
-                     const MatrixXd P, const MatrixXd yhat, int level, double w,
-                     int num_leaves, int num_nodes, int num_levels) {
+                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
+                       const MatrixXd P, int level, double w) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   SpMat G;
@@ -112,8 +111,8 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
 }
 
 MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
-                    const MatrixXd P, const MatrixXd yhat, int level, double w,
-                    int num_leaves, int num_nodes, int num_levels) {
+                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
+                       const MatrixXd P, int level, double w) {
   MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
 
   MatrixXd G, res, y;
