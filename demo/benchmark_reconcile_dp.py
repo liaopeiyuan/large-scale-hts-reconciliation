@@ -82,6 +82,7 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
         print("Middle out (dp algo): ", str(elapsed), " ", lhts.smape(rec2, gt))
+        print(np.abs(rec2[:5650,-1:] - rec[:5650,-1:]).sum())
 
     start = timer()
     rec = distrib.reconcile_dp_matrix("OLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.0)
