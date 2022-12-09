@@ -67,13 +67,12 @@ def test_main():
     elapsed = round(end - start, 4)
     print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
 
-    """
-
     start = timer()
     rec = lhts.reconcile_sparse_algo("WLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.5)
     end = timer()
     elapsed = round(end - start, 4)
     print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
+    """
 
 
     assert(True)
