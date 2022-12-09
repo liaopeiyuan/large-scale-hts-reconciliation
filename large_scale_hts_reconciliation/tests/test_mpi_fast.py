@@ -23,6 +23,13 @@ if (METHOD == "middle_out"):
 else:
     P = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+
+gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
+yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
+
+
 @pytest.mark.mpi
 def test_mpi():
 
@@ -31,15 +38,13 @@ def test_mpi():
     size = comm.Get_size()
     distrib = MPI_utils()
 
-    with np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb')) as gt:
-        with np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb')) as yhat:
-            start = timer()
-            rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
-            end = timer()
-            elapsed = round(end - start, 4)
-            if (rank == size - 1):
-                print(METHOD, ":")
-                print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
+    start = timer()
+    rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
+    end = timer()
+    elapsed = round(end - start, 4)
+    if (rank == size - 1):
+        print(METHOD, ":")
+        print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
 
     #gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
     #yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
