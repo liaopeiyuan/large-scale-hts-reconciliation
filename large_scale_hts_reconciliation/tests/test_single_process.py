@@ -113,7 +113,7 @@ def run_main():
 
     return True
 
-d = defaultdict(list)
+d = defaultdict(dict)
 
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
@@ -127,7 +127,7 @@ def test_single_process(benchmark, mode, method):
     elif method == "top_down":
         result = benchmark(run_top_down(mode))
 
-    d[method].append(result)
+    d[method][mode] = result
     print(len(d[method]))
-    for (i, j) in itertools.combinations(d[method], 2):
-        assert np.allclose(i, j, tol=1e-5)
+    for (i, j) in itertools.combinations(d[method].values(), 2):
+        assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
