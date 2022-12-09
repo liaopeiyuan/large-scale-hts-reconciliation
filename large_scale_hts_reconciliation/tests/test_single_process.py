@@ -2,7 +2,7 @@ import lhts
 import numpy as np
 from timeit import default_timer as timer
 
-def main_test():
+def test_main():
     ROOT = "/data/cmu/large-scale-hts-reconciliation/"
     data_dir = ROOT + "notebooks/"
 
