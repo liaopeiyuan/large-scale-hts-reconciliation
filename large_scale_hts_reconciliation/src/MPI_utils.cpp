@@ -176,13 +176,6 @@ MatrixXd MPI_utils::reconcile_dp_optimized(const std::string method, const Matri
       curr_row += rows[i];
     }
 
-    /*
-if (world_rank == 0) {
-  for (int i = 0; i < world_size; i++) {
-      printf("%d \n", slice_starts[i]);
-  }
-}
-*/
     std::vector<std::tuple<int, int, int>> root_triplets(0);
 
     for (int i = 0; i < num_leaves; i++) {
@@ -199,7 +192,6 @@ if (world_rank == 0) {
       }
       if (is_base) {
         int root_process = 0, leaf_process = 0;
-        // if (world_rank == 0) printf("%d %d\n", root, co);
         for (int j = 0; j < world_size; j++) {
           if (slice_starts[j] + rows[j] > root) {
             root_process = j;
