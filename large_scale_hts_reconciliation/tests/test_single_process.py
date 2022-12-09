@@ -13,9 +13,13 @@ top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'r
 level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
 methods = ["bottom_up", "middle_out", "top_down"]
+modes = ["dense", "sparse"]
 
-def run_bottom_up(method):
-    return lhts.reconcile_sparse_algo(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
+def run_bottom_up(mode):
+    if mode == "dense":
+        return lhts.reconcile_sparse_algo("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
+    else:
+        return lhts.reconcile_dense_algo("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
 
 def run_main():
 
@@ -85,12 +89,12 @@ def run_main():
     return True
 
 @pytest.mark.parametrize(
-    "method", methods
+    "mode", modes
 )
-def test_main(benchmark, method):
-    benchmark.group = '%s - perf' % method
+def test_main(benchmark, mode):
+    benchmark.group = '%s - perf' % mode
     # benchmark something
-    result = benchmark(run_bottom_up(method))
+    result = benchmark(run_bottom_up(mode))
 
     # Extra code, to verify that the run completed correctly.
     # Sometimes you may want to check the result, fast functions
