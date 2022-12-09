@@ -31,7 +31,7 @@ d = defaultdict(dict)
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
 )
-def test_single_process(benchmark, mode, method):
+def test_single_process_slow(benchmark, mode, method):
     benchmark.group = method 
     result = benchmark(run(mode, method))
     
