@@ -14,9 +14,6 @@ level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'
 
 methods = ["bottom_up", "middle_out", "top_down"]
 
-@pytest.mark.parametrize(
-    "method", methods
-)
 def run_bottom_up(method):
     return lhts.reconcile_sparse_algo(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
 
@@ -87,9 +84,13 @@ def run_main():
 
     return True
 
-def test_main(benchmark):
+@pytest.mark.parametrize(
+    "method", methods
+)
+def test_main(benchmark, method):
+    benchmark.group = '%s - perf' % method
     # benchmark something
-    result = benchmark(run_bottom_up)
+    result = benchmark(run_bottom_up(method))
 
     # Extra code, to verify that the run completed correctly.
     # Sometimes you may want to check the result, fast functions
