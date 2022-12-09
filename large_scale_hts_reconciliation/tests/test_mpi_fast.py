@@ -26,6 +26,7 @@ def test_mpi():
 
     start = timer()
 
+    return
     S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
     
     if (METHOD == "middle_out"):
