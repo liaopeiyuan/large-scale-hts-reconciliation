@@ -15,13 +15,9 @@ from timeit import default_timer as timer
 ROOT = "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "notebooks/"
 
-METHOD = "middle_out"
-S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-    
-if (METHOD == "middle_out"):
-    P = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-else:
-    P = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))    
+top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -29,41 +25,33 @@ rank = comm.Get_rank()
 gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
 yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
+methods = ["middle_out", "bottom_up", "top_down"]
+modes = ["gather", "dp_matrix", "dp_optimized"]
+
+def run(mode, method):
+    if mode == "gather":
+        return lambda: lhts.reconcile_gather(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "dp_matrix":
+        return lambda: lhts.reconcile_dp_matrix(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "dp_optimized":
+        return lambda: lhts.reconcile_dp_optimized(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+ 
+d = defaultdict(dict)
 
 @pytest.mark.mpi
-def test_mpi():
+@pytest.mark.parametrize(
+    "mode,method", itertools.product(modes, methods)
+)
+def test_mpi(benchmark, mode, method):
 
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     distrib = MPI_utils()
 
-    start = timer()
-    rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1):
-        print(METHOD, ":")
-        print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
-
-    #gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
-    #yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
-
-    return
-
-    start = timer()
-    rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1): 
-        print("dp algo: ", str(elapsed), " ", lhts.smape(rec2, gt))
-
-    start = timer()
-    rec3 = distrib.reconcile_gather(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1):
-        print("gather: ", str(elapsed), " ", lhts.smape(rec3, gt))
-        print("dp mat vs dp algo: ", np.abs(rec2 - rec).sum())
-        print("gather vs dp algo: ", np.abs(rec2- rec3).sum())
-        print("gather vs dp mat: ", np.abs(rec - rec3).sum())
+    benchmark.group = method 
+    result = benchmark(run(mode, method))
+    
+    d[method][mode] = result
+    for (i, j) in itertools.combinations(d[method].values(), 2):
+        assert np.allclose(i, j, rtol=1e-3, atol=1e-5)

@@ -16,15 +16,35 @@ level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'
 methods = ["OLS", "WLS"]
 modes = ["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
 
-def run(mode, method):
+def run_bottom_up(mode):
     if mode == "sparse_matrix":
-        return lambda: lhts.reconcile_sparse_matrix(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_sparse_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "sparse_algo":
-        return lambda: lhts.reconcile_sparse_algo(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_sparse_algo("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dense_matrix":
-        return lambda: lhts.reconcile_dense_matrix(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_dense_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dense_algo":
-        return lambda: lhts.reconcile_dense_algo(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_dense_algo("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+
+def run_top_down(mode):
+    if mode == "sparse_matrix":
+        return lambda: lhts.reconcile_sparse_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "sparse_algo":
+        return lambda: lhts.reconcile_sparse_algo("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "dense_matrix":
+        return lambda: lhts.reconcile_dense_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "dense_algo":
+        return lambda: lhts.reconcile_dense_algo("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+
+def run_middle_out(mode):
+    if mode == "sparse_matrix":
+        return lambda: lhts.reconcile_sparse_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+    elif mode == "sparse_algo":
+        return lambda: lhts.reconcile_sparse_algo("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+    elif mode == "dense_matrix":
+        return lambda: lhts.reconcile_dense_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+    elif mode == "dense_algo":
+        return lambda: lhts.reconcile_dense_algo("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
 
 d = defaultdict(dict)
 
@@ -36,7 +56,13 @@ d = defaultdict(dict)
 )
 def test_single_process_slow(benchmark, mode, method):
     benchmark.group = method 
-    result = benchmark(run(mode, method))
+    
+    if method == "bottom_up":
+        result = benchmark(run_bottom_up(mode))
+    elif method == "middle_out":
+        result = benchmark(run_middle_out(mode))
+    elif method == "top_down":
+        result = benchmark(run_top_down(mode))
     
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
