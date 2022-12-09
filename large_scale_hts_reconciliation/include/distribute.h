@@ -27,7 +27,7 @@ using namespace Eigen;
 namespace lhts {
 namespace distribute {
 MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
-                  const MatrixXd yhat, int num_leaves, int num_nodes,
+                  MatrixXd yhat, int num_leaves, int num_nodes,
                   int num_levels);
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
                     MatrixXd yhat, int level, int num_leaves,
