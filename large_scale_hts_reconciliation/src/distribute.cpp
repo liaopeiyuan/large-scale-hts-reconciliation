@@ -18,7 +18,7 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
     std::cerr << "[lhts] Warning: Only the first column of the proportions "
                  "matrix will be used\n";
 
-#pragma omp parallel for
+#pragma omp simd
   for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
     int root = S_compact(i, num_levels - 1);
@@ -47,7 +47,7 @@ MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
     std::cerr << "[lhts] Warning: Only the first column of the proportions "
                  "matrix will be used\n";
 
-#pragma omp parallel for
+#pragma omp simd
   for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
     int lvl = num_levels - level;
