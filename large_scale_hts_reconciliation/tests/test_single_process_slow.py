@@ -18,13 +18,13 @@ modes = ["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
 
 def run(mode, method):
     if mode == "sparse_matrix":
-        return lambda: lhts.reconcile_sparse_matrix(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_sparse_matrix(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "sparse_algo":
-        return lambda: lhts.reconcile_sparse_algo(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_sparse_algo(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dense_matrix":
-        return lambda: lhts.reconcile_dense_matrix(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_dense_matrix(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dense_algo":
-        return lambda: lhts.reconcile_dense_algo(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: lhts.reconcile_dense_algo(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
 
 d = defaultdict(dict)
 
