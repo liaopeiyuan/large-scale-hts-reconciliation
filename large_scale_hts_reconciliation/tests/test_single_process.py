@@ -128,5 +128,6 @@ def test_single_process(benchmark, mode, method):
         result = benchmark(run_top_down(mode))
 
     d[method].append(result)
+    print(len(d[method]))
     for (i, j) in itertools.combinations(d[method], 2):
         assert np.allclose(i, j, tol=1e-5)
