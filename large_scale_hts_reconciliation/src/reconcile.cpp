@@ -145,7 +145,8 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
 MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
-  MatrixXd S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels).cast<double>();
+  MatrixXi Si = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
+  MatrixXd S = Si.cast<double>();
 
   MatrixXd G;
   MatrixXd result, y;
