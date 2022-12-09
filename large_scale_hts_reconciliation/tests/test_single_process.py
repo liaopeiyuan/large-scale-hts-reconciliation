@@ -116,7 +116,7 @@ def run_main():
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
 )
-def test_bottom_up(benchmark, mode, method):
+def test_single_process(benchmark, mode, method):
     benchmark.group = method 
     if method == "bottom_up":
         result = benchmark(run_bottom_up(mode))
