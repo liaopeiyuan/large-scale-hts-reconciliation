@@ -145,37 +145,37 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
 MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
-  MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
+  MatrixXd S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels).cast<double>();
 
-  MatrixXd G, res, y;
+  MatrixXd G;
+  MatrixXd result, y;
   y = yhat;
 
   if (method == "bottom_up") {
-    res = S.cast<double>();
     y = yhat.topRows(num_leaves).eval();
+    result = yhat;
+    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "top_down") {
-    res = S.cast<double>();
     y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
+    result = S * y;
   } else if (method == "middle_out") {
-    res = S.cast<double>();
     y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
+    result = S * y;
   } else if (method == "OLS") {
     G = G::build_dense_OLS(S);
-    res = S.cast<double>() * G;
+    result = (S * G) * y;
   } else if (method == "WLS") {
     G = G::build_dense_WLS(S, w);
-    res = S.cast<double>() * G;
+    result = (S * G) * y;
   } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
         "top_down, middle_out, OLS, WLS");
   }
 
-  res = res * y;
-
-  return res;
+  return result;
 }
 
 }  // namespace reconcile
