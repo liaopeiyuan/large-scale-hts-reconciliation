@@ -123,11 +123,11 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   } else if (method == "middle_out") {
     y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
-    totalSimulationTime = totalSimulationTimer.elapsed();
-    printf("total simulation time: %.6fs\n", totalSimulationTime);
+    //totalSimulationTime = totalSimulationTimer.elapsed();
+    //printf("total simulation time: %.6fs\n", totalSimulationTime);
     result = S * y;
-    totalSimulationTime = totalSimulationTimer.elapsed();
-    printf("total simulation time: %.6fs\n", totalSimulationTime);
+    //totalSimulationTime = totalSimulationTimer.elapsed();
+    //printf("total simulation time: %.6fs\n", totalSimulationTime);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     result = (S * G) * y;
