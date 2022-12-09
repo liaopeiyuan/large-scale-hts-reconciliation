@@ -28,13 +28,29 @@ yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) 
 methods = ["middle_out", "bottom_up", "top_down"]
 modes = ["gather", "dp_matrix", "dp_optimized"]
 
-def run(mode, method):
+def run_bottom_up(distrib, mode):
     if mode == "gather":
-        return lambda: lhts.reconcile_gather(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: distrib.reconcile_gather("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
-        return lambda: lhts.reconcile_dp_matrix(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: distrib.reconcile_dp_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_optimized":
-        return lambda: lhts.reconcile_dp_optimized(method, S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        return lambda: distrib.reconcile_dp_optimized("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+
+def run_top_down(distrib, mode):
+    if mode == "gather":
+        return lambda: distrib.reconcile_gather("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "dp_matrix":
+        return lambda: distrib.reconcile_dp_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    elif mode == "dp_optimized":
+        return lambda: distrib.reconcile_dp_optimized("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+
+def run_middle_out(distrib, mode):
+    if mode == "gather":
+        return lambda: distrib.reconcile_gather("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+    elif mode == "dp_matrix":
+        return lambda: distrib.reconcile_dp_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+    elif mode == "dp_optimized":
+        return lambda: distrib.reconcile_dp_optimized("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
  
 d = defaultdict(dict)
 
@@ -50,7 +66,13 @@ def test_mpi(benchmark, mode, method):
     distrib = MPI_utils()
 
     benchmark.group = method 
-    result = benchmark(run(mode, method))
+    
+    if method == "bottom_up":
+        result = benchmark(run_bottom_up(distrib, mode))
+    elif method == "middle_out":
+        result = benchmark(run_middle_out(distrib, mode))
+    elif method == "top_down":
+        result = benchmark(run_top_down(distrib, mode))
     
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
