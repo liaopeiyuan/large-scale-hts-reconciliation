@@ -63,7 +63,7 @@ MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
     //int root = co;
     int lvl = num_levels - level;
     // bool is_base = true;
-    int root = S_compact(i, 1 + lvl);
+    int root = S_compact(i, lvl);
     bool is_base = S_compact(i, num_levels - 1) != -1;
     /*
     for (int j = 1; j < num_levels; j++) {
