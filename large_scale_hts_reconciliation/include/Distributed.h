@@ -25,11 +25,11 @@ typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpMat;
 typedef Eigen::Triplet<double> T;
 
 namespace lhts {
-class MPI_utils {
+class Distributed {
  public:
-  MPI_utils() : comm_global(MPI_COMM_WORLD) { initParallel(); }
+  Distributed() : comm_global(MPI_COMM_WORLD) { initParallel(); }
 
-  ~MPI_utils() {}
+  ~Distributed() {}
 
   MatrixXd reconcile_dp_optimized(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,

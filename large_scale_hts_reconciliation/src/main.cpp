@@ -19,9 +19,9 @@
 #include <Eigen/SparseQR>
 
 #include "G.h"
-#include "MPI_utils.h"
+#include "Distributed.h"
 #include "S.h"
-#include "distribute.h"
+#include "distribute_forecast.h"
 #include "metrics.h"
 
 using namespace lhts;
@@ -63,13 +63,13 @@ PYBIND11_MODULE(lhts, m) {
   m.def("build_G_sparse_top_down", &G::build_sparse_top_down);
   m.def("build_G_sparse_middle_out", &G::build_sparse_middle_out);
 
-  py::class_<MPI_utils>(m, "MPI_utils")
+  py::class_<Distributed>(m, "Distributed")
       .def(py::init<>())
-      .def("test_mpi", &MPI_utils::test, "test")
-      .def("reconcile_gather", &MPI_utils::reconcile_gather, "reconcile_gather")
-      .def("reconcile_dp_matrix", &MPI_utils::reconcile_dp_matrix,
+      .def("test_mpi", &Distributed::test, "test")
+      .def("reconcile_gather", &Distributed::reconcile_gather, "reconcile_gather")
+      .def("reconcile_dp_matrix", &Distributed::reconcile_dp_matrix,
            "reconcile_dp_matrix")
-      .def("reconcile_dp_optimized", &MPI_utils::reconcile_dp_optimized,
+      .def("reconcile_dp_optimized", &Distributed::reconcile_dp_optimized,
            "reconcile_dp_matrix");
 
 #ifdef VERSION_INFO

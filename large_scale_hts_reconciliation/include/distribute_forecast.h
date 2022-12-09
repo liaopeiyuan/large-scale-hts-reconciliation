@@ -25,12 +25,12 @@ typedef Eigen::Triplet<double> T;
 using namespace Eigen;
 
 namespace lhts {
-namespace distribute {
+namespace distribute_forecast {
 MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
                   const MatrixXd yhat, int num_leaves, int num_nodes,
                   int num_levels);
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
                     const MatrixXd yhat, int level, int num_leaves,
                     int num_nodes, int num_levels);
-}  // namespace distribute
+}  // namespace distribute_forecast
 }  // namespace lhts

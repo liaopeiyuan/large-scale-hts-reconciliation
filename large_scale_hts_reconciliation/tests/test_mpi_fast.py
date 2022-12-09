@@ -7,7 +7,7 @@ import mpi4py
 mpi4py.rc.threaded = True
 mpi4py.rc.thread_level = "funneled"
 from mpi4py import MPI
-from lhts import MPI_utils
+from lhts import Distributed
 import sys
 import numpy as np
 from timeit import default_timer as timer
@@ -63,7 +63,7 @@ def test_mpi(benchmark, mode, method):
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
-    distrib = MPI_utils()
+    distrib = Distributed()
 
     benchmark.group = method 
     

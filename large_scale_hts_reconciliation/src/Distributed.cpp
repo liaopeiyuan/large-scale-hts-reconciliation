@@ -1,4 +1,4 @@
-#include "MPI_utils.h"
+#include "Distributed.h"
 
 using namespace lhts;
 
@@ -20,11 +20,11 @@ MatrixXd dp_reconcile_optimized(const std::string method,
     y = yhat.topRows(num_leaves).eval();
   } else if (method == "top_down") {
     res = S;
-    y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
+    y = distribute_forecast::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
   } else if (method == "middle_out") {
     res = S;
-    y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
+    y = distribute_forecast::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
@@ -44,7 +44,7 @@ MatrixXd dp_reconcile_optimized(const std::string method,
 }
 
 
-MatrixXd MPI_utils::reconcile_dp_optimized(const std::string method, const MatrixXi S_compact,
+MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
   omp_set_num_threads(24);
@@ -379,7 +379,7 @@ else if (method == "WLS") {
   return result;
 }
 
-MatrixXd MPI_utils::reconcile_dp_matrix(const std::string method, const MatrixXi S_compact,
+MatrixXd Distributed::reconcile_dp_matrix(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
   omp_set_num_threads(24);
@@ -462,7 +462,7 @@ if (world_rank == world_size - 1) {
 */
 }
 
-MatrixXd MPI_utils::reconcile_gather(const std::string method, const MatrixXi S_compact,
+MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
   int world_size;
@@ -556,7 +556,7 @@ MatrixXd MPI_utils::reconcile_gather(const std::string method, const MatrixXi S_
   }
 }
 
-void MPI_utils::test(const MatrixXd& xs) {
+void Distributed::test(const MatrixXd& xs) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;

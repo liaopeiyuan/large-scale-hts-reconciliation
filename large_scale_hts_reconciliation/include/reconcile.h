@@ -19,7 +19,7 @@
 
 #include "G.h"
 #include "S.h"
-#include "distribute.h"
+#include "distribute_forecast.h"
 
 using namespace Eigen;
 
