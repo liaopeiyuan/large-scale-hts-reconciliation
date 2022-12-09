@@ -74,5 +74,6 @@ def test_main():
     print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
     """
 
+    del S_compact, yhat, gt, top_down_p, level_2_p
 
     assert(True)
