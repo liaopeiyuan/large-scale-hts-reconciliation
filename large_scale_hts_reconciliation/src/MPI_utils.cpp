@@ -564,8 +564,9 @@ MatrixXd MPI_utils::reconcile_gather(const std::string method,
     omp_set_num_threads(24);
 
     MatrixXd y_reconciled =
-        reconcile::sparse_algo(method, S_compact, P, yhat_total, level, w,
-                               num_leaves, num_nodes, num_levels);
+        reconcile::sparse_algo(method, S_compact,
+                       num_leaves, num_nodes, num_levels, yhat,
+                        P, level, w);
 
     y_return = y_reconciled.topRows(rows[0]).eval();
 
