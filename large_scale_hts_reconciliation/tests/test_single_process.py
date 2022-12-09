@@ -12,13 +12,16 @@ gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))
 top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
-methods = ["bottom_up", "middle_out", "top_down"]
-modes = ["dense", "sparse"]
+modes = ["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
 
 def run_bottom_up(mode):
-    if mode == "sparse":
+    if mode == "sparse_matrix":
+        return lambda: lhts.reconcile_sparse_matrix("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
+    elif mode == "sparse_algo":
         return lambda: lhts.reconcile_sparse_algo("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
-    else:
+    elif mode == "dense_matrix":
+        return lambda: lhts.reconcile_dense_matrix("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
+    elif mode == "dense_algo":
         return lambda: lhts.reconcile_dense_algo("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
 
 def run_main():
@@ -91,12 +94,7 @@ def run_main():
 @pytest.mark.parametrize(
     "mode", modes
 )
-def test_main(benchmark, mode):
+def test_bottom_up(benchmark, mode):
     benchmark.group = '%s - perf' % mode
-    # benchmark something
     result = benchmark(run_bottom_up(mode))
-
-    # Extra code, to verify that the run completed correctly.
-    # Sometimes you may want to check the result, fast functions
-    # are no good if they return incorrect results :-)
     assert True
