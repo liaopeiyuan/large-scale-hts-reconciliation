@@ -57,8 +57,8 @@ MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
     throw std::invalid_argument("Invalid level.");
 
 
-#pragma omp parallel for schedule(dynamic, 32)
-  for (int i = 0; i < num_nodes; i++) {
+#pragma omp parallel for
+  for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
     int root = co;
     int lvl = num_levels - level;
