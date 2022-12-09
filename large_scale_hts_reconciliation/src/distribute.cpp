@@ -55,7 +55,7 @@ MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
     std::cerr << "[lhts] Warning: Only the first column of the proportions "
                  "matrix will be used\n";
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 32)
   for (int i = 0; i < num_nodes; i++) {
     int co = S_compact(i, 0);
     int root = co;
