@@ -75,3 +75,5 @@ def main_test():
     elapsed = round(end - start, 4)
     print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
 
+
+    assert(True)
