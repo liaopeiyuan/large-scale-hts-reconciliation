@@ -39,6 +39,8 @@ SpMat build_sparse_top_down(const MatrixXi S_compact, const MatrixXd P,
         "Hierarchy does not correspond to all nodes' path to root.");
   if (num_levels <= 1)
     throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (P.rows() != num_nodes)
+    throw std::invalid_argument("P does not correspond to all nodes.");
 
   std::vector<T> tripletList;
 
@@ -76,6 +78,10 @@ SpMat build_sparse_middle_out(const MatrixXi S_compact, const MatrixXd P,
         "Hierarchy does not correspond to all nodes' path to root.");
   if (num_levels <= 1)
     throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (P.rows() != num_nodes)
+    throw std::invalid_argument("P does not correspond to all nodes.");
+  if (level < 1 || level >= num_levels)
+    throw std::invalid_argument("Invalid level.");
 
   std::vector<T> tripletList;
 
@@ -164,9 +170,16 @@ MatrixXd build_dense_top_down(const MatrixXi S_compact, const MatrixXd P,
                               int num_leaves, int num_nodes, int num_levels) {
   MatrixXd G = MatrixXd::Zero(num_leaves, num_nodes);
 
-  assert(S_compact.rows() == num_nodes);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (P.rows() != num_nodes)
+    throw std::invalid_argument("P does not correspond to all nodes.");
+
 
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {
@@ -194,9 +207,18 @@ MatrixXd build_dense_middle_out(const MatrixXi S_compact, const MatrixXd P,
                                 int num_levels) {
   MatrixXd G = MatrixXd::Zero(num_leaves, num_nodes);
 
-  assert(S_compact.rows() == num_nodes);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
+  if (P.rows() != num_nodes)
+    throw std::invalid_argument("P does not correspond to all nodes.");
+  if (level < 1 || level >= num_levels)
+    throw std::invalid_argument("Invalid level.");
+
 
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {
@@ -227,9 +249,13 @@ MatrixXd build_dense_bottom_up(const MatrixXi S_compact, int num_leaves,
                                int num_nodes, int num_levels) {
   MatrixXd G = MatrixXd::Zero(num_leaves, num_nodes);
 
-  assert(S_compact.rows() == num_nodes);
-  assert(S_compact.cols() == num_levels);
-  assert(num_levels > 1);
+  if (S_compact.rows() != num_nodes)
+    throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
+  if (S_compact.cols() != num_levels)
+    throw std::invalid_argument(
+        "Hierarchy does not correspond to all nodes' path to root.");
+  if (num_levels <= 1)
+    throw std::invalid_argument("No hierarchy (num_levels <=1).");
 
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {

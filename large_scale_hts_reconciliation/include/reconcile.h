@@ -27,18 +27,18 @@ namespace lhts {
 namespace reconcile {
 MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+                       const MatrixXd P = MatrixXd(), int level = 2, double w = 1.0);
 
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+                       const MatrixXd P = MatrixXd(), int level = 2, double w = 1.0);
 
 MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+                       const MatrixXd P = MatrixXd(), int level = 2, double w = 1.0);
 
 MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+                       const MatrixXd P = MatrixXd(), int level = 2, double w = 1.0);
 }  // namespace reconcile
 }  // namespace lhts
