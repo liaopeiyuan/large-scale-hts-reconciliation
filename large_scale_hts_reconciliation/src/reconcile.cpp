@@ -118,7 +118,8 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   } else if (method == "top_down") {
     y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
-    result = S * y;
+    result = yhat;
+    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "middle_out") {
     y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
