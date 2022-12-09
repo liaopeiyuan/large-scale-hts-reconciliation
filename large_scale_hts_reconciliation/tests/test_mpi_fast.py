@@ -31,22 +31,20 @@ def test_mpi():
     size = comm.Get_size()
     distrib = MPI_utils()
 
-    with gt as np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb')):
-        with yhat as np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb')):
-            pass
-        
+    with np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb')) as gt:
+        with np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb')) as yhat:
+            start = timer()
+            rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
+            end = timer()
+            elapsed = round(end - start, 4)
+            if (rank == size - 1):
+                print(METHOD, ":")
+                print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
+
     #gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
     #yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
     return
-
-    start = timer()
-    rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1):
-        print(METHOD, ":")
-        print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
 
     start = timer()
     rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
