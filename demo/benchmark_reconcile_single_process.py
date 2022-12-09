@@ -37,7 +37,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     print("Top down (sparse algo): ", str(elapsed), " ", lhts.smape(rec, gt))
-    print(rec)
+
 
     start = timer()
     rec2 = lhts.reconcile_sparse_matrix("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
@@ -51,7 +51,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     print("Middle out (sparse algo): ", str(elapsed), " ", lhts.smape(rec, gt))
-    print(rec)
+
 
     start = timer()
     rec2 = lhts.reconcile_sparse_matrix("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
@@ -65,14 +65,14 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     print("OLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-    print(rec)
+
 
     start = timer()
     rec = lhts.reconcile_sparse_algo("WLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.5)
     end = timer()
     elapsed = round(end - start, 4)
     print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
-    print(rec)
+
 
     
 
