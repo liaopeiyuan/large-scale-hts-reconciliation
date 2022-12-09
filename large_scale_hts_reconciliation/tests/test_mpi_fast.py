@@ -26,7 +26,7 @@ gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.
 yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
 methods = ["middle_out", "bottom_up", "top_down"]
-modes = ["gather", "dp_matrix", "dp_optimized"]
+modes = ["dp_matrix", "dp_optimized"]
 
 def run_bottom_up(distrib, mode):
     if mode == "gather":
