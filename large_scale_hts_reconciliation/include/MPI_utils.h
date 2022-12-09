@@ -17,6 +17,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
+#include "reconcile.h"
 
 using namespace Eigen;
 
