@@ -73,7 +73,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
-        print("Middle out: ", str(elapsed), " ", lhts.smape(rec, gt))
+        print("Middle out (dp matrix): ", str(elapsed), " ", lhts.smape(rec, gt))
         #print(rec[-5:, :])
 
     start = timer()
