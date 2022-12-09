@@ -95,6 +95,6 @@ def run_main():
     "mode", modes
 )
 def test_bottom_up(benchmark, mode):
-    benchmark.group = mode.split("_")[0]
+    benchmark.group = "bottom_up"
     result = benchmark(run_bottom_up(mode))
     assert True
