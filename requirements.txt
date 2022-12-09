@@ -1,4 +1,4 @@
 mpi4py
 pytest
 pytest-benchmark
-pytest-mpi
+pytest-mpi@https://github.com/orausch/pytest-mpi/archive/master.zip
