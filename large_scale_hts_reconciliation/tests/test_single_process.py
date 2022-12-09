@@ -2,15 +2,18 @@ import lhts
 import numpy as np
 from timeit import default_timer as timer
 
-def test_main():
-    ROOT = "/data/cmu/large-scale-hts-reconciliation/"
-    data_dir = ROOT + "notebooks/"
+ROOT = "/data/cmu/large-scale-hts-reconciliation/"
+data_dir = ROOT + "notebooks/"
 
-    S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-    yhat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
-    gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))
-    top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-    level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
+yhat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
+gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))
+top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+
+
+def test_main():
+
     print(yhat.shape)
 
     print(yhat)
@@ -73,7 +76,5 @@ def test_main():
     elapsed = round(end - start, 4)
     print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
     """
-
-    del S_compact, yhat, gt, top_down_p, level_2_p
 
     assert(True)
