@@ -12,7 +12,7 @@ top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'r
 level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
 
-def test_main():
+def run_main():
 
     print(yhat.shape)
 
@@ -77,4 +77,13 @@ def test_main():
     print("WLS: ", str(elapsed), " ", lhts.smape(rec, gt))
     """
 
-    assert(True)
+    return True
+
+def test_main(benchmark):
+    # benchmark something
+    result = benchmark(run_main)
+
+    # Extra code, to verify that the run completed correctly.
+    # Sometimes you may want to check the result, fast functions
+    # are no good if they return incorrect results :-)
+    assert result
