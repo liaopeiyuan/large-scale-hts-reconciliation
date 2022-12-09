@@ -108,8 +108,6 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   MatrixXd result, y;
   y = yhat;
 
-  Timer totalSimulationTimer;
-  double totalSimulationTime;
   
   if (method == "bottom_up") {
     y = yhat.topRows(num_leaves).eval();
@@ -124,11 +122,9 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
   } else if (method == "middle_out") {
     y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
-    //totalSimulationTime = totalSimulationTimer.elapsed();
-    //printf("total simulation time: %.6fs\n", totalSimulationTime);
-    result = S * y;
-    //totalSimulationTime = totalSimulationTimer.elapsed();
-    //printf("total simulation time: %.6fs\n", totalSimulationTime);
+    result = yhat;
+    result.topRows(num_leaves) = y;
+    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     result = (S * G) * y;
@@ -161,11 +157,15 @@ MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
   } else if (method == "top_down") {
     y = distribute::top_down(S_compact, P, yhat, num_leaves, num_nodes,
                              num_levels);
-    result = S * y;
+    result = yhat;
+    result.topRows(num_leaves) = y;
+    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "middle_out") {
     y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
-    result = S * y;
+    result = yhat;
+    result.topRows(num_leaves) = y;
+    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "OLS") {
     G = G::build_dense_OLS(Si);
     result = (S * G) * y;
