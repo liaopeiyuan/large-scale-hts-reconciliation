@@ -165,10 +165,10 @@ MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
                                num_levels);
     result = S * y;
   } else if (method == "OLS") {
-    G = G::build_dense_OLS(S);
+    G = G::build_dense_OLS(Si);
     result = (S * G) * y;
   } else if (method == "WLS") {
-    G = G::build_dense_WLS(S, w);
+    G = G::build_dense_WLS(Si, w);
     result = (S * G) * y;
   } else {
     throw std::invalid_argument(
