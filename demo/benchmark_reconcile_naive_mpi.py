@@ -77,7 +77,7 @@ def main():
         print(rec[-5:, -1])
 
     start = timer()
-    rec = distrib.reconcile_gather("WLS", S_compact, top_down_p, yhat, 2, 1.5, 5650, 6218, 4)
+    rec = distrib.reconcile_gather("WLS", S_compact, 5650, 6218, 4, yhat, top_down_p, 0, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == RANK_TO_TEST):
