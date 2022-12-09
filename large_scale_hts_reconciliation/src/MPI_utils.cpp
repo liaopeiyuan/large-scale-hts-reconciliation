@@ -411,11 +411,9 @@ else if (method == "WLS") {
   return result;
 }
 
-MatrixXd MPI_utils::reconcile_dp_matrix(const std::string method,
-                                        const MatrixXi S_compact,
-                                        const MatrixXd P, const MatrixXd yhat,
-                                        int level, double w, int num_leaves,
-                                        int num_nodes, int num_levels) {
+MatrixXd MPI_utils::reconcile_dp_matrix(const std::string method, const MatrixXi S_compact,
+                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
+                       const MatrixXd P, int level, double w) {
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;
