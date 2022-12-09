@@ -54,6 +54,10 @@ PYBIND11_MODULE(lhts, m) {
   m.def("reconcile_sparse_algo", &reconcile::sparse_algo, R"pbdoc(
         Forecast reconciliation
     )pbdoc");
+  m.def("reconcile_dense_matrix", &reconcile::dense_matrix);
+  m.def("reconcile_dense_algo", &reconcile::dense_algo, R"pbdoc(
+        Forecast reconciliation
+    )pbdoc");
   m.def("build_S_sparse", &S::build_sparse);
   m.def("build_G_sparse_bottom_up", &G::build_sparse_bottom_up);
   m.def("build_G_sparse_top_down", &G::build_sparse_top_down);
