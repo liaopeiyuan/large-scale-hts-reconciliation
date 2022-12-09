@@ -1,6 +1,7 @@
 import lhts
 import numpy as np
 from timeit import default_timer as timer
+import pytest
 
 ROOT = "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "notebooks/"
@@ -11,6 +12,13 @@ gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))
 top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
+methods = ["bottom_up", "middle_out", "top_down"]
+
+@pytest.mark.parametrize(
+    "method", methods
+)
+def run_bottom_up(method):
+    return lhts.reconcile_sparse_algo(method, S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
 
 def run_main():
 
@@ -81,9 +89,9 @@ def run_main():
 
 def test_main(benchmark):
     # benchmark something
-    result = benchmark(run_main)
+    result = benchmark(run_bottom_up)
 
     # Extra code, to verify that the run completed correctly.
     # Sometimes you may want to check the result, fast functions
     # are no good if they return incorrect results :-)
-    assert result
+    assert True
