@@ -40,7 +40,7 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
 }
 
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
-                    const MatrixXd yhat, int level, int num_leaves,
+                    MatrixXd yhat, int level, int num_leaves,
                     int num_nodes, int num_levels) {
   //MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
 
