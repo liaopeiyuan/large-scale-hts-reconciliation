@@ -78,6 +78,7 @@ MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
+  omp_set_num_threads(24);
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   SpMat G;
