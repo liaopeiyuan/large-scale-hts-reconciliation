@@ -43,43 +43,11 @@ MatrixXd dp_reconcile_optimized(const std::string method,
   return result;
 }
 
-SpMat construct_dp_reconciliation_matrix(const std::string method,
-                                         const MatrixXi S_compact,
-                                         const MatrixXd P, int level, double w,
-                                         int num_leaves, int num_nodes,
-                                         int num_levels, int slice_start,
-                                         int slice_length) {
-  SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
-
-  SpMat G;
-
-  if (method == "bottom_up") {
-    G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
-  } else if (method == "top_down") {
-    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes,
-                                 num_levels);
-  } else if (method == "middle_out") {
-    G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
-                                   num_levels);
-  } else if (method == "OLS") {
-    G = G::build_sparse_OLS(S);
-  } else if (method == "WLS") {
-    G = G::build_sparse_WLS(S, w);
-  } else {
-    throw std::invalid_argument(
-        "invalid reconciliation method. Available options are: bottom_up, "
-        "top_down, middle_out, OLS, WLS");
-  }
-
-  SpMat S_slice = S.middleRows(slice_start, slice_length).eval();
-  SpMat res = (S_slice * G).eval();
-
-  return res;
-}
 
 MatrixXd MPI_utils::reconcile_dp_optimized(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
+  omp_set_num_threads(24);
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;
@@ -414,6 +382,7 @@ else if (method == "WLS") {
 MatrixXd MPI_utils::reconcile_dp_matrix(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
+  omp_set_num_threads(24);
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;
