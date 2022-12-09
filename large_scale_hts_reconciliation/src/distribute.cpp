@@ -15,12 +15,9 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
   if (P.cols() > 1)
     std::cerr << "[lhts] Warning: Only the first column of the proportions "
                  "matrix will be used\n";
-  if (level < 1 || level >= num_levels)
-    throw std::invalid_argument("Invalid level.");
-
 
 #pragma omp parallel for
-  for (int i = 0; i < num_nodes; i++) {
+  for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
     int root = -1;
     bool is_base = true;
