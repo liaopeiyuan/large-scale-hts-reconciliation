@@ -1,8 +1,8 @@
 import lhts
 import numpy as np
-from timeit import default_timer as timer
 import pytest
 import itertools
+from collections import defaultdict
 
 ROOT = "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "notebooks/"
@@ -113,6 +113,8 @@ def run_main():
 
     return True
 
+d = defaultdict(list)
+
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
 )
@@ -125,4 +127,6 @@ def test_single_process(benchmark, mode, method):
     elif method == "top_down":
         result = benchmark(run_top_down(mode))
 
-    assert True
+    d[method].append(result)
+    for (i, j) in itertools.combinations(d[method], 2):
+        assert np.allclose(i, j, tol=1e-5)
