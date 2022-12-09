@@ -128,7 +128,7 @@ MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
                              num_levels);
   } else if (method == "middle_out") {
     res = S.cast<double>();
-    y = distribute::middel_out(S_compact, P, yhat, level, num_leaves, num_nodes,
+    y = distribute::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
                                num_levels);
   } else if (method == "OLS") {
     G = G::build_dense_OLS(S);
