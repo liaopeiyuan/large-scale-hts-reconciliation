@@ -42,7 +42,7 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
                     const MatrixXd yhat, int level, int num_leaves,
                     int num_nodes, int num_levels) {
-  MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
+  //MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
 
   if (S_compact.rows() != num_nodes)
     throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
@@ -73,11 +73,11 @@ MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
       }
     }
     if (is_base) {
-      y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
+      yhat.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
     }
   }
 
-  return y;
+  return yhat;
 }
 }  // namespace distribute
 }  // namespace lhts
