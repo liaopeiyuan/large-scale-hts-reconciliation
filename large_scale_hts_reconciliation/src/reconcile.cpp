@@ -1,19 +1,5 @@
 #include "reconcile.h"
 
-#include <chrono>
-class Timer {
-public:
-  Timer() : beg_(clock_::now()) {}
-  void reset() { beg_ = clock_::now(); }
-  double elapsed() const {
-    return std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
-  }
-
-private:
-  typedef std::chrono::high_resolution_clock clock_;
-  typedef std::chrono::duration<double, std::ratio<1>> second_;
-  std::chrono::time_point<clock_> beg_;
-};
 
 namespace lhts {
 namespace reconcile {
@@ -26,9 +12,6 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
   MatrixXd result, y;
   y = yhat;
 
-  Timer totalSimulationTimer;
-  double totalSimulationTime;
-
   if (method == "bottom_up") {
     G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
     res = S * G;
@@ -39,11 +22,7 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
   } else if (method == "middle_out") {
     G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
                                    num_levels);
-    totalSimulationTime = totalSimulationTimer.elapsed();
-    printf("total simulation time: %.6fs\n", totalSimulationTime);
     res = S * G;
-    totalSimulationTime = totalSimulationTimer.elapsed();
-    printf("total simulation time: %.6fs\n", totalSimulationTime);
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     res = S * G;
@@ -57,8 +36,6 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
   }
 
   result = res * y;
-  totalSimulationTime = totalSimulationTimer.elapsed();
-  printf("total simulation time: %.6fs\n", totalSimulationTime);
 
   return result;
 }
