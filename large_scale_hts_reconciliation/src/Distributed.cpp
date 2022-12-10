@@ -522,7 +522,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
   MatrixXd y_return;
 
   if (world_rank == 0) {
-    //omp_set_num_threads(24);
+    omp_set_num_threads(24);
 
     MatrixXd y_reconciled =
         reconcile::sparse_matrix(method, S_compact,
