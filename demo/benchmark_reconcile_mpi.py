@@ -35,6 +35,7 @@ def main():
     
     gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
     yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
+    yhat_full = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
 
     start = timer()
     rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
@@ -43,6 +44,9 @@ def main():
     if (rank == size - 1):
         print(METHOD, ":")
         print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
+
+    rec0 = lhts.reconcile_sparse_matrix(METHOD, S_compact, 30490, 33549, 4, yhat_full, P, 2, 0.0)
+    rec0 = rec0[-rec.shape[0]:, :]
 
     start = timer()
     rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
@@ -57,9 +61,9 @@ def main():
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print("gather: ", str(elapsed), " ", lhts.smape(rec3, gt))
-        print("dp mat vs dp algo: ", np.abs(rec2 - rec).sum())
-        print("gather vs dp algo: ", np.abs(rec2 - rec3).sum())
-        print("gather vs dp mat: ", np.abs(rec - rec3).sum())
+        print("dp mat vs original: ", np.abs(rec - rec0).sum())
+        print("dp algo vs original: ", np.abs(rec2 - rec0).sum())
+        print("gather vs original: ", np.abs(rec3 - rec0).sum())
 
 if __name__ == "__main__":
     main()
