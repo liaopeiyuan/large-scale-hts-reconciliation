@@ -58,11 +58,11 @@ d = defaultdict(dict)
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
 )
-#@pytest.mark.benchmark(
-#    min_rounds=1,
-#    max_time=1,
-#)
-def test_mpi(mode, method):
+@pytest.mark.benchmark(
+    min_rounds=1,
+    max_time=1,
+)
+def test_mpi(benchmark, mode, method):
 
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -71,12 +71,16 @@ def test_mpi(mode, method):
 
     #benchmark.group = method 
     
-    if method == "bottom_up":
-        result = run_bottom_up(distrib, mode)
-    elif method == "middle_out":
-        result = run_middle_out(distrib, mode)
-    elif method == "top_down":
-        result = run_top_down(distrib, mode)
+    def f():
+        if method == "bottom_up":
+            result = run_bottom_up(distrib, mode)
+        elif method == "middle_out":
+            result = run_middle_out(distrib, mode)
+        elif method == "top_down":
+            result = run_top_down(distrib, mode)
+        return result 
+
+    result = benchmark(f)
     
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
