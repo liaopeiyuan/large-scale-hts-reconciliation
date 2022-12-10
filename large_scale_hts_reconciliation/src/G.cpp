@@ -180,7 +180,6 @@ MatrixXd build_dense_top_down(const MatrixXi S_compact, const MatrixXd P,
   if (P.rows() != num_nodes)
     throw std::invalid_argument("P does not correspond to all nodes.");
 
-
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {
     int co = S_compact(i, 0);
@@ -218,7 +217,6 @@ MatrixXd build_dense_middle_out(const MatrixXi S_compact, const MatrixXd P,
     throw std::invalid_argument("P does not correspond to all nodes.");
   if (level < 1 || level >= num_levels)
     throw std::invalid_argument("Invalid level.");
-
 
 #pragma omp parallel for
   for (int i = 0; i < num_nodes; i++) {

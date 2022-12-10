@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+
 #include <set>
 #include <stdexcept>
 #include <tuple>
@@ -13,15 +14,16 @@
 #endif
 #include <mpi.h>
 #include <stdio.h>
+
 #include <Eigen/LU>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
+#include "Distributed.h"
 #include "G.h"
-#include "MPI_utils.h"
 #include "S.h"
-#include "distribute.h"
+#include "distribute_forecast.h"
 #include "metrics.h"
 
 using namespace lhts;
@@ -54,18 +56,23 @@ PYBIND11_MODULE(lhts, m) {
   m.def("reconcile_sparse_algo", &reconcile::sparse_algo, R"pbdoc(
         Forecast reconciliation
     )pbdoc");
+  m.def("reconcile_dense_matrix", &reconcile::dense_matrix);
+  m.def("reconcile_dense_algo", &reconcile::dense_algo, R"pbdoc(
+        Forecast reconciliation
+    )pbdoc");
   m.def("build_S_sparse", &S::build_sparse);
   m.def("build_G_sparse_bottom_up", &G::build_sparse_bottom_up);
   m.def("build_G_sparse_top_down", &G::build_sparse_top_down);
   m.def("build_G_sparse_middle_out", &G::build_sparse_middle_out);
 
-  py::class_<MPI_utils>(m, "MPI_utils")
+  py::class_<Distributed>(m, "Distributed")
       .def(py::init<>())
-      .def("test_mpi", &MPI_utils::test, "test")
-      .def("reconcile_gather", &MPI_utils::reconcile_gather, "reconcile_gather")
-      .def("reconcile_dp_matrix", &MPI_utils::reconcile_dp_matrix,
+      .def("test_mpi", &Distributed::test, "test")
+      .def("reconcile_gather", &Distributed::reconcile_gather,
+           "reconcile_gather")
+      .def("reconcile_dp_matrix", &Distributed::reconcile_dp_matrix,
            "reconcile_dp_matrix")
-      .def("reconcile_dp_optimized", &MPI_utils::reconcile_dp_optimized,
+      .def("reconcile_dp_optimized", &Distributed::reconcile_dp_optimized,
            "reconcile_dp_matrix");
 
 #ifdef VERSION_INFO

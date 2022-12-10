@@ -1,10 +1,12 @@
-#include "distribute.h"
+#include "distribute_forecast.h"
 
 namespace lhts {
-namespace distribute {
+namespace distribute_forecast {
 MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
-                  MatrixXd yhat, int num_leaves, int num_nodes,
+                  const MatrixXd yhat, int num_leaves, int num_nodes,
                   int num_levels) {
+  MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
+
   if (S_compact.rows() != num_nodes)
     throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
   if (S_compact.cols() != num_levels)
@@ -16,30 +18,24 @@ MatrixXd top_down(const MatrixXi S_compact, const MatrixXd P,
     std::cerr << "[lhts] Warning: Only the first column of the proportions "
                  "matrix will be used\n";
 
-#pragma omp parallel for
+#pragma omp simd
   for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
-    int root = -1;
-    bool is_base = true;
-    for (int j = 1; j < num_levels; j++) {
-      int ro = S_compact(i, j);
-      if (ro == -1) {
-        is_base = false;
-        break;
-      }
-      root = ro;
-    }
+    int root = S_compact(i, num_levels - 1);
+    int is_base = root != -1;
     if (is_base) {
-      yhat.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
+      y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
     }
   }
 
-  return yhat;
+  return y;
 }
 
 MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
-                    MatrixXd yhat, int level, int num_leaves,
+                    const MatrixXd yhat, int level, int num_leaves,
                     int num_nodes, int num_levels) {
+  MatrixXd y = MatrixXd::Zero(num_leaves, yhat.cols());
+
   if (S_compact.rows() != num_nodes)
     throw std::invalid_argument("Hierarchy does not correspond to all nodes.");
   if (S_compact.cols() != num_levels)
@@ -50,35 +46,19 @@ MatrixXd middle_out(const MatrixXi S_compact, const MatrixXd P,
   if (P.cols() > 1)
     std::cerr << "[lhts] Warning: Only the first column of the proportions "
                  "matrix will be used\n";
-  if (level < 1 || level >= num_levels)
-    throw std::invalid_argument("Invalid level.");
 
-
-#pragma omp parallel for
+#pragma omp simd
   for (int i = 0; i < num_leaves; i++) {
     int co = S_compact(i, 0);
-    int root = co;
     int lvl = num_levels - level;
-    bool is_base = true;
-    for (int j = 1; j < num_levels; j++) {
-      int ro = S_compact(i, j);
-      if (ro == -1) {
-        is_base = false;
-        break;
-      }
-      if (lvl > 0) {
-        root = ro;
-        lvl--;
-      } else {
-        break;
-      }
-    }
+    int root = S_compact(i, lvl);
+    bool is_base = S_compact(i, num_levels - 1) != -1;
     if (is_base) {
-      yhat.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
+      y.middleRows(co, 1) = P(co, 0) * yhat.middleRows(root, 1);
     }
   }
 
-  return yhat;
+  return y;
 }
-}  // namespace distribute
+}  // namespace distribute_forecast
 }  // namespace lhts
