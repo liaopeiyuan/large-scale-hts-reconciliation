@@ -526,7 +526,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
 
     MatrixXd y_reconciled =
         reconcile::sparse_matrix(method, S_compact,
-                       num_leaves, num_nodes, num_levels, yhat,
+                       num_leaves, num_nodes, num_levels, yhat_total,
                         P, level, w);
 
     y_return = y_reconciled.topRows(rows[0]).eval();
