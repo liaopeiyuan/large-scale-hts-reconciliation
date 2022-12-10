@@ -38,26 +38,26 @@ def main():
     yhat_full = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
 
     start = timer()
-    rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
+    rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
         print(METHOD, ":")
         print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
 
-    rec0 = lhts.reconcile_sparse_matrix(METHOD, S_compact, 30490, 33549, 4, yhat_full, P, 2, 0.0)
+    rec0 = lhts.reconcile_sparse_matrix(METHOD, S_compact, 5650, 6218, 4, yhat_full, P, 2, 0.0)
     rec0 = rec0[-rec.shape[0]:, :]
     if (rank == size - 1): print(rec0.shape, rec.shape)
 
     start = timer()
-    rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
+    rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
         print("dp algo: ", str(elapsed), " ", lhts.smape(rec2, gt))
 
     start = timer()
-    rec3 = distrib.reconcile_gather(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
+    rec3 = distrib.reconcile_gather(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):

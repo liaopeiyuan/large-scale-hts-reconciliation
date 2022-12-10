@@ -19,33 +19,33 @@ modes = ["sparse_algo", "sparse_matrix"] #["dense_algo", "sparse_algo", "dense_m
 
 def run_bottom_up(mode):
     if mode == "sparse_matrix":
-        return lambda: lhts.reconcile_sparse_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_sparse_matrix("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
     elif mode == "sparse_algo":
-        return lambda: lhts.reconcile_sparse_algo("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_sparse_algo("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
     elif mode == "dense_matrix":
-        return lambda: lhts.reconcile_dense_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_dense_matrix("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
     elif mode == "dense_algo":
-        return lambda: lhts.reconcile_dense_algo("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_dense_algo("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
 
 def run_top_down(mode):
     if mode == "sparse_matrix":
-        return lambda: lhts.reconcile_sparse_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_sparse_matrix("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
     elif mode == "sparse_algo":
-        return lambda: lhts.reconcile_sparse_algo("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_sparse_algo("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
     elif mode == "dense_matrix":
-        return lambda: lhts.reconcile_dense_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_dense_matrix("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
     elif mode == "dense_algo":
-        return lambda: lhts.reconcile_dense_algo("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 0.0)
+        return lambda: lhts.reconcile_dense_algo("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 0.0)
 
 def run_middle_out(mode):
     if mode == "sparse_matrix":
-        return lambda: lhts.reconcile_sparse_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 0.0)
+        return lambda: lhts.reconcile_sparse_matrix("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
     elif mode == "sparse_algo":
-        return lambda: lhts.reconcile_sparse_algo("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 0.0)
+        return lambda: lhts.reconcile_sparse_algo("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
     elif mode == "dense_matrix":
-        return lambda: lhts.reconcile_dense_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 0.0)
+        return lambda: lhts.reconcile_dense_matrix("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
     elif mode == "dense_algo":
-        return lambda: lhts.reconcile_dense_algo("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 0.0)
+        return lambda: lhts.reconcile_dense_algo("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 0.0)
 
 d = defaultdict(dict)
 
