@@ -25,7 +25,7 @@ rank = comm.Get_rank()
 gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
 yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
-methods = ["bottom_up"] #, "middle_out", "top_down"]
+methods = ["bottom_up", "middle_out", "top_down"]
 modes = ["dp_matrix", "dp_optimized"]
 
 def run_bottom_up(mode):
@@ -76,7 +76,7 @@ d = defaultdict(dict)
 )
 def test_mpi(benchmark, mode, method):
 
-    #benchmark.group = method 
+    benchmark.group = method 
     
     def f():
         if method == "bottom_up":
