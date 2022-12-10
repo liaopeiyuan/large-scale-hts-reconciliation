@@ -111,8 +111,6 @@ MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const Mat
         } else {
           yhats[i] = yhat;
         }
-        // printf("rank %d @ %d, %d-%d\n", world_rank, i, slice_start,
-        // slice_length);
 
         MPI_Bcast(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, 0, leaf_comm);
         yhat_total.middleRows(curr_row, rows[i]) = yhats[i].eval();
@@ -143,13 +141,6 @@ MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const Mat
       curr_row += rows[i];
     }
 
-    /*
-if (world_rank == 0) {
-  for (int i = 0; i < world_size; i++) {
-      printf("%d \n", slice_starts[i]);
-  }
-}
-*/
     std::vector<std::tuple<int, int, int>> root_triplets(0);
 
     for (int i = 0; i < num_leaves; i++) {
@@ -166,7 +157,6 @@ if (world_rank == 0) {
       }
       if (is_base) {
         int root_process = 0, leaf_process = 0;
-        // if (world_rank == 0) printf("%d %d\n", root, co);
         for (int j = 0; j < world_size; j++) {
           if (slice_starts[j] + rows[j] > root) {
             root_process = j;
@@ -187,9 +177,6 @@ if (world_rank == 0) {
               root - slice_starts[root_process]});
         }
 
-        // if (world_rank == 0) printf("%d %d %d %d %d %d\n", root_process,
-        // leaf_process, slice_starts[root_process],
-        // slice_starts[leaf_process], root, co);
         recvs[leaf_process].insert(root_process);
         sends[root_process].insert(leaf_process);
       }
@@ -242,18 +229,6 @@ if (world_rank == 0) {
     SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
                   .middleRows(slice_starts[world_rank], rows[world_rank])
                   .eval();
-
-    /*
-if (world_rank == 0) {
-  for (int i = 0; i < world_size; i++) {
-      printf("Rank %d needs ", i);
-      for (int k: recvs[i]) {
-          printf("%d, ", k);
-      }
-      printf("\n");
-  }
-}
-*/
 
     result = (S * yhat_total.topRows(num_leaves)).eval();
 
@@ -362,17 +337,10 @@ if (world_rank == 0) {
                   .eval();
 
     result = (S * yhat_total.topRows(num_leaves)).eval();
-  }
-  /* else if (method == "OLS") {
-  result = yhat;
-}
-else if (method == "WLS") {
-  result = yhat;
-} */
-  else {
+  } else {
     throw std::invalid_argument(
         "invalid reconciliation method. Available options are: bottom_up, "
-        "top_down, middle_out");  //, OLS, WLS");
+        "top_down, middle_out");
   }
 
   return result;
@@ -434,31 +402,10 @@ MatrixXd Distributed::reconcile_dp_matrix(const std::string method, const Matrix
     curr_row += rows[i];
   }
 
-  // printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
-
   return dp_reconcile(method, S_compact, P, yhat_total, level, w,
                                 num_leaves, num_nodes, num_levels, slice_start,
                                 slice_length);
 
-  /*
-MPI_Barrier(comm_global);
-
-MatrixXd reconciliation_matrix =
-  construct_dp_reconciliation_matrix(method,
-      S_compact, P, level, w, num_leaves, num_nodes, num_levels,
-slice_start, slice_length);
-
-
-return reconciliation_matrix * yhat_total;
-*/
-
-  /*
-if (world_rank == world_size - 1) {
-   std::stringstream ss;
-   ss << reconciliation_matrix; //(seqN(0, 5), all);
-   printf("y_return: %s\n", ss.str().c_str());
-}
-*/
 }
 
 MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi S_compact,
@@ -530,10 +477,6 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
                         P, level, w);
 
     y_return = y_reconciled.topRows(rows[0]).eval();
-
-    // std::stringstream ss;
-    // ss << y_reconciled(seqN(0, 5), all);
-    // printf("y_return: %s\n", ss.str().c_str());
 
     int curr_row = rows[0];
     for (int i = 1; i < world_size; i++) {
