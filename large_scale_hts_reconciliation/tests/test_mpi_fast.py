@@ -28,7 +28,11 @@ yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) 
 methods = ["bottom_up"] #, "middle_out", "top_down"]
 modes = ["dp_matrix", "dp_optimized"]
 
-def run_bottom_up(distrib, mode):
+def run_bottom_up(mode):
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    distrib = Distributed()
     if mode == "gather":
         return distrib.reconcile_gather("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
@@ -36,7 +40,11 @@ def run_bottom_up(distrib, mode):
     elif mode == "dp_optimized":
         return distrib.reconcile_dp_optimized("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
 
-def run_top_down(distrib, mode):
+def run_top_down(mode):
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    distrib = Distributed()
     if mode == "gather":
         return distrib.reconcile_gather("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
@@ -44,7 +52,11 @@ def run_top_down(distrib, mode):
     elif mode == "dp_optimized":
         return distrib.reconcile_dp_optimized("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
 
-def run_middle_out(distrib, mode):
+def run_middle_out(mode):
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    distrib = Distributed()
     if mode == "gather":
         return distrib.reconcile_gather("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
     elif mode == "dp_matrix":
@@ -64,20 +76,15 @@ d = defaultdict(dict)
 )
 def test_mpi(benchmark, mode, method):
 
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-    distrib = Distributed()
-
     #benchmark.group = method 
     
     def f():
         if method == "bottom_up":
-            result = run_bottom_up(distrib, mode)
+            result = run_bottom_up(mode)
         elif method == "middle_out":
-            result = run_middle_out(distrib, mode)
+            result = run_middle_out(mode)
         elif method == "top_down":
-            result = run_top_down(distrib, mode)
+            result = run_top_down(mode)
         return result 
 
     result = benchmark(f)
