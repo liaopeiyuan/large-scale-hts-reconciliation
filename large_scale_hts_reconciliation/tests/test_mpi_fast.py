@@ -62,14 +62,14 @@ d = defaultdict(dict)
 #    min_rounds=1,
 #    max_time=1,
 #)
-def test_mpi(benchmark, mode, method):
+def test_mpi(mode, method):
 
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     distrib = Distributed()
 
-    benchmark.group = method 
+    #benchmark.group = method 
     
     if method == "bottom_up":
         result = run_bottom_up(distrib, mode)
