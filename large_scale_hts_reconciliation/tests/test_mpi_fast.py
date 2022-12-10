@@ -81,3 +81,7 @@ def test_mpi(mode, method):
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
         assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
+
+    comm.Barrier()
+    
+    return
