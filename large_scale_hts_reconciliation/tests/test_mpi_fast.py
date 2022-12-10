@@ -13,7 +13,7 @@ import numpy as np
 from timeit import default_timer as timer
 
 DATA_ROOT = "m5_hobbies"
-ROOT = "/data/cmu/large-scale-hts-reconciliation/"
+ROOT = "/afs/andrew.cmu.edu/usr23/peiyuanl/private/15-418/large-scale-hts-reconciliation/large_scale_hts_reconciliation" #"/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "notebooks/"
 
 S_compact = np.load(open(data_dir + DATA_ROOT + '/m5_hierarchy_parent.npy', 'rb'))    
