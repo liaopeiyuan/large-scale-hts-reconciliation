@@ -15,7 +15,7 @@ top_down_p = np.load(open(data_dir + DATA_ROOT + '/top_down_tensor.npy', 'rb'))[
 level_2_p = np.load(open(data_dir + DATA_ROOT +'/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
 methods = ["middle_out", "bottom_up", "top_down"]
-modes = ["sparse_algo", "sparse_matrix"] #["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
+modes = ["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
 
 def run_bottom_up(mode):
     if mode == "sparse_matrix":
