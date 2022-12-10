@@ -525,7 +525,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
     //omp_set_num_threads(24);
 
     MatrixXd y_reconciled =
-        reconcile::sparse_algo(method, S_compact,
+        reconcile::sparse_matrix(method, S_compact,
                        num_leaves, num_nodes, num_levels, yhat,
                         P, level, w);
 
