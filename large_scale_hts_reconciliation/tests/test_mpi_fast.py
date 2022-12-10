@@ -34,11 +34,13 @@ def run_bottom_up(mode):
     size = comm.Get_size()
     distrib = Distributed()
     if mode == "gather":
-        return distrib.reconcile_gather("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        result = distrib.reconcile_gather("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
-        return distrib.reconcile_dp_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        result = distrib.reconcile_dp_matrix("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_optimized":
-        return distrib.reconcile_dp_optimized("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        result = distrib.reconcile_dp_optimized("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    comm.Barrier()
+    return result
 
 def run_top_down(mode):
     comm = MPI.COMM_WORLD
@@ -46,11 +48,13 @@ def run_top_down(mode):
     size = comm.Get_size()
     distrib = Distributed()
     if mode == "gather":
-        return distrib.reconcile_gather("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        result = distrib.reconcile_gather("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
-        return distrib.reconcile_dp_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        result = distrib.reconcile_dp_matrix("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_optimized":
-        return distrib.reconcile_dp_optimized("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+        result = distrib.reconcile_dp_optimized("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
+    comm.Barrier()
+    return result
 
 def run_middle_out(mode):
     comm = MPI.COMM_WORLD
@@ -58,11 +62,13 @@ def run_middle_out(mode):
     size = comm.Get_size()
     distrib = Distributed()
     if mode == "gather":
-        return distrib.reconcile_gather("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+        result = distrib.reconcile_gather("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
     elif mode == "dp_matrix":
-        return distrib.reconcile_dp_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+        result = distrib.reconcile_dp_matrix("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
     elif mode == "dp_optimized":
-        return distrib.reconcile_dp_optimized("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+        result = distrib.reconcile_dp_optimized("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)
+    comm.Barrier()
+    return result
  
 d = defaultdict(dict)
 
@@ -92,7 +98,5 @@ def test_mpi(benchmark, mode, method):
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
         assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
-
-    comm.Barrier()
     
     return
