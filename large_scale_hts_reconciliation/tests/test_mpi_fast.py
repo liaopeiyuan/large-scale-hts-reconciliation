@@ -12,18 +12,19 @@ import sys
 import numpy as np
 from timeit import default_timer as timer
 
-ROOT = "/afs/andrew.cmu.edu/usr23/peiyuanl/private/15-418/large-scale-hts-reconciliation/large_scale_hts_reconciliation/" #"/data/cmu/large-scale-hts-reconciliation/"
+DATA_ROOT = "m5_hobbies"
+ROOT = "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "notebooks/"
 
-S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))    
-top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+S_compact = np.load(open(data_dir + DATA_ROOT + '/m5_hierarchy_parent.npy', 'rb'))    
+top_down_p = np.load(open(data_dir + DATA_ROOT +'/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+level_2_p = np.load(open(data_dir + DATA_ROOT + '/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
-gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
-yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
+gt = np.load(open(data_dir + DATA_ROOT + '/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
+yhat = np.load(open(data_dir + DATA_ROOT + '/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
 methods = ["bottom_up", "top_down", "middle_out"]
 modes = ["dp_matrix", "dp_optimized", "gather"]

@@ -4,14 +4,15 @@ import pytest
 import itertools
 from collections import defaultdict
 
-ROOT = "/afs/andrew.cmu.edu/usr23/peiyuanl/private/15-418/large-scale-hts-reconciliation/large_scale_hts_reconciliation/" #"/data/cmu/large-scale-hts-reconciliation/"
+DATA_ROOT = "m5_hobbies"
+ROOT = "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "notebooks/"
 
-S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
-yhat = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
-gt = np.load(open(data_dir + 'm5_prediction_raw/gt_tensor.npy', 'rb'))
-top_down_p = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
-level_2_p = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+S_compact = np.load(open(data_dir + DATA_ROOT + '/m5_hierarchy_parent.npy', 'rb'))
+yhat = np.load(open(data_dir + DATA_ROOT + '/pred_tensor.npy', 'rb'))
+gt = np.load(open(data_dir + DATA_ROOT + '/gt_tensor.npy', 'rb'))
+top_down_p = np.load(open(data_dir + DATA_ROOT + '/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+level_2_p = np.load(open(data_dir + DATA_ROOT +'/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
 methods = ["middle_out", "bottom_up", "top_down"]
 modes = ["sparse_algo", "sparse_matrix"] #["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
