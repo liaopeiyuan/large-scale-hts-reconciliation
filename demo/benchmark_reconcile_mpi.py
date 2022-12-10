@@ -47,6 +47,7 @@ def main():
 
     rec0 = lhts.reconcile_sparse_matrix(METHOD, S_compact, 30490, 33549, 4, yhat_full, P, 2, 0.0)
     rec0 = rec0[-rec.shape[0]:, :]
+    if (rank == size - 1): print(rec0.shape, rec.shape)
 
     start = timer()
     rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
