@@ -1,12 +1,12 @@
 #include "reconcile.h"
 
-
 namespace lhts {
 namespace reconcile {
 
 MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+                       int num_leaves, int num_nodes, int num_levels,
+                       const MatrixXd yhat, const MatrixXd P, int level,
+                       double w) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
   SpMat G, res;
   MatrixXd result, y;
@@ -41,8 +41,9 @@ MatrixXd sparse_matrix(const std::string method, const MatrixXi S_compact,
 }
 
 MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+                      int num_leaves, int num_nodes, int num_levels,
+                      const MatrixXd yhat, const MatrixXd P, int level,
+                      double w) {
   MatrixXi S = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
 
   MatrixXd G, res, y;
@@ -77,31 +78,34 @@ MatrixXd dense_matrix(const std::string method, const MatrixXi S_compact,
 }
 
 MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+                     int num_leaves, int num_nodes, int num_levels,
+                     const MatrixXd yhat, const MatrixXd P, int level,
+                     double w) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels);
 
   SpMat G;
   MatrixXd result, y;
   y = yhat;
 
-  
   if (method == "bottom_up") {
     y = yhat.topRows(num_leaves).eval();
     result = yhat;
-    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
+    result.bottomRows(num_nodes - num_leaves) =
+        S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "top_down") {
     y = distribute_forecast::top_down(S_compact, P, yhat, num_leaves, num_nodes,
-                             num_levels);
+                                      num_levels);
     result = yhat;
     result.topRows(num_leaves) = y;
-    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
+    result.bottomRows(num_nodes - num_leaves) =
+        S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "middle_out") {
-    y = distribute_forecast::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
-                               num_levels);
+    y = distribute_forecast::middle_out(S_compact, P, yhat, level, num_leaves,
+                                        num_nodes, num_levels);
     result = yhat;
     result.topRows(num_leaves) = y;
-    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
+    result.bottomRows(num_nodes - num_leaves) =
+        S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     result = (S * G) * y;
@@ -118,8 +122,9 @@ MatrixXd sparse_algo(const std::string method, const MatrixXi S_compact,
 }
 
 MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+                    int num_leaves, int num_nodes, int num_levels,
+                    const MatrixXd yhat, const MatrixXd P, int level,
+                    double w) {
   MatrixXi Si = S::build_dense(S_compact, num_leaves, num_nodes, num_levels);
   MatrixXd S = Si.cast<double>();
 
@@ -130,19 +135,22 @@ MatrixXd dense_algo(const std::string method, const MatrixXi S_compact,
   if (method == "bottom_up") {
     y = yhat.topRows(num_leaves).eval();
     result = yhat;
-    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
+    result.bottomRows(num_nodes - num_leaves) =
+        S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "top_down") {
     y = distribute_forecast::top_down(S_compact, P, yhat, num_leaves, num_nodes,
-                             num_levels);
+                                      num_levels);
     result = yhat;
     result.topRows(num_leaves) = y;
-    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
+    result.bottomRows(num_nodes - num_leaves) =
+        S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "middle_out") {
-    y = distribute_forecast::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
-                               num_levels);
+    y = distribute_forecast::middle_out(S_compact, P, yhat, level, num_leaves,
+                                        num_nodes, num_levels);
     result = yhat;
     result.topRows(num_leaves) = y;
-    result.bottomRows(num_nodes - num_leaves) = S.bottomRows(num_nodes - num_leaves) * y;
+    result.bottomRows(num_nodes - num_leaves) =
+        S.bottomRows(num_nodes - num_leaves) * y;
   } else if (method == "OLS") {
     G = G::build_dense_OLS(Si);
     result = (S * G) * y;

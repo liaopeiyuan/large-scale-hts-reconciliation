@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+
 #include <set>
 #include <stdexcept>
 #include <tuple>
@@ -13,10 +14,12 @@
 #endif
 #include <mpi.h>
 #include <stdio.h>
+
 #include <Eigen/LU>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
+
 #include "reconcile.h"
 
 #define OMP_NUM_THREADS 8
@@ -33,17 +36,22 @@ class Distributed {
 
   ~Distributed() {}
 
-  MatrixXd reconcile_dp_optimized(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+  MatrixXd reconcile_dp_optimized(const std::string method,
+                                  const MatrixXi S_compact, int num_leaves,
+                                  int num_nodes, int num_levels,
+                                  const MatrixXd yhat, const MatrixXd P,
+                                  int level, double w);
 
-  MatrixXd reconcile_dp_matrix(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+  MatrixXd reconcile_dp_matrix(const std::string method,
+                               const MatrixXi S_compact, int num_leaves,
+                               int num_nodes, int num_levels,
+                               const MatrixXd yhat, const MatrixXd P, int level,
+                               double w);
 
   MatrixXd reconcile_gather(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w);
+                            int num_leaves, int num_nodes, int num_levels,
+                            const MatrixXd yhat, const MatrixXd P, int level,
+                            double w);
 
   void test(const MatrixXd& xs);
 

@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+
 #include <set>
 #include <stdexcept>
 #include <tuple>
@@ -13,13 +14,14 @@
 #endif
 #include <mpi.h>
 #include <stdio.h>
+
 #include <Eigen/LU>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 
-#include "G.h"
 #include "Distributed.h"
+#include "G.h"
 #include "S.h"
 #include "distribute_forecast.h"
 #include "metrics.h"
@@ -66,7 +68,8 @@ PYBIND11_MODULE(lhts, m) {
   py::class_<Distributed>(m, "Distributed")
       .def(py::init<>())
       .def("test_mpi", &Distributed::test, "test")
-      .def("reconcile_gather", &Distributed::reconcile_gather, "reconcile_gather")
+      .def("reconcile_gather", &Distributed::reconcile_gather,
+           "reconcile_gather")
       .def("reconcile_dp_matrix", &Distributed::reconcile_dp_matrix,
            "reconcile_dp_matrix")
       .def("reconcile_dp_optimized", &Distributed::reconcile_dp_optimized,

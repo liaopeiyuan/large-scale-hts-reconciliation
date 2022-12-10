@@ -2,11 +2,10 @@
 
 using namespace lhts;
 
-MatrixXd dp_reconcile(const std::string method,
-                                const MatrixXi S_compact, const MatrixXd P,
-                                const MatrixXd yhat, int level, double w,
-                                int num_leaves, int num_nodes, int num_levels,
-                                int slice_start, int slice_length) {
+MatrixXd dp_reconcile(const std::string method, const MatrixXi S_compact,
+                      const MatrixXd P, const MatrixXd yhat, int level,
+                      double w, int num_leaves, int num_nodes, int num_levels,
+                      int slice_start, int slice_length) {
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
                 .middleRows(slice_start, slice_length)
                 .eval();
@@ -42,10 +41,10 @@ MatrixXd dp_reconcile(const std::string method,
   return result;
 }
 
-
-MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+MatrixXd Distributed::reconcile_dp_optimized(
+    const std::string method, const MatrixXi S_compact, int num_leaves,
+    int num_nodes, int num_levels, const MatrixXd yhat, const MatrixXd P,
+    int level, double w) {
   omp_set_num_threads(OMP_NUM_THREADS);
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -122,9 +121,9 @@ MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const Mat
     }
 
     if (slice_start + slice_length >= num_leaves) {
-      result = dp_reconcile(method, S_compact, P, yhat_total, level,
-                                      w, num_leaves, num_nodes, num_levels,
-                                      slice_start, slice_length);
+      result =
+          dp_reconcile(method, S_compact, P, yhat_total, level, w, num_leaves,
+                       num_nodes, num_levels, slice_start, slice_length);
     } else {
       result = yhat.eval();
     }
@@ -346,9 +345,12 @@ MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const Mat
   return result;
 }
 
-MatrixXd Distributed::reconcile_dp_matrix(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+MatrixXd Distributed::reconcile_dp_matrix(const std::string method,
+                                          const MatrixXi S_compact,
+                                          int num_leaves, int num_nodes,
+                                          int num_levels, const MatrixXd yhat,
+                                          const MatrixXd P, int level,
+                                          double w) {
   omp_set_num_threads(OMP_NUM_THREADS);
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -402,15 +404,15 @@ MatrixXd Distributed::reconcile_dp_matrix(const std::string method, const Matrix
     curr_row += rows[i];
   }
 
-  return dp_reconcile(method, S_compact, P, yhat_total, level, w,
-                                num_leaves, num_nodes, num_levels, slice_start,
-                                slice_length);
-
+  return dp_reconcile(method, S_compact, P, yhat_total, level, w, num_leaves,
+                      num_nodes, num_levels, slice_start, slice_length);
 }
 
-MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi S_compact,
-                      int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
-                       const MatrixXd P, int level, double w) {
+MatrixXd Distributed::reconcile_gather(const std::string method,
+                                       const MatrixXi S_compact, int num_leaves,
+                                       int num_nodes, int num_levels,
+                                       const MatrixXd yhat, const MatrixXd P,
+                                       int level, double w) {
   omp_set_num_threads(OMP_NUM_THREADS);
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
@@ -470,11 +472,9 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
   MatrixXd y_return;
 
   if (world_rank == 0) {
-
     MatrixXd y_reconciled =
-        reconcile::sparse_matrix(method, S_compact,
-                       num_leaves, num_nodes, num_levels, yhat_total,
-                        P, level, w);
+        reconcile::sparse_matrix(method, S_compact, num_leaves, num_nodes,
+                                 num_levels, yhat_total, P, level, w);
 
     y_return = y_reconciled.topRows(rows[0]).eval();
 
@@ -491,7 +491,8 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
     return y_return;
   } else {
     y_return = MatrixXd::Zero(ro, co);
-    MPI_Irecv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global, &reqs[0]);
+    MPI_Irecv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
+              &reqs[0]);
     MPI_Wait(&reqs[0], &stats[0]);
     MPI_Barrier(comm_global);
     return y_return;

@@ -3,6 +3,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -14,6 +15,7 @@
 #endif
 #include <mpi.h>
 #include <stdio.h>
+
 #include <Eigen/LU>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
