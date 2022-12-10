@@ -60,6 +60,7 @@ d = defaultdict(dict)
 )
 @pytest.mark.benchmark(
     min_rounds=1,
+    max_time=1,
 )
 def test_mpi(benchmark, mode, method):
 
