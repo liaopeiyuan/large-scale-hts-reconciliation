@@ -411,7 +411,6 @@ MatrixXd Distributed::reconcile_dp_matrix(const std::string method, const Matrix
 MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi S_compact,
                       int num_leaves, int num_nodes, int num_levels, const MatrixXd yhat,
                        const MatrixXd P, int level, double w) {
-  omp_set_num_threads(24);
   int world_size;
   MPI_Comm_size(comm_global, &world_size);
   int world_rank;
@@ -470,6 +469,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method, const MatrixXi 
   MatrixXd y_return;
 
   if (world_rank == 0) {
+    omp_set_num_threads(24);
 
     MatrixXd y_reconciled =
         reconcile::sparse_matrix(method, S_compact,
