@@ -51,6 +51,7 @@ d = defaultdict(dict)
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
 )
+@pytest.mark.mpi_skip()
 def test_single_process_fast(benchmark, mode, method):
     benchmark.group = method 
     

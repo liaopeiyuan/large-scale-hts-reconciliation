@@ -54,9 +54,12 @@ def run_middle_out(distrib, mode):
  
 d = defaultdict(dict)
 
-@pytest.mark.mpi
+@pytest.mark.mpi()
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
+)
+@pytest.mark.benchmark(
+    min_rounds=1,
 )
 def test_mpi(benchmark, mode, method):
 

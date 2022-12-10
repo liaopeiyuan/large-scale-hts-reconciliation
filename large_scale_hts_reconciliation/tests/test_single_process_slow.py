@@ -34,6 +34,7 @@ d = defaultdict(dict)
 @pytest.mark.benchmark(
     min_rounds=1,
 )
+@pytest.mark.mpi_skip()
 def test_single_process_slow(benchmark, mode, method):
     benchmark.group = method 
     result = benchmark(run(mode, method))
