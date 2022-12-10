@@ -30,8 +30,6 @@ modes = ["dp_matrix", "dp_optimized"]
 
 def run_bottom_up(mode):
     comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
     distrib = Distributed()
     if mode == "gather":
         result = distrib.reconcile_gather("bottom_up", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
@@ -44,8 +42,6 @@ def run_bottom_up(mode):
 
 def run_top_down(mode):
     comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
     distrib = Distributed()
     if mode == "gather":
         result = distrib.reconcile_gather("top_down", S_compact, 30490, 33549, 4, yhat, top_down_p, -1, 1.5)
@@ -58,8 +54,6 @@ def run_top_down(mode):
 
 def run_middle_out(mode):
     comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
     distrib = Distributed()
     if mode == "gather":
         result = distrib.reconcile_gather("middle_out", S_compact, 30490, 33549, 4, yhat, level_2_p, 2, 1.5)

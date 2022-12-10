@@ -2,7 +2,7 @@
 
 using namespace lhts;
 
-MatrixXd dp_reconcile_optimized(const std::string method,
+MatrixXd dp_reconcile(const std::string method,
                                 const MatrixXi S_compact, const MatrixXd P,
                                 const MatrixXd yhat, int level, double w,
                                 int num_leaves, int num_nodes, int num_levels,
@@ -10,22 +10,21 @@ MatrixXd dp_reconcile_optimized(const std::string method,
   SpMat S = S::build_sparse(S_compact, num_leaves, num_nodes, num_levels)
                 .middleRows(slice_start, slice_length)
                 .eval();
-  SpMat res, G;
-
+  SpMat G, res;
   MatrixXd result, y;
   y = yhat;
 
   if (method == "bottom_up") {
-    res = S;
-    y = yhat.topRows(num_leaves).eval();
+    G = G::build_sparse_bottom_up(S_compact, num_leaves, num_nodes, num_levels);
+    res = S * G;
   } else if (method == "top_down") {
-    res = S;
-    y = distribute_forecast::top_down(S_compact, P, yhat, num_leaves, num_nodes,
-                             num_levels);
+    G = G::build_sparse_top_down(S_compact, P, num_leaves, num_nodes,
+                                 num_levels);
+    res = S * G;
   } else if (method == "middle_out") {
-    res = S;
-    y = distribute_forecast::middle_out(S_compact, P, yhat, level, num_leaves, num_nodes,
-                               num_levels);
+    G = G::build_sparse_middle_out(S_compact, P, level, num_leaves, num_nodes,
+                                   num_levels);
+    res = S * G;
   } else if (method == "OLS") {
     G = G::build_sparse_OLS(S);
     res = S * G;
@@ -125,7 +124,7 @@ MatrixXd Distributed::reconcile_dp_optimized(const std::string method, const Mat
     }
 
     if (slice_start + slice_length >= num_leaves) {
-      result = dp_reconcile_optimized(method, S_compact, P, yhat_total, level,
+      result = dp_reconcile(method, S_compact, P, yhat_total, level,
                                       w, num_leaves, num_nodes, num_levels,
                                       slice_start, slice_length);
     } else {
@@ -437,7 +436,7 @@ MatrixXd Distributed::reconcile_dp_matrix(const std::string method, const Matrix
 
   // printf("rank %d: %d %d\n", world_rank, slice_start, slice_length);
 
-  return dp_reconcile_optimized(method, S_compact, P, yhat_total, level, w,
+  return dp_reconcile(method, S_compact, P, yhat_total, level, w,
                                 num_leaves, num_nodes, num_levels, slice_start,
                                 slice_length);
 
