@@ -19,6 +19,8 @@
 #include <Eigen/SparseQR>
 #include "reconcile.h"
 
+#define OMP_NUM_THREADS 8
+
 using namespace Eigen;
 
 typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpMat;
