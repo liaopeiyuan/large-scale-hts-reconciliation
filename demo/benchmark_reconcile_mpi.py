@@ -51,7 +51,6 @@ def main():
     if (rank == size - 1): 
         print("dp algo: ", str(elapsed), " ", lhts.smape(rec2, gt))
 
-    """
     start = timer()
     rec3 = distrib.reconcile_gather(METHOD, S_compact, 30490, 33549, 4, yhat, P, 2, 0.0)
     end = timer()
@@ -61,7 +60,6 @@ def main():
         print("dp mat vs dp algo: ", np.abs(rec2 - rec).sum())
         print("gather vs dp algo: ", np.abs(rec2- rec3).sum())
         print("gather vs dp mat: ", np.abs(rec - rec3).sum())
-    """
 
 if __name__ == "__main__":
     main()
