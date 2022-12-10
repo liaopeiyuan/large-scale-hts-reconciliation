@@ -14,7 +14,7 @@ from timeit import default_timer as timer
 
 DATA_ROOT = "m5_hobbies"
 ROOT = "/afs/andrew.cmu.edu/usr23/peiyuanl/private/15-418/large-scale-hts-reconciliation/large_scale_hts_reconciliation" #"/data/cmu/large-scale-hts-reconciliation/"
-data_dir = ROOT + "notebooks/"
+data_dir = ROOT + "/notebooks/"
 
 S_compact = np.load(open(data_dir + DATA_ROOT + '/m5_hierarchy_parent.npy', 'rb'))    
 top_down_p = np.load(open(data_dir + DATA_ROOT +'/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
