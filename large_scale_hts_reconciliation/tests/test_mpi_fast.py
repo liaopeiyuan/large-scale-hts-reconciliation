@@ -26,7 +26,7 @@ gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.
 yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
 methods = ["bottom_up", "top_down", "middle_out"]
-modes = ["dp_matrix", "dp_optimized"]
+modes = ["dp_matrix", "dp_optimized", "gather"]
 
 def run_bottom_up(mode):
     comm = MPI.COMM_WORLD
