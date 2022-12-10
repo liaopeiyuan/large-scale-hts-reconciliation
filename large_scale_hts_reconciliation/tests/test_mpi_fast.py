@@ -87,7 +87,7 @@ def test_mpi(benchmark, mode, method):
             result = run_top_down(mode)
         return result 
 
-    result = benchmark(f)
+    result = benchmark.pedantic(f, iterations=1, rounds=1)
     
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
