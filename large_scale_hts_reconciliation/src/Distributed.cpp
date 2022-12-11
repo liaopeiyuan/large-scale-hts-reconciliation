@@ -485,7 +485,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
   }
 }
 
-reconcile_gather_per_node(const std::string method,
+MatrixXd reconcile_gather_per_node(const std::string method,
                                        const MatrixXi S_compact, int num_leaves,
                                        int num_nodes, int num_levels,
                                        const MatrixXd yhat, const MatrixXd P,
