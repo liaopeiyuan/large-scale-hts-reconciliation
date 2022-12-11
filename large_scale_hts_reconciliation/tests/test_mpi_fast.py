@@ -108,11 +108,11 @@ def test_mpi(benchmark, mode, method, dataset):
     
     def f():
         if method == "bottom_up":
-            result = run_bottom_up(mode)
+            result = run_bottom_up(mode, dataset)
         elif method == "middle_out":
-            result = run_middle_out(mode)
+            result = run_middle_out(mode, dataset)
         elif method == "top_down":
-            result = run_top_down(mode)
+            result = run_top_down(mode, dataset)
         return result 
 
     result = benchmark.pedantic(f, iterations=1, rounds=10)
