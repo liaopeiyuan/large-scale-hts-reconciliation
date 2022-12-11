@@ -224,7 +224,7 @@ def test_mpi(benchmark, mode, method, dataset):
 
     result = benchmark.pedantic(f, iterations=1, rounds=10)
 
-    d[dataset][method][mode] = result = result
+    d[dataset][method][mode] = result
     for (i, j) in itertools.combinations(d[dataset][method].values(), 2):
         assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
 
