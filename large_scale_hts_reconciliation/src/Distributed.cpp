@@ -544,13 +544,6 @@ MatrixXd Distributed::reconcile_gather_per_node(const std::string method,
 
     if (world_rank == 0) {
       int n_cols = cols[0];
-      for (int i = 1; i < world_size; i++) {
-        if (cols[i] != n_cols) {
-          char buffer[200];
-          sprintf(buffer, "Error: cols[%d] != cols[0]\n", i);
-          throw std::invalid_argument(buffer);
-        }
-      }
 
       yhat_total =
           MatrixXd::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]);
@@ -596,7 +589,6 @@ MatrixXd Distributed::reconcile_gather_per_node(const std::string method,
 
       MPI_Waitall(world_size, reqs.data(), stats.data());
       MPI_Barrier(comm_global);
-      return y_return;
     } else {
       result = MatrixXd::Zero(ro, co);
       MPI_Irecv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
