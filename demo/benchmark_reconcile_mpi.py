@@ -58,13 +58,6 @@ def main():
         print("dp algo: ", str(elapsed), " ", lhts.smape(rec2, gt))
 
     start = timer()
-    rec3 = distrib.reconcile_gather_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1): 
-        print("gather per node: ", str(elapsed), " ", lhts.smape(rec2, gt))
-
-    start = timer()
     rec4 = distrib.reconcile_gather(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
@@ -73,7 +66,6 @@ def main():
         print("dp mat vs original: ", np.abs(rec - rec0).sum())
         print("dp algo vs original: ", np.abs(rec2 - rec0).sum())
         print("gather vs original: ", np.abs(rec4 - rec0).sum())
-        print("gather per node vs original: ", np.abs(rec3 - rec0).sum())
 
 if __name__ == "__main__":
     main()

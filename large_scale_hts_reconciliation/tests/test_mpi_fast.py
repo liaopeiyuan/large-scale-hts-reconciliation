@@ -27,15 +27,13 @@ gt = np.load(open(data_dir + DATA_ROOT + '/mpi/gt_tensor_' + str(rank) + '.npy',
 yhat = np.load(open(data_dir + DATA_ROOT + '/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
 methods = ["bottom_up", "top_down", "middle_out"]
-modes = ["dp_matrix", "dp_optimized", "gather", "gather_optimized"]
+modes = ["dp_matrix", "dp_optimized", "gather"]
 
 def run_bottom_up(mode):
     comm = MPI.COMM_WORLD
     distrib = Distributed()
     if mode == "gather":
         result = distrib.reconcile_gather("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
-    elif mode == "gather_optimized":
-        result = distrib.reconcile_gather_optimized("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
         result = distrib.reconcile_dp_matrix("bottom_up", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_optimized":
@@ -48,8 +46,6 @@ def run_top_down(mode):
     distrib = Distributed()
     if mode == "gather":
         result = distrib.reconcile_gather("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
-    elif mode == "gather_optimized":
-        result = distrib.reconcile_gather_optimized("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_matrix":
         result = distrib.reconcile_dp_matrix("top_down", S_compact, 5650, 6218, 4, yhat, top_down_p, -1, 1.5)
     elif mode == "dp_optimized":
@@ -62,8 +58,6 @@ def run_middle_out(mode):
     distrib = Distributed()
     if mode == "gather":
         result = distrib.reconcile_gather("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 1.5)
-    elif mode == "gather_optimized":
-        result = distrib.reconcile_gather_optimized("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 1.5)
     elif mode == "dp_matrix":
         result = distrib.reconcile_dp_matrix("middle_out", S_compact, 5650, 6218, 4, yhat, level_2_p, 2, 1.5)
     elif mode == "dp_optimized":
