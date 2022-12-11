@@ -4,7 +4,7 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["m5_hobbies", "m5_full"]
+DATASETS = ["m5_hobbies"] #, "m5_full"]
 
 num_leaves = {"m5_hobbies": 5650, "m5_full": 30490}
 num_nodes = {"m5_hobbies": 6218, "m5_full": 33549}
