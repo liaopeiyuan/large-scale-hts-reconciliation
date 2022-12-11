@@ -5,7 +5,7 @@ import itertools
 from collections import defaultdict
 
 DATA_ROOT = "m5_hobbies"
-ROOT = "/afs/andrew.cmu.edu/usr23/peiyuanl/private/15-418/large-scale-hts-reconciliation/large_scale_hts_reconciliation" #"/data/cmu/large-scale-hts-reconciliation/"
+ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation" #"/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "/notebooks/"
 
 S_compact = np.load(open(data_dir + DATA_ROOT + '/m5_hierarchy_parent.npy', 'rb'))
