@@ -27,7 +27,7 @@ gt = np.load(open(data_dir + DATA_ROOT + '/mpi/gt_tensor_' + str(rank) + '.npy',
 yhat = np.load(open(data_dir + DATA_ROOT + '/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
 methods = ["bottom_up"] #, "top_down", "middle_out"]
-modes = ["dp_matrix", "dp_optimized", "gather"]
+modes = ["dp_matrix", "dp_optimized"] #, "gather"]
 
 def run_bottom_up(mode):
     comm = MPI.COMM_WORLD
@@ -88,7 +88,7 @@ def test_mpi(benchmark, mode, method):
             result = run_top_down(mode)
         return result 
 
-    result = benchmark.pedantic(f, iterations=1, rounds=1, min_rounds=1)
+    result = benchmark.pedantic(f, iterations=1, rounds=1)
     
     d[method][mode] = result
     for (i, j) in itertools.combinations(d[method].values(), 2):
