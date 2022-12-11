@@ -70,6 +70,8 @@ PYBIND11_MODULE(lhts, m) {
       .def("test_mpi", &Distributed::test, "test")
       .def("reconcile_gather", &Distributed::reconcile_gather,
            "reconcile_gather")
+      .def("reconcile_gather_per_node", &Distributed::reconcile_gather_per_node,
+           "reconcile_gather_per_node")
       .def("reconcile_dp_matrix", &Distributed::reconcile_dp_matrix,
            "reconcile_dp_matrix")
       .def("reconcile_dp_optimized", &Distributed::reconcile_dp_optimized,

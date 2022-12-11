@@ -494,6 +494,12 @@ MatrixXd Distributed::reconcile_gather_per_node(const std::string method,
   int world_rank;
   MPI_Comm_rank(comm_global, &world_rank);
 
+  MPI_Comm shmcomm;
+  MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0,
+                      MPI_INFO_NULL, &shmcomm);
+  int shmrank;
+  MPI_Comm_rank(shmcomm, &shmrank);
+
   int ro = yhat.rows();
   int co = yhat.cols();
 
