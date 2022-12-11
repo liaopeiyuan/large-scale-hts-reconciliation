@@ -15,7 +15,8 @@ from timeit import default_timer as timer
 def main():
     METHOD = sys.argv[1]
 
-    ROOT = "/data/cmu/large-scale-hts-reconciliation/"
+    DATA_ROOT = "m5_hobbies"
+    ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation"
     data_dir = ROOT + "notebooks/"
 
     comm = MPI.COMM_WORLD
@@ -25,17 +26,17 @@ def main():
 
     start = timer()
 
-    S_compact = np.load(open(data_dir + 'm5_hierarchy_parent.npy', 'rb'))
+    S_compact = np.load(open(data_dir + DATA_ROOT + '/m5_hierarchy_parent.npy', 'rb'))
     
     if (METHOD == "middle_out"):
-        P = np.load(open(data_dir + 'm5_prediction_raw/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+        P = np.load(open(data_dir + DATA_ROOT + '/top_down_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
     else:
-        P = np.load(open(data_dir + 'm5_prediction_raw/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
+        P = np.load(open(data_dir + DATA_ROOT + '/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
     
-    gt = np.load(open(data_dir + 'm5_prediction_raw/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
-    yhat = np.load(open(data_dir + 'm5_prediction_raw/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
-    yhat_full = np.load(open(data_dir + 'm5_prediction_raw/pred_tensor.npy', 'rb'))
+    gt = np.load(open(data_dir + DATA_ROOT + '/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
+    yhat = np.load(open(data_dir + DATA_ROOT + '/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
+    yhat_full = np.load(open(data_dir + DATA_ROOT + '/pred_tensor.npy', 'rb'))
 
     start = timer()
     rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
