@@ -582,7 +582,7 @@ MatrixXd Distributed::reconcile_gather_optimized(const std::string method,
 
       int curr_row = rows[0];
       for (int i = 1; i < world_size; i++) {
-        if (slice_starts[i] >= num_leaves) {
+        if (slice_starts[i] + rows[i] >= num_leaves) {
           yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
           MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
                     comm_global, &reqs[i]);
@@ -593,7 +593,7 @@ MatrixXd Distributed::reconcile_gather_optimized(const std::string method,
       MPI_Waitall(world_size, reqs.data(), stats.data());
       MPI_Barrier(comm_global);
     } else {
-      if (slice_starts[i] >= num_leaves) {
+      if (slice_start + ro >= num_leaves) {
         result = MatrixXd::Zero(ro, co);
         MPI_Irecv(result.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
                   &reqs[0]);
