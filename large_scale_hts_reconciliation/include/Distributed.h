@@ -22,7 +22,7 @@
 
 #include "reconcile.h"
 
-#define OMP_NUM_THREADS 2
+#define OMP_NUM_THREADS 1
 
 using namespace Eigen;
 
