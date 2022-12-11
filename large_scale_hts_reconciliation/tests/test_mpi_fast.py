@@ -68,6 +68,16 @@ def run_middle_out(mode):
 d = defaultdict(dict)
 
 @pytest.mark.mpi()
+def test_ping():
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    if rank == 0:
+        print("Hello world from rank 0")
+    else:
+        print("Hello world from rank " + str(rank))
+    comm.Barrier()
+
+@pytest.mark.mpi()
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
 )
