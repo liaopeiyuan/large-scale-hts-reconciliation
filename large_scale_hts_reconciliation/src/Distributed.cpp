@@ -241,17 +241,6 @@ MatrixXd Distributed::reconcile_dp_optimized(
       int lvl = num_levels - level;
       int root = S_compact(i, lvl);
       bool is_base = S_compact(i, num_levels - 1) != -1;
-      for (int j = 1; j < num_levels; j++) {
-        int ro = S_compact(i, j);
-        if (ro == -1) {
-          is_base = false;
-          break;
-        }
-        if (lvl > 0) {
-          root = ro;
-          lvl--;
-        }
-      }
       if (is_base) {
         int root_process = 0, leaf_process = 0;
         for (int j = 0; j < world_size; j++) {
