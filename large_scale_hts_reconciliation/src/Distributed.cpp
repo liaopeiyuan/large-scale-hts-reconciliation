@@ -526,21 +526,24 @@ MatrixXd Distributed::reconcile_gather_optimized(const std::string method,
   MatrixXd result;
 
   if (method == "bottom_up") {
-    int slice_start = 0, slice_length = 0;
-    int curr_row = 0;
-
-    for (int i = 0; i < world_size; i++) {
-      if (i == world_rank) {
-        slice_start = curr_row;
-        slice_length = rows[i];
-        break;
-      }
-
-      curr_row += rows[i];
-    }
 
     MatrixXd yhat_total;
     std::vector<MatrixXd> yhats(world_size);
+    int slice_start = 0;
+
+    if (world_rank == 0) {
+      
+      std::vector<int> slice_starts(world_size);
+      int curr_row = 0;
+
+      for (int i = 0; i < world_size; i++) {
+        slice_starts[i] = curr_row;
+        curr_row += rows[i];
+      }
+    }
+
+    MPI_Scatter(slice_starts.data(), 1, MPI_INT, &slice_start, 1, MPI_INT, 0,
+                comm_global);
 
     if (world_rank == 0) {
       int n_cols = cols[0];
@@ -581,19 +584,25 @@ MatrixXd Distributed::reconcile_gather_optimized(const std::string method,
 
       int curr_row = rows[0];
       for (int i = 1; i < world_size; i++) {
-        yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
-        MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
-                  comm_global, &reqs[i]);
+        if (slice_starts[i] >= num_leaves) {
+          yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
+          MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
+                    comm_global, &reqs[i]);
+        }
         curr_row += rows[i];
       }
 
       MPI_Waitall(world_size, reqs.data(), stats.data());
       MPI_Barrier(comm_global);
     } else {
-      result = MatrixXd::Zero(ro, co);
-      MPI_Irecv(result.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
-                &reqs[0]);
-      MPI_Wait(&reqs[0], &stats[0]);
+      if (slice_starts[i] >= num_leaves) {
+        result = MatrixXd::Zero(ro, co);
+        MPI_Irecv(result.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
+                  &reqs[0]);
+        MPI_Wait(&reqs[0], &stats[0]);
+      } else {
+        result = yhat;
+      }
       MPI_Barrier(comm_global);
     }
 
