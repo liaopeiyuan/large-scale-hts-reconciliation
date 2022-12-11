@@ -467,19 +467,19 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
     int curr_row = rows[0];
     for (int i = 1; i < world_size; i++) {
       yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
-      MPI_Isend(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
-                comm_global, &reqs[i]);
+      MPI_Send(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
+                comm_global);
       curr_row += rows[i];
     }
 
-    MPI_Waitall(world_size, reqs.data(), stats.data());
+    //MPI_Waitall(world_size, reqs.data(), stats.data());
     MPI_Barrier(comm_global);
     return y_return;
   } else {
-    y_return = MatrixXd::Zero(ro, co);
-    MPI_Irecv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
-              &reqs[0]);
-    MPI_Wait(&reqs[0], &stats[0]);
+    y_return = MatrixXd::Zero(ro, co).eval();
+    MPI_Recv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
+              &stats[0]);
+    //MPI_Wait(&reqs[0], &stats[0]);
     MPI_Barrier(comm_global);
     return y_return;
   }
