@@ -529,13 +529,11 @@ MatrixXd Distributed::reconcile_gather_optimized(const std::string method,
 
     MatrixXd yhat_total;
     std::vector<MatrixXd> yhats(world_size);
+    std::vector<int> slice_starts(world_size);
     int slice_start = 0;
 
     if (world_rank == 0) {
-      
-      std::vector<int> slice_starts(world_size);
       int curr_row = 0;
-
       for (int i = 0; i < world_size; i++) {
         slice_starts[i] = curr_row;
         curr_row += rows[i];
