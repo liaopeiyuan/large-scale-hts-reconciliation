@@ -452,6 +452,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
     MPI_Barrier(comm_global);
   }
 
+  MPI_Barrier(comm_global);
 
   MatrixXd y_return;
 
@@ -460,6 +461,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
         reconcile::sparse_matrix(method, S_compact, num_leaves, num_nodes,
                                  num_levels, yhat_total, P, level, w);
 
+    MPI_Barrier(comm_global);
     y_return = y_reconciled.topRows(rows[0]).eval();
 
     int curr_row = rows[0];
@@ -474,6 +476,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
     MPI_Barrier(comm_global);
     return y_return;
   } else {
+    MPI_Barrier(comm_global);
     y_return = MatrixXd::Zero(ro, co);
     MPI_Irecv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
               &reqs[0]);
