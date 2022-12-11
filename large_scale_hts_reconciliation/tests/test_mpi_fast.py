@@ -187,7 +187,7 @@ def run_middle_out(mode, dataset):
     return result
 
 
-d = defaultdict(dict)
+d = defaultdict(lambda: defaultdict(dict))
 
 
 @pytest.mark.mpi()
@@ -224,8 +224,8 @@ def test_mpi(benchmark, mode, method, dataset):
 
     result = benchmark.pedantic(f, iterations=1, rounds=10)
 
-    d[method][mode] = result
-    for (i, j) in itertools.combinations(d[method].values(), 2):
+    d[dataset][method][mode] = result = result
+    for (i, j) in itertools.combinations(d[dataset][method].values(), 2):
         assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
 
     return
