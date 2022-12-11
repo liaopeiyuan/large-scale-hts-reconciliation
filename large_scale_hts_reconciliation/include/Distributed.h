@@ -53,7 +53,7 @@ class Distributed {
                             const MatrixXd yhat, const MatrixXd P, int level,
                             double w);
 
-  MatrixXd reconcile_gather_per_node(const std::string method, const MatrixXi S_compact,
+  MatrixXd reconcile_gather_optimized(const std::string method, const MatrixXi S_compact,
                             int num_leaves, int num_nodes, int num_levels,
                             const MatrixXd yhat, const MatrixXd P, int level,
                             double w);

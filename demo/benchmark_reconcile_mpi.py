@@ -58,7 +58,7 @@ def main():
         print("dp algo: ", str(elapsed), " ", lhts.smape(rec2, gt))
 
     start = timer()
-    rec3 = distrib.reconcile_gather_per_node(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
+    rec3 = distrib.reconcile_gather_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1): 
