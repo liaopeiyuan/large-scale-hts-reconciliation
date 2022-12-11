@@ -26,8 +26,8 @@ rank = comm.Get_rank()
 gt = np.load(open(data_dir + DATA_ROOT + '/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
 yhat = np.load(open(data_dir + DATA_ROOT + '/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
 
-methods = ["bottom_up"] #, "top_down", "middle_out"]
-modes = ["dp_matrix", "dp_optimized"] #, "gather"]
+methods = ["bottom_up", "top_down", "middle_out"]
+modes = ["dp_matrix", "dp_optimized", "gather"]
 
 def run_bottom_up(mode):
     comm = MPI.COMM_WORLD
