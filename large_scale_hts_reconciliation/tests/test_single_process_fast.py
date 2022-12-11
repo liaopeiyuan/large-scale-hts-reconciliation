@@ -39,7 +39,7 @@ for DATA_ROOT in DATASETS:
     yhats[DATA_ROOT] = yhat
 
 methods = ["middle_out", "bottom_up", "top_down"]
-modes = ["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
+modes = ["dense_algo", "sparse_algo"] #, "dense_matrix", "sparse_matrix"]
 
 
 def run_bottom_up(mode, dataset):
@@ -105,7 +105,7 @@ d = defaultdict(lambda: defaultdict(dict))
 @pytest.mark.parametrize("mode,method,dataset", itertools.product(modes, methods, DATASETS))
 @pytest.mark.mpi_skip()
 def test_single_process_fast(benchmark, mode, method, dataset):
-    benchmark.group = method
+    benchmark.group = method + "/" + dataset
 
     if method == "bottom_up":
         result = benchmark(run_bottom_up(mode, dataset))
