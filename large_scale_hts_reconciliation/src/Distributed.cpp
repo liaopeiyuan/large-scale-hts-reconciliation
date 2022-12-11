@@ -506,11 +506,22 @@ MatrixXd Distributed::reconcile_gather_per_node(const std::string method,
   std::vector<int> rows(world_size);
   std::vector<int> cols(world_size);
 
+  std::vector<int> local_ranks(world_size);
+  std::vector<int> global_ranks(world_size);
+
   std::vector<MPI_Request> reqs(world_size);
   std::vector<MPI_Status> stats(world_size);
 
   MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, comm_global);
   MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, comm_global);
+
+  MPI_Allgather(&world_rank, 1, MPI_INT, global_ranks.data(), 1, MPI_INT, comm_global);
+  MPI_Allgather(&shmrank, 1, MPI_INT, local_ranks.data(), 1, MPI_INT, comm_global);
+
+  MPI_Comm node_root_comm;
+  int color = shmcomm == 0;
+  MPI_Comm_split(comm_global, color, 0, &node_root_comm);
+  
   //MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
   //MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
