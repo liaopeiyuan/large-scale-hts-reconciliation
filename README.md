@@ -21,3 +21,4 @@ platform/architecture. One instance is in `us-central1-a` and the other is in `u
 2. Install OpenMPI 4.1.4 and set up `hosts` file properly (see passwordless SSH)
 3. For single-node results, run `mpirun -n 8 --bind-to socket python3 -m pytest --with-mpi $HOME/large-scale-hts-reconciliation/large_scale_hts_reconciliation/tests/test_mpi_fast.py --unmute-ranks=0` and `mpirun -n 1 --bind-to socket python3 -m pytest tests/test_single_process_fast.py` for multi-process benchmarks (test_mpi_fast.py) and single-process benchmarks (test_single_process_fast.py)
 4. For multi-node results, run `mpirun --hostfile hosts -n 8 --bind-to socket python3 -m pytest --with-mpi $HOME/large-scale-hts-reconciliation/large_scale_hts_reconciliation/tests/test_mpi_fast.py --unmute-ranks=0`
+5. For OLS/WLS results, run `mpirun -n 1 --bind-to socket python3 -m pytest tests/test_single_process_slow.py`. *They are quite slow.*
