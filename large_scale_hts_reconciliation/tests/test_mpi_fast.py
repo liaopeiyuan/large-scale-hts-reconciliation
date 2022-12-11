@@ -54,7 +54,7 @@ for DATA_ROOT in DATASETS:
     gts[DATA_ROOT] = gt
     yhats[DATA_ROOT] = yhat
 
-methods = ["bottom_up"] #["bottom_up", "top_down", "middle_out"]
+methods = ["bottom_up", "top_down", "middle_out"]
 modes = ["dp_matrix", "dp_optimized", "gather"]
 
 
@@ -155,7 +155,7 @@ def run_middle_out(mode, dataset):
             num_nodes[dataset],
             num_levels[dataset],
             yhats[dataset],
-            level_2_p,
+            level_2_ps[dataset],
             2,
             1.5,
         )
@@ -167,7 +167,7 @@ def run_middle_out(mode, dataset):
             num_nodes[dataset],
             num_levels[dataset],
             yhats[dataset],
-            level_2_p,
+            level_2_ps[dataset],
             2,
             1.5,
         )
@@ -179,7 +179,7 @@ def run_middle_out(mode, dataset):
             num_nodes[dataset],
             num_levels[dataset],
             yhats[dataset],
-            level_2_p,
+            level_2_ps[dataset],
             2,
             1.5,
         )
