@@ -144,16 +144,8 @@ MatrixXd Distributed::reconcile_dp_optimized(
 
     for (int i = 0; i < num_leaves; i++) {
       int co = S_compact(i, 0);
-      int root = -1;
-      bool is_base = true;
-      for (int j = 1; j < num_levels; j++) {
-        int ro = S_compact(i, j);
-        if (ro == -1) {
-          is_base = false;
-          break;
-        }
-        root = ro;
-      }
+      int root = S_compact(i, num_levels - 1);
+      int is_base = root != -1;
       if (is_base) {
         int root_process = 0, leaf_process = 0;
         for (int j = 0; j < world_size; j++) {
@@ -246,9 +238,9 @@ MatrixXd Distributed::reconcile_dp_optimized(
     std::vector<std::tuple<int, int, int>> root_triplets(0);
     for (int i = 0; i < num_leaves; i++) {
       int co = S_compact(i, 0);
-      int root = co;
       int lvl = num_levels - level;
-      bool is_base = true;
+      int root = S_compact(i, lvl);
+      bool is_base = S_compact(i, num_levels - 1) != -1;
       for (int j = 1; j < num_levels; j++) {
         int ro = S_compact(i, j);
         if (ro == -1) {
