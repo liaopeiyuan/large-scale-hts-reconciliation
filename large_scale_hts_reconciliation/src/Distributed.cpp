@@ -409,10 +409,8 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
   std::vector<MPI_Request> reqs(world_size);
   std::vector<MPI_Status> stats(world_size);
 
-  MPI_Allgather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, comm_global);
-  MPI_Allgather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, comm_global);
-  //MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
-  //MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
+  MPI_Gather(&ro, 1, MPI_INT, rows.data(), 1, MPI_INT, 0, comm_global);
+  MPI_Gather(&co, 1, MPI_INT, cols.data(), 1, MPI_INT, 0, comm_global);
 
   MatrixXd yhat_total;
   std::vector<MatrixXd> yhats(world_size);
