@@ -82,19 +82,19 @@ def run_top_down(mode, dataset):
 def run_middle_out(mode, dataset):
     if mode == "sparse_matrix":
         return lambda: lhts.reconcile_sparse_matrix(
-            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_p, 2, 0.0
+            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_ps[dataset], 2, 0.0
         )
     elif mode == "sparse_algo":
         return lambda: lhts.reconcile_sparse_algo(
-            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_p, 2, 0.0
+            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_ps[dataset], 2, 0.0
         )
     elif mode == "dense_matrix":
         return lambda: lhts.reconcile_dense_matrix(
-            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_p, 2, 0.0
+            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_ps[dataset], 2, 0.0
         )
     elif mode == "dense_algo":
         return lambda: lhts.reconcile_dense_algo(
-            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_p, 2, 0.0
+            "middle_out", S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], level_2_ps[dataset], 2, 0.0
         )
 
 
