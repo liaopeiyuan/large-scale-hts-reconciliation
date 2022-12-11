@@ -77,6 +77,7 @@ def test_ping():
         print("Hello world from rank " + str(rank))
     comm.Barrier()
 
+"""
 @pytest.mark.mpi()
 @pytest.mark.parametrize(
     "mode,method", itertools.product(modes, methods)
@@ -105,3 +106,4 @@ def test_mpi(benchmark, mode, method):
         assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
     
     return
+"""
