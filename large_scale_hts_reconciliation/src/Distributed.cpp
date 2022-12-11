@@ -591,7 +591,7 @@ MatrixXd Distributed::reconcile_gather_per_node(const std::string method,
       MPI_Barrier(comm_global);
     } else {
       result = MatrixXd::Zero(ro, co);
-      MPI_Irecv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
+      MPI_Irecv(result.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
                 &reqs[0]);
       MPI_Wait(&reqs[0], &stats[0]);
       MPI_Barrier(comm_global);
