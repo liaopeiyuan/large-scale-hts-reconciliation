@@ -17,7 +17,7 @@ def main():
 
     DATA_ROOT = "m5_hobbies"
     ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation"
-    data_dir = ROOT + "notebooks/"
+    data_dir = ROOT + "/notebooks/"
 
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
