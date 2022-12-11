@@ -54,7 +54,7 @@ for DATA_ROOT in DATASETS:
     gts[DATA_ROOT] = gt
     yhats[DATA_ROOT] = yhat
 
-methods = ["bottom_up", "top_down", "middle_out"]
+methods = ["bottom_up"] #["bottom_up", "top_down", "middle_out"]
 modes = ["dp_matrix", "dp_optimized", "gather"]
 
 
