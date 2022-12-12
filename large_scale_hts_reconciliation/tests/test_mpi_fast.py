@@ -13,9 +13,9 @@ import sys
 import numpy as np
 from timeit import default_timer as timer
 
-DATASETS = ["m5_hobbies", "m5_full"]
+DATASETS = ["m5_hobbies", "m5_full", "tourism_small"]
 
-hierarchy_prefix = {"m5_hobbies": "m5", "m5_full": "m5", "wikipedia": "wikipedia"}
+hierarchy_prefix = {"m5_hobbies": "m5", "m5_full": "m5", "wikipedia": "wikipedia", "tourism_small": "tourism"}
 num_leaves = {"m5_hobbies": 5650, "m5_full": 30490}
 num_nodes = {"m5_hobbies": 6218, "m5_full": 33549}
 num_levels = {"m5_hobbies": 4, "m5_full": 4}
