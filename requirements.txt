@@ -2,3 +2,4 @@ mpi4py
 pytest
 pytest-benchmark
 pytest-mpi@https://github.com/liaopeiyuan/pytest-mpi/archive/master.zip
+pytest-monitor
