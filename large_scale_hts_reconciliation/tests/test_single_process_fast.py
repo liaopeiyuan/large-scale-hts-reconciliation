@@ -4,8 +4,9 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["m5_hobbies"] #, "m5_full"]
+DATASETS = ["m5_hobbies", "wikipedia", "m5_full"]
 
+hierarchy_prefix = {"m5_hobbies": "m5", "m5_full": "m5", "wikipedia": "wikipedia"}
 num_leaves = {"m5_hobbies": 5650, "m5_full": 30490}
 num_nodes = {"m5_hobbies": 6218, "m5_full": 33549}
 num_levels = {"m5_hobbies": 4, "m5_full": 4}
@@ -21,7 +22,7 @@ gts = {}
 yhats = {}
 
 for DATA_ROOT in DATASETS:
-    S_compact = np.load(open(data_dir + DATA_ROOT + "/m5_hierarchy_parent.npy", "rb"))
+    S_compact = np.load(open(data_dir + DATA_ROOT + "/" + hierarchy_prefix[DATA_ROOT] + "_hierarchy_parent.npy", "rb"))
     top_down_p = np.load(open(data_dir + DATA_ROOT + "/top_down_tensor.npy", "rb"))[
         :, 0
     ].reshape(-1, 1)
@@ -39,7 +40,7 @@ for DATA_ROOT in DATASETS:
     yhats[DATA_ROOT] = yhat
 
 methods = ["middle_out", "bottom_up", "top_down"]
-modes = ["sparse_matrix", "sparse_algo", "dense_matrix", "dense_algo"]
+modes = ["sparse_matrix", "sparse_algo"] #, "dense_matrix", "dense_algo"]
 
 def run_bottom_up(mode, dataset):
     if mode == "sparse_matrix":
