@@ -46,11 +46,12 @@ def main():
     gt = np.zeros((len(df_slice), TIME_HORIZON))
 
     if rank == 0:
-        it = tqdm(df_slice.iterrows())
+        it = tqdm(df_slice.iterrows(), total=len(df_slice))
     else:
         it = df_slice.iterrows()
 
     for i, row in it:
+        print(i)
         data = pd.DataFrame({'ds': (row.index)[1:-4][-TIME_HORIZON:], 'y':(row.values)[1:-4][-TIME_HORIZON:]})
         m = Prophet()
         m.fit(data)
