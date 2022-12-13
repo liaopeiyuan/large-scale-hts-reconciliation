@@ -4,7 +4,7 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["m5_hobbies"] #, "m5_full"]
+DATASETS = ["m5_hobbies"]  # , "m5_full"]
 
 num_leaves = {"m5_hobbies": 5650, "m5_full": 30490}
 num_nodes = {"m5_hobbies": 6218, "m5_full": 33549}
@@ -45,26 +45,60 @@ modes = ["dense_algo", "sparse_algo", "dense_matrix", "sparse_matrix"]
 def run(mode, method, dataset):
     if mode == "sparse_matrix":
         return lambda: lhts.reconcile_sparse_matrix(
-            method, S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], top_down_ps[dataset], -1, 1.5
+            method,
+            S_compacts[dataset],
+            num_leaves[dataset],
+            num_nodes[dataset],
+            num_levels[dataset],
+            yhats[dataset],
+            top_down_ps[dataset],
+            -1,
+            1.5,
         )
     elif mode == "sparse_algo":
         return lambda: lhts.reconcile_sparse_algo(
-            method, S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], top_down_ps[dataset], -1, 1.5
+            method,
+            S_compacts[dataset],
+            num_leaves[dataset],
+            num_nodes[dataset],
+            num_levels[dataset],
+            yhats[dataset],
+            top_down_ps[dataset],
+            -1,
+            1.5,
         )
     elif mode == "dense_matrix":
         return lambda: lhts.reconcile_dense_matrix(
-            method, S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], top_down_ps[dataset], -1, 1.5
+            method,
+            S_compacts[dataset],
+            num_leaves[dataset],
+            num_nodes[dataset],
+            num_levels[dataset],
+            yhats[dataset],
+            top_down_ps[dataset],
+            -1,
+            1.5,
         )
     elif mode == "dense_algo":
         return lambda: lhts.reconcile_dense_algo(
-            method, S_compacts[dataset], num_leaves[dataset], num_nodes[dataset], num_levels[dataset], yhats[dataset], top_down_ps[dataset], -1, 1.5
+            method,
+            S_compacts[dataset],
+            num_leaves[dataset],
+            num_nodes[dataset],
+            num_levels[dataset],
+            yhats[dataset],
+            top_down_ps[dataset],
+            -1,
+            1.5,
         )
 
 
 d = defaultdict(dict)
 
 
-@pytest.mark.parametrize("mode,method,dataset", itertools.product(modes, methods, DATASETS))
+@pytest.mark.parametrize(
+    "mode,method,dataset", itertools.product(modes, methods, DATASETS)
+)
 @pytest.mark.benchmark(
     min_rounds=1,
     max_time=10,

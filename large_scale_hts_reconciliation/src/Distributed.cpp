@@ -426,12 +426,13 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
     }
 
     yhat_total =
-        MatrixXd::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0]).eval();
+        MatrixXd::Zero(std::accumulate(rows.begin(), rows.end(), 0), cols[0])
+            .eval();
 
     for (int i = 1; i < world_size; i++) {
       yhats[i] = MatrixXd::Zero(rows[i], cols[i]).eval();
       MPI_Recv(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
-                comm_global, &stats[i]);
+               comm_global, &stats[i]);
     }
 
     MPI_Barrier(comm_global);
@@ -450,7 +451,6 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
     MPI_Barrier(comm_global);
   }
 
-
   MatrixXd y_return;
 
   if (world_rank == 0) {
@@ -464,7 +464,7 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
     for (int i = 1; i < world_size; i++) {
       yhats[i] = y_reconciled.middleRows(curr_row, rows[i]).eval();
       MPI_Send(yhats[i].data(), rows[i] * cols[i], MPI_DOUBLE, i, 0,
-                comm_global);
+               comm_global);
       curr_row += rows[i];
     }
 
@@ -473,12 +473,11 @@ MatrixXd Distributed::reconcile_gather(const std::string method,
   } else {
     y_return = MatrixXd::Zero(ro, co).eval();
     MPI_Recv(y_return.data(), ro * co, MPI_DOUBLE, 0, 0, comm_global,
-              &stats[0]);
+             &stats[0]);
     MPI_Barrier(comm_global);
     return y_return;
   }
 }
-
 
 void Distributed::test(const MatrixXd& xs) {
   int world_size;

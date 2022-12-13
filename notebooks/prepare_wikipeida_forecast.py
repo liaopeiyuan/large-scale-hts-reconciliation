@@ -42,8 +42,8 @@ forecast_horizon = 100
 def predict(row):
     data = pd.DataFrame(
         {
-            "ds": (row.index)[1:][-2*forecast_horizon:-forecast_horizon],
-            "y": (row.values)[1:][-2*forecast_horizon:-forecast_horizon],
+            "ds": (row.index)[1:][-2 * forecast_horizon : -forecast_horizon],
+            "y": (row.values)[1:][-2 * forecast_horizon : -forecast_horizon],
         }
     )
     m = Prophet()
