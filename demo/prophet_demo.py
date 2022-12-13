@@ -48,7 +48,7 @@ class suppress_stdout_stderr(object):
 
 
 def main():
-    METHOD = "bottom_up"
+    METHOD = "middle_out"
     TIME_HORIZON = 28
 
     DATA_ROOT = "m5_hobbies"
