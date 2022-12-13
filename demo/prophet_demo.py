@@ -42,8 +42,8 @@ def main():
     
     df_slice = df.iloc[len_per_rank * rank : min(total_len, len_per_rank * (rank + 1)), :]
 
-    yhat = np.zeros((len(df_slice), 28))
-    gt = np.zeros((len(df_slice), 28))
+    yhat = np.zeros((len(df_slice), TIME_HORIZON))
+    gt = np.zeros((len(df_slice), TIME_HORIZON))
 
     if rank == 0:
         it = tqdm(df_slice.iterrows())
@@ -62,7 +62,7 @@ def main():
         gt[i, :] = (row.values)[1:-4][-TIME_HORIZON:]
 
     start = timer()
-    rec = distrib.reconcile_dp_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
+    rec = distrib.reconcile_dp_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 1.5)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
