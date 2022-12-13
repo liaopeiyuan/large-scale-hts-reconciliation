@@ -6,7 +6,6 @@ from collections import defaultdict
 import mpi4py
 
 mpi4py.rc.threaded = True
-# mpi4py.rc.thread_level = "funneled"
 from mpi4py import MPI
 from lhts import Distributed
 import sys
