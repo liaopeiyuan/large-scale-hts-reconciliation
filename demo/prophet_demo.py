@@ -13,6 +13,37 @@ import numpy as np
 import pandas as pd
 from timeit import default_timer as timer
 from tqdm import tqdm 
+import os 
+
+# from https://stackoverflow.com/questions/11130156/suppress-stdout-stderr-print-from-python-functions
+class suppress_stdout_stderr(object):
+    '''
+    A context manager for doing a "deep suppression" of stdout and stderr in
+    Python, i.e. will suppress all print, even if the print originates in a
+    compiled C/Fortran sub-function.
+       This will not suppress raised exceptions, since exceptions are printed
+    to stderr just before a script exits, and after the context manager has
+    exited (at least, I think that is why it lets exceptions through).
+
+    '''
+    def __init__(self):
+        # Open a pair of null files
+        self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
+        # Save the actual stdout (1) and stderr (2) file descriptors.
+        self.save_fds = (os.dup(1), os.dup(2))
+
+    def __enter__(self):
+        # Assign the null pointers to stdout and stderr.
+        os.dup2(self.null_fds[0], 1)
+        os.dup2(self.null_fds[1], 2)
+
+    def __exit__(self, *_):
+        # Re-assign the real stdout/stderr back to (1) and (2)
+        os.dup2(self.save_fds[0], 1)
+        os.dup2(self.save_fds[1], 2)
+        # Close the null files
+        os.close(self.null_fds[0])
+        os.close(self.null_fds[1])
 
 def main():
     METHOD = "bottom_up"
@@ -53,8 +84,10 @@ def main():
     for i, row in it:
         print(i)
         data = pd.DataFrame({'ds': (row.index)[1:-4][-TIME_HORIZON:], 'y':(row.values)[1:-4][-TIME_HORIZON:]})
-        m = Prophet()
-        m.fit(data)
+        
+        with suppress_stdout_stderr():
+            m = Prophet()
+            m.fit(data)
 
         future = m.make_future_dataframe(periods=TIME_HORIZON)
         forecast = m.predict(future)
@@ -66,7 +99,7 @@ def main():
     rec = distrib.reconcile_dp_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 1.5)
     end = timer()
     elapsed = round(end - start, 4)
-    if (rank == size - 1):
+    if (rank == 0):
         print("Reconciliation with " + METHOD + " done: ", str(elapsed), " ", lhts.smape(rec, gt))
 
 
