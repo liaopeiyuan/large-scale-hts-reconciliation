@@ -40,7 +40,7 @@ def main():
     total_len = len(df)
     len_per_rank = (total_len + size - 1) // size
     
-    df_slice = df.iloc[len_per_rank * rank : min(total_len, len_per_rank * (rank + 1)), :]
+    df_slice = df.iloc[len_per_rank * rank : min(total_len, len_per_rank * (rank + 1)), :].reset_index(drop=True)
 
     yhat = np.zeros((len(df_slice), TIME_HORIZON))
     gt = np.zeros((len(df_slice), TIME_HORIZON))
