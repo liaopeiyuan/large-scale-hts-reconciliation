@@ -7,13 +7,16 @@ mpi4py.rc.thread_level = "funneled"
 from mpi4py import MPI
 from lhts import Distributed
 import lhts
-import sys
+from prophet import Prophet
 
 import numpy as np
+import pandas as pd
 from timeit import default_timer as timer
+from tqdm import tqdm 
 
 def main():
-    METHOD = sys.argv[1]
+    METHOD = "bottom_up"
+    TIME_HORIZON = 28
 
     DATA_ROOT = "m5_hobbies"
     ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation"
@@ -33,39 +36,38 @@ def main():
     else:
         P = np.load(open(data_dir + DATA_ROOT + '/level_2_tensor.npy', 'rb'))[:, 0].reshape(-1, 1)
 
+    df = pd.read_csv(data_dir + DATA_ROOT + '/m5_historical.csv')
+    total_len = len(df)
+    len_per_rank = (total_len + size - 1) // size
     
-    gt = np.load(open(data_dir + DATA_ROOT + '/mpi/gt_tensor_' + str(rank) + '.npy', 'rb'))
-    yhat = np.load(open(data_dir + DATA_ROOT + '/mpi/pred_tensor_' + str(rank) + '.npy', 'rb'))
-    yhat_full = np.load(open(data_dir + DATA_ROOT + '/pred_tensor.npy', 'rb'))
+    df_slice = df.iloc[len_per_rank * rank : min(total_len, len_per_rank * (rank + 1)), :]
+
+    yhat = np.zeros((len(df_slice), 28))
+    gt = np.zeros((len(df_slice), 28))
+
+    if rank == 0:
+        it = tqdm(df_slice.iterrows())
+    else:
+        it = df_slice.iterrows()
+
+    for i, row in it:
+        data = pd.DataFrame({'ds': (row.index)[1:-4][-TIME_HORIZON:], 'y':(row.values)[1:-4][-TIME_HORIZON:]})
+        m = Prophet()
+        m.fit(data)
+
+        future = m.make_future_dataframe(periods=TIME_HORIZON)
+        forecast = m.predict(future)
+
+        yhat[i, :] = forecast[['yhat']][-TIME_HORIZON:].values.reshape(-1)
+        gt[i, :] = (row.values)[1:-4][-TIME_HORIZON:]
 
     start = timer()
-    rec = distrib.reconcile_dp_matrix(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
+    rec = distrib.reconcile_dp_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == size - 1):
-        print(METHOD, ":")
-        print("dp matrix: ", str(elapsed), " ", lhts.smape(rec, gt))
+        print("Reconciliation with " + METHOD + " done: ", str(elapsed), " ", lhts.smape(rec, gt))
 
-    rec0 = lhts.reconcile_sparse_matrix(METHOD, S_compact, 5650, 6218, 4, yhat_full, P, 2, 0.0)
-    rec0 = rec0[-rec.shape[0]:, :]
-    if (rank == size - 1): print(rec0.shape, rec.shape)
-
-    start = timer()
-    rec2 = distrib.reconcile_dp_optimized(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1): 
-        print("dp algo: ", str(elapsed), " ", lhts.smape(rec2, gt))
-
-    start = timer()
-    rec4 = distrib.reconcile_gather(METHOD, S_compact, 5650, 6218, 4, yhat, P, 2, 0.0)
-    end = timer()
-    elapsed = round(end - start, 4)
-    if (rank == size - 1):
-        print("gather: ", str(elapsed), " ", lhts.smape(rec4, gt))
-        print("dp mat vs original: ", np.abs(rec - rec0).sum())
-        print("dp algo vs original: ", np.abs(rec2 - rec0).sum())
-        print("gather vs original: ", np.abs(rec4 - rec0).sum())
 
 if __name__ == "__main__":
     main()
