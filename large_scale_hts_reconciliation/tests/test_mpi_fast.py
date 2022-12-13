@@ -223,8 +223,7 @@ def test_mpi(benchmark, mode, method, dataset):
             result = run_top_down(mode, dataset)
         return result
 
-    result = benchmark(f)
-    #result = benchmark.pedantic(f, iterations=1, rounds=20)
+    result = benchmark.pedantic(f, iterations=1, rounds=20)
 
     d[dataset][method][mode] = result
     for (i, j) in itertools.combinations(d[dataset][method].values(), 2):
