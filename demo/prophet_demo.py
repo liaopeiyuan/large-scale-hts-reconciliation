@@ -99,7 +99,7 @@ def main():
     end = timer()
     elapsed = round(end - start, 4)
     if (rank == 0):
-        print("Reconciliation with " + METHOD + " done: ", str(elapsed), " ", lhts.smape(rec, gt))
+        print("Reconciliation with " + METHOD + " done: ", str(elapsed), " ", lhts.smape(yhat, gt), " -> ", lhts.smape(rec, gt))
 
 
 if __name__ == "__main__":
