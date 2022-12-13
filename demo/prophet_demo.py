@@ -82,7 +82,6 @@ def main():
         it = df_slice.iterrows()
 
     for i, row in it:
-        print(i)
         data = pd.DataFrame({'ds': (row.index)[1:-4][-TIME_HORIZON:], 'y':(row.values)[1:-4][-TIME_HORIZON:]})
         
         with suppress_stdout_stderr():
