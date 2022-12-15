@@ -4,7 +4,7 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["wikipedia"] #, "tourism_small", "labour", "m5_hobbies"]
+DATASETS = ["wikipedia", "m5_full", "m5_hobbies"] #, "tourism_small", "labour", "m5_hobbies"]
 
 hierarchy_prefix = {
     "m5_hobbies": "m5",
@@ -36,7 +36,7 @@ num_levels = {
 }
 
 
-ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation"  # "/data/cmu/large-scale-hts-reconciliation/"
+ROOT = "/home/yifeiche/large-scale-hts-reconciliation"  # "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "/notebooks/"
 
 S_compacts = {}

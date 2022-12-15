@@ -12,7 +12,7 @@ import sys
 import numpy as np
 from timeit import default_timer as timer
 
-DATASETS = ["wikipedia"] #["m5_hobbies", "m5_full", "tourism_small", "labour"]
+DATASETS = ["wikipedia", "m5_full", "m5_hobbies"] #["m5_hobbies", "m5_full", "tourism_small", "labour"]
 
 hierarchy_prefix = {
     "m5_hobbies": "m5",
@@ -44,7 +44,7 @@ num_levels = {
 }
 
 
-ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation"  # "/data/cmu/large-scale-hts-reconciliation/"
+ROOT = "/home/yifeiche/large-scale-hts-reconciliation"  # "/data/cmu/large-scale-hts-reconciliation/"
 data_dir = ROOT + "/notebooks/"
 
 S_compacts = {}
