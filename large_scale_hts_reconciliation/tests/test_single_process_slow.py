@@ -4,11 +4,36 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["m5_hobbies"]  # , "m5_full"]
+DATASETS = ["tourism_small", "labour"]
 
-num_leaves = {"m5_hobbies": 5650, "m5_full": 30490}
-num_nodes = {"m5_hobbies": 6218, "m5_full": 33549}
-num_levels = {"m5_hobbies": 4, "m5_full": 4}
+hierarchy_prefix = {
+    "m5_hobbies": "m5",
+    "m5_full": "m5",
+    "wikipedia": "wikipedia",
+    "tourism_small": "tourism",
+    "labour": "labour",
+}
+num_leaves = {
+    "m5_hobbies": 5650,
+    "m5_full": 30490,
+    "wikipedia": 145063,
+    "tourism_small": 56,
+    "labour": 32,
+}
+num_nodes = {
+    "m5_hobbies": 6218,
+    "m5_full": 33549,
+    "wikipedia": 308004,
+    "tourism_small": 89,
+    "labour": 57,
+}
+num_levels = {
+    "m5_hobbies": 4,
+    "m5_full": 4,
+    "wikipedia": 4,
+    "tourism_small": 4,
+    "labour": 4,
+}
 
 
 ROOT = "/home/peiyuan20013/large-scale-hts-reconciliation/large_scale_hts_reconciliation"  # "/data/cmu/large-scale-hts-reconciliation/"
