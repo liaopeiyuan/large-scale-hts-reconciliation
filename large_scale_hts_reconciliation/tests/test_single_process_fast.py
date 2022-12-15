@@ -73,7 +73,7 @@ for DATA_ROOT in DATASETS:
     yhats[DATA_ROOT] = yhat
 
 methods = ["middle_out", "bottom_up", "top_down"]
-modes = ["sparse_matrix", "sparse_algo", "dense_algo"] #, "dense_matrix", "dense_algo"]
+modes = ["sparse_matrix", "sparse_algo"] #, "dense_matrix", "dense_algo"]
 
 
 def run_bottom_up(mode, dataset):
