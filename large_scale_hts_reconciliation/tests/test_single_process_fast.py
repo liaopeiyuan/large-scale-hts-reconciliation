@@ -4,7 +4,7 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["m5_hobbies", "wikipedia", "m5_full", "tourism_small", "labour"]
+DATASETS = ["m5_hobbies", "m5_full", "tourism_small", "labour"]
 
 hierarchy_prefix = {
     "m5_hobbies": "m5",
