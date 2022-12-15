@@ -88,7 +88,7 @@ for DATA_ROOT in DATASETS:
     yhats[DATA_ROOT] = yhat
 
 methods = ["bottom_up", "top_down", "middle_out"]
-modes = ["gather", "dp_matrix", "dp_optimized"]
+modes = ["gather", "dp_optimized"] #"dp_matrix", 
 
 
 def run_bottom_up(mode, dataset):
