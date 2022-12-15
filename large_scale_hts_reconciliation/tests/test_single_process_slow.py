@@ -127,7 +127,7 @@ def run(mode, method, dataset):
         )
 
 
-d = defaultdict(dict)
+d = defaultdict(lambda: defaultdict(dict))
 
 
 @pytest.mark.parametrize(
@@ -139,9 +139,11 @@ d = defaultdict(dict)
 )
 @pytest.mark.mpi_skip()
 def test_single_process_slow(benchmark, mode, method, dataset):
-    benchmark.group = method
-    result = benchmark.pedantic(run(mode, method, dataset), iterations=1, rounds=1)
+    
+    benchmark.group = method + "/" + dataset
 
-    d[method][mode] = result
-    for (i, j) in itertools.combinations(d[method].values(), 2):
+    result = benchmark.pedantic(run(mode, method, dataset), iterations=1, rounds=20)
+
+    d[dataset][method][mode] = result
+    for (i, j) in itertools.combinations(d[dataset][method].values(), 2):
         assert np.allclose(i, j, rtol=1e-3, atol=1e-5)
