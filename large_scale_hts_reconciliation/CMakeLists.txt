@@ -34,4 +34,4 @@ endif()
 # define (VERSION_INFO) here.
 target_compile_definitions(lhts
                            PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
-add_compile_definitions(EIGEN_DONT_PARALLELIZE)
+# add_compile_definitions(EIGEN_DONT_PARALLELIZE)
