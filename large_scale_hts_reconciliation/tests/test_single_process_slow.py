@@ -4,7 +4,7 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["tourism_small", "labour"]
+DATASETS = ["m5_hobbies"]
 
 hierarchy_prefix = {
     "m5_hobbies": "m5",
@@ -142,7 +142,7 @@ def test_single_process_slow(benchmark, mode, method, dataset):
     
     benchmark.group = method + "/" + dataset
 
-    result = benchmark.pedantic(run(mode, method, dataset), iterations=1, rounds=20)
+    result = benchmark.pedantic(run(mode, method, dataset), iterations=1, rounds=1)
 
     # Due to instability of QR factorization, we omit the check
     # d[dataset][method][mode] = result
