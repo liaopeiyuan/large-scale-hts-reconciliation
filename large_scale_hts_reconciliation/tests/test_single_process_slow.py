@@ -46,7 +46,16 @@ gts = {}
 yhats = {}
 
 for DATA_ROOT in DATASETS:
-    S_compact = np.load(open(data_dir + DATA_ROOT + "/m5_hierarchy_parent.npy", "rb"))
+    S_compact = np.load(
+        open(
+            data_dir
+            + DATA_ROOT
+            + "/"
+            + hierarchy_prefix[DATA_ROOT]
+            + "_hierarchy_parent.npy",
+            "rb",
+        )
+    )
     top_down_p = np.load(open(data_dir + DATA_ROOT + "/top_down_tensor.npy", "rb"))[
         :, 0
     ].reshape(-1, 1)
