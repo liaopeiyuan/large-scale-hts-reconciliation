@@ -4,7 +4,7 @@ import pytest
 import itertools
 from collections import defaultdict
 
-DATASETS = ["m5_hobbies"] #,"m5_full",  "wikipedia", "tourism_small", "labour", "m5_hobbies"]
+DATASETS = ["m5_full"] #,,  "wikipedia", "tourism_small", "labour", "m5_hobbies"]
 
 hierarchy_prefix = {
     "m5_hobbies": "m5",
@@ -73,7 +73,7 @@ for DATA_ROOT in DATASETS:
     yhats[DATA_ROOT] = yhat
 
 methods = ["middle_out", "bottom_up", "top_down"]
-modes = ["sparse_matrix", "sparse_algo", "dense_matrix", "dense_algo"]
+modes = ["sparse_matrix", "sparse_algo", "dense_algo"] #"dense_matrix", 
 
 
 def run_bottom_up(mode, dataset):
