@@ -96,6 +96,8 @@ d-figure > figure {
 
   <d-article>
 
+    <a href="https://github.com/liaopeiyuan/large-scale-hts-reconciliation/">GitHub Repository</a>
+
     <h4>Summary</h4>
     <p>
       We present the design and implementation of a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple reconciliation methods (top-down, bottom-up, middle-out, OLS, and WLS) on single-node, multi-core, and multi-node CPU platforms using Eigen, OpenMP, and OpenMPI. It is suitable for heavy workloads on platforms with non-uniform data access latency for individual forecasts, where communication- and computation-reduction techniques have demonstrated up to 1000x speed-up compared to existing open-source alternatives (Nixtla HierarchicalForecast v0.2.1) utilizing dense matrix multiplication. In addition, we have also created three large-scale time-series forecasting benchmarks (M5-Hobbies, M5-Full and Wikipedia), which contain hierarchical information that are orders of magnitude richer than existing academic counterparts. The resulting artifact is a Python package, LHTS, that invokes optimized reconciliation routines written in C++ on numeric NumPy matrices in single- and multi-process settings. A demo of integration of our package into a regular multi-process time-series forecasting workload involving a popular forecasting system, Prophet, is also provided and studied.    
