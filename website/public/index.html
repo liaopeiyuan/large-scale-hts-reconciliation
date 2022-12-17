@@ -100,6 +100,7 @@ d-figure > figure {
 =======
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 5ab831d (update website)
     <h4>Summary</h4>
 =======
@@ -109,16 +110,21 @@ d-figure > figure {
       We are going to design and implement a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple matrix-based reconciliation methods (top-down, bottom-up, middle-out, OLS and WLS) on single-node, multi-core and multi-node Intel CPU platforms using LAPACK, OpenMP, and MPI. It is suitable for heavy workloads on platforms with overall tight memory limit and non-uniform data access latency for individual forecasts, and we plan to perform an in-depth study on the performance characteristics, especially memory constraints and communication profile, of our system compared to existing methods (naive matrix-based solution, Nixtla HierarchicalForecast).
     </p>
 <<<<<<< HEAD
-
-    <h4>Milestone Report</h4>
 =======
+    <a href="https://github.com/liaopeiyuan/large-scale-hts-reconciliation">GitHub Repository</a>
+>>>>>>> 74f6a0b (add project website)
+
+    <h4>Summary</h4>
+    <p>
+      We present the design and implementation of a system that performs forecast reconciliation for large-scale, hierarchical time-series datasets. The system features various forms of parallelization (shared-memory, message-passing, SIMD) of multiple reconciliation methods (top-down, bottom-up, middle-out, OLS, and WLS) on single-node, multi-core, and multi-node CPU platforms using Eigen, OpenMP, and OpenMPI. It is suitable for heavy workloads on platforms with non-uniform data access latency for individual forecasts, where communication- and computation-reduction techniques have demonstrated up to 1000x speed-up compared to existing open-source alternatives (Nixtla HierarchicalForecast v0.2.1) utilizing dense matrix multiplication. In addition, we have also created three large-scale time-series forecasting benchmarks (M5-Hobbies, M5-Full and Wikipedia), which contain hierarchical information that are orders of magnitude richer than existing academic counterparts. The resulting artifact is a Python package, LHTS, that invokes optimized reconciliation routines written in C++ on numeric NumPy matrices in single- and multi-process settings. A demo of integration of our package into a regular multi-process time-series forecasting workload involving a popular forecasting system, Prophet, is also provided and studied.    
+    </p>
     
-    <h2>Background</h2>
-    <h3>The Problem</h3>
+    <h4>Background</h4>
+    <h5>The Problem</h5>
     <p>Time-series forecasting is a very popular field in statistical and machine learning and has many applications in financial markets (predicting stocks), IoT (predicting sensors), geosciences (predicting earthquakes), etc. Time-series is usually represented as a list of values <span class="math inline"><em>y</em><sub>1</sub>⋯<em>y</em><sub><em>k</em></sub></span> with timestamps <span class="math inline"><em>t</em><sub>1</sub>⋯<em>t</em><sub><em>k</em></sub></span> associated with each value, and the task of forecasting could be defined as "extending" the values to certain time stamps <span class="math inline"><em>t</em><sub><em>k</em> + 1</sub>⋯<em>t</em><sub><em>k</em> + <em>l</em></sub></span> into the future <span class="math inline"><em>y</em><sub><em>k</em> + 1</sub>⋯<em>y</em><sub><em>k</em> + <em>l</em></sub></span> [Hyndman and Athanasopoulos, 2021].</p>
     <p>Oftentimes, the time-series in a forecasting workload can be organized by certain characteristics of interest, which can naturally be aggregated into different levels of a hierarchy. For example, if one were to forecast Australia's domestic visitors per day [Panagiotelis et al., 2021], one would be additionally interested in city-level, state-level, or nation-level forecasts. Notably, these forecasts have constraints placed on some of them with respect to the hierarchy; e.g., a state's forecast is the sum of all of the cities' forecasts. Thus, a natural question arises:</p>
     <p><em>How can we effectively leverage the structural information in the hierarchy to make forecasts on all levels more accurate in a more efficient manner?</em></p>
-    <h3>The Algorithm</h3>
+    <h5>The Algorithm</h5>
     <p>In most settings, the algorithm forecasting individual time-series is oblivious of the above-mentioned hierarchy, hence the manuscript focuses on a reconciliation-oriented approach, where forecasts are individually produced for each entity <span class="math inline"><em>Ŷ</em><sub><em>v</em></sub></span> (for node <span class="math inline"><em>v</em></span> in the directed graph of hierarchy <span class="math inline"><em>G</em> = {<em>V</em>, <em>E</em>}</span>), and the goal would be to find a way to "reconcile" each forecast to produce <span class="math inline">$\overline{Y}_v$</span> such that they conform to the constraints imposed by the hierarchy (such as parent equalling to sum of children) and more desirably, achieves a better performance metric <span class="math inline">ℒ</span> across all levels <span class="math inline">$\Sigma_{v \in V}\mathcal{L}(Y_v, \overline{Y}_v)$</span>. The set of updated forecasts <span class="math inline">$\overline{Y}_v$</span> is often called <strong>coherent forecasts</strong>. This approach is intuitive because e.g. 1: if the model independently predicts tourism on city level and on state level, it is very unlikely that the city-level forecast could sum to that of the state-level naively; 2: there are patterns within the state-level forecast than can help improve city-level forecast, and vice versa.</p>
     <p>Not all nodes <span class="math inline"><em>v</em></span> are required to be forecasted for a successful reconciliation. Here presents five popular methods, each of which has different requirements on nodes to forecast to produce a coherent forecast:</p>
     <ol>
@@ -139,28 +145,28 @@ d-figure > figure {
     <p>and a summing matrix S bearing a relationship like</p>
     <img src="img/S.png" class="center">
     <p>The computational intensity matrix multiplication paves the way for speed-up using optimized libraries like BLAS  (Basic Linear Algebra Subprograms, [Lawson et al., 1979]), leveraging SIMD and threaded-parallelism. Commercial, open-sourced solutions like Nixtla HierarchicalForecast [Olivares et al., 2022] also utilize this property.</p>
-    <h3>The Challenge</h3>
+    <h5>The Challenge</h5>
     <p>On the first look, the matrix-based solution in a single process seems to be efficient enough and embarrassingly parallel. Below illustrates why this notion is wrong, espcially when the workload is scaling with memory constraints and the forecasts start off in different memory locations with non-uniform access cost.</p>
-    <h4>The Constraints</h4>
+    <h6>The Constraints</h6>
     <p>Real-world hierarchical time-series forecast datasets are large and unsuitable for the naive dense-matrix-based parallelization technique. For example, the Web Traffic Time Series Forecasting [Kaggle, b] contains 145,063 time-series for 551 time-stamps across multiple hierarchies (e.g. locale, access, agent), which places a lower bound of <span class="math inline">145063<sup>2</sup> × 4 ≈ 84.17</span> gigabytes to store the summing and reconciliation matrices in dense format, not to mention the time it takes to perform the matrix multiplication. The difficulty therefore lies in how to efficiently design an algorithm that has less memory footprint while efficiently parallelizing the reconciliation.</p>
     <p>Furthermore, matrix multiplication in a reconciliation workload are sparse in nature. The summing matrix <span class="math inline"><em>S</em></span>, from how it's defined, only contains up to <span class="math inline"><em>O</em>(<em>n</em>log<em>n</em>)</span> non-zero entries among <span class="math inline"><em>O</em>(<em>n</em><sup>2</sup>)</span> total entries, and the reconciliation matrix <span class="math inline"><em>G</em></span> are also very sparse for bottom-up, top-down and middle-out methods. The result is wasted computation on zero-entries in dense-dense matrix multiplications of <span class="math inline"><em>S</em><em>G</em></span> and <span class="math inline"><em>S</em><em>G</em><em>Y</em></span>.</p>
     <p>Finally, under a multiprocess setting, the forecasts before reconciliation are spread across many processes on cores that are far away from each other. Devising an efficient method to distribute the computation across different processes while minimizing communication is equally challenging.</p>
-    <h4>The Workload</h4>
+    <h6>The Workload</h6>
     <p>Data dependencies and memory access characteristics of the forecast reconciliation workload tie back to the graph structure of the hierarchy. All processes require a copy of the hierarchy itself to be aware of where communication takes place. Based on communication and computation intensity, we need to also devise non-trivial strategies for splitting up work into chunks owned by each process, even when assuming that producing the forecast for each is uniform. For bottom-up, top-down and middle-out approaches respectively, node that are closer to the leaves/root/selected level require less work to produce than others. The different choices may result in divergent execution or workload imbalance. Locality also exists in this place based on where forecasts are originally: processes only need to communicate with each other forecasts that are necessary for aggregation (instead of all); if all forecasts of a certain level exists on a process in the first place, we could eliminate communication altogether in the round. This intricate interplay between graph topology and communication-to-computation ratio also presents a challenge in optimizing our system across many different real-world datasets. Apart from existing academic benchmarks [Olivares et al., 2022] that are more compact, below are two examples where strategies that minimizes workload imbalance could look very different:</p>
     <ul>
-      <li><p>Wikipedia [Kaggle, b]: few levels, each node containing many children, essentially a "flat hierarchy"</p></li>
+      <li><p>Wikipedia [Kaggle, b]: few levels, each node containing many children, essentially a “flat hierarchy”</p></li>
       <li><p>Retail Goods in Walmart [Kaggle, a]: uneven, "ragged" hierarchy with vastly different lengths along each path. Varied compute intensity at each level.</p></li>
     </ul>
     <p>For OLS and WLS reconciliation, computing the <span class="math inline"><em>G</em></span> matrix for large datasets in a message-passing setting could be challenging or even unfeasible due to memory constraints. Designing a strategy efficiently across many processes in conjunction with optimized matrix algebra routines, and only preserving information required for timeseries of each process presents many challenges to system and algorithmic design.</p>
     
-    <h2>Approach</h2>
+    <h4>Approach</h4>
     <p>We present the approaches employed by core artifacts in our proposed system, <code>LHTS</code>. Our contributions are multi-fold: a novel compact storage format with per-process constrained ordering for time-series hierarchy, a large-scale benchmark for hierarchical time-series reconciliation containing orders-of-magnitude richer structural information, and "bag-of-tricks" optimization strategies for single-process and multi-process reconciliation methods.</p>
-    <h3>Compact Storage Format and Constrained Ordering</h3>
+    <h5>Compact Storage Format and Constrained Ordering</h5>
     <p>Existing reconciliation implementations  ([Olivares et al., 2022], [Wickramasuriya et al., 2019]) store the graph hierarchy as a dense integer summing matrix <span class="math inline"><em>S</em></span>. This allows near constant time loading (since the summing matrix has already been built), but imposes huge costs when the number of nodes is large (mapping <span class="math inline"><em>k</em></span> leaf nodes to all <span class="math inline"><em>O</em>(<em>k</em>)</span> nodes in a tree requires <span class="math inline"><em>O</em>(<em>k</em><sup>2</sup>)</span> space). Alternatively, we could store the hierarchy as a traditional graph using edge list, and rebuild the summing matrix during reconciliation. This saves space (guaranteed <span class="math inline"><em>O</em>(<em>k</em>)</span> edges in a hierarchy) and time during loading from disk, but the process of summing matrix construction is likely time-consuming and hard to map to a parallel machine with maintainable code. We present a compromise between the two paradigms, termed "Compact Storage Format", that represents the hierarchy as a matrix in <span class="math inline"><em>O</em>(<em>k</em>log<em>k</em>)</span> space and easily parallelizable. We define the storage format below, assuming that all nodes are labeled from <span class="math inline"><em>n</em><sub><em>l</em></sub> = 0⋯<em>N</em></span>, where <span class="math inline"><em>N</em></span> is total number of nodes in the hierarchy. <span class="math inline"><em>S</em><sub>compact</sub></span> is the compact hierarchy matrix:</p>
     <img src="img/P.png" class="center">
     <p><span class="math inline"><em>S</em><sub>compact</sub></span> utilizes the fact that all contributions of a node in the hierarchy in the summing matrix is it's path to root. It is also important to note that <span class="math inline"><em>S</em><sub>compact</sub></span> is storage efficient and workload mapping-friendly: all non-<span class="math inline"> − 1</span> entries of <span class="math inline"><em>S</em><sub>compact</sub></span> are exactly the non-zero entries in <span class="math inline"><em>S</em></span>, and a parallel machine can easily map rows of <span class="math inline"><em>S</em><sub>compact</sub></span> to primitives to achieve speedup in summation matrix construction (OpenMP threads in our implementation, or alternatively SIMD gangs or CUDA threads).</p>
     <p>The second remark is that little constraints are placed on the order of nodes in existing implementations, which means that many sequences of reconciliation by <span class="math inline"><em>G</em></span> and summation by <span class="math inline"><em>S</em></span> exists. We instead impose "Constrained Ordering", which enforces that all leaf nodes have ID between <span class="math inline">0</span> and <span class="math inline"><em>k</em></span>, and all non-leaf nodes occupy the rest of the IDs. Not only does this make construction of <span class="math inline"><em>G</em></span> and <span class="math inline"><em>S</em></span> easily parallelizable and maintainable, but also paves the way for algorithmic optimizations (e.g. reconciliation of a leaf forecast in a bottom-up case is the identity transformation explained below.</p>
-    <h3>Large-scale Hierarchical Time-series Reconciliation Benchmark</h3>
+    <h5>Large-scale Hierarchical Time-series Reconciliation Benchmark</h5>
     <p>To perform accurate stress-tests of forecast reconciliation algorithms require novel, large-scale benchmarks. To this end, we present three newly designed benchmarks (M5-Full, M5-Hobbies, Wikipedia) that are orders-of-magnitude larger than their counterparts in existing academic literature. Figure <a href="#fig:bench" data-reference-type="ref" data-reference="fig:bench">[fig:bench]</a> provides a description and compares key characteristics of the proposed benchmarks. All data comes with the hierarchy in compact storage format, historicals, and forecasts using Prophet [Taylor and Letham] for the last 100 time-stamps available.</p>
     <table>
     <thead>
@@ -210,11 +216,11 @@ d-figure > figure {
     </tr>
     </tbody>
     </table>
-    <h3>Implementation Details and Problem Mapping</h3>
+    <h5>Implementation Details and Problem Mapping</h5>
     <p>The <code>LHTS</code> (large-scale hierarchical time-series reconciliation) package is a Python library that enables data scientists to easily access a parallel system for reconciling large hierarchical time-series datasets in single CPU-node, multi-process, and multi CPU-node settings. The core component is implemented in C++ with OpenMPI, OpenMP, and Eigen (a popular LAPACK/BLAS replacement), and is connected to Python via pybind11. It is built using setuptools and CMake, allowing users to easily call highly-optimized routines that leverage SIMD, threaded-parallelism, and message-passing with NumPy arrays produced in the same Python process. This is often useful for existing forecasts produced by frameworks like PyTorch, sklearn, Prophet, or Nixtla.</p>
     <p>The package provides implementations of naive single-process and MPI solutions for five popular reconciliation algorithms (bottom-up, top-down, middle-out OLS, WLS) in both sparse and dense versions, as well as two techniques leveraging data parallelism similar to those used in deep learning. Benchmarks indicate that the single-process C++ implementation is 25x faster than Nixtla in top-down and middle-out methods, and the data-parallel communication reduction technique is 25% faster than its naive MPI counterpart. The results of our experiments also demonstrate the trade-offs of different methods offered by <code>LHTS</code>.</p>
     <p>During development, we drew inspiration from implementations in Nixtla as well as sample CMake projects using pybind11. Forecasts are mapped to the processes they originate from, and matrix multiplication between <span class="math inline"><em>S</em></span> and <span class="math inline"><em>G</em></span> is marked for either SIMD execution or sequential execution based on the matrix type (dense vs sparse). Multiplication between <span class="math inline"><em>ŷ</em></span> and <span class="math inline"><em>S</em><em>G</em></span> is marked for SIMD execution. Construction of <span class="math inline"><em>S</em></span> and <span class="math inline"><em>G</em></span> is marked for threaded OpenMP execution for increased speed, as presented in the compact storage format. We benchmarked our solutions using two Google Cloud Platform <code>e2-highcpu-16</code> instances with 1 vCPU per core, 8 cores, and an Intel Broadwell x86/64 architecture, one located in <code>us-central1-a</code> and the other in <code>us-east1-b1</code>.</p>
-    <h3>Single-Process Optimizations</h3>
+    <h5>Single-Process Optimizations</h5>
     <p>The traditional forecast reconciliation algorithm, such as Nixtla, is a single-process solution that relies on dense matrix operations, which can be a computationally expensive and resource-intensive task, especially when dealing with large matrices. In an effort to improve the performance of this approach, we explored two strategies.</p>
     <p>First, we utilized sparse matrices, which require less memory to store and can be processed more efficiently than dense matrices. Specifically, we used Eigen's [Guennebaud et al., 2010] sparse matrix operations to multiply the sparse matrices S and G (which represent the hierarchy and flow of forecasts, respectively) with the dense matrix <span class="math inline"><em>ŷ</em></span>, representing incoherent forecast predictions. Our implementation of this strategy resulted in significant performance improvements.</p>
     <p>Alternatively, we reconstructed the matrix operations using algorithms that perform the same tasks and implemented OpenMP to execute them in parallel using multiple threads. While this approach did improve the performance of the dense matrix solution, the improvement was not as significant as the sparse matrix approach. Here are some core insights to algorithmic optimization opportunities in each reconciliation algorithm where this is possible:</p>
@@ -224,121 +230,143 @@ d-figure > figure {
     <li><p>Middle-out: Instead of reconciling through <span class="math inline"><em>G</em></span>, distribute the forecasts from the given level to each leaf in parallel using OpenMP, then sum up by <span class="math inline"><em>S</em></span>.</p></li>
     </ul>
     <p>To fully optimize the performance of the forecast reconciliation algorithm, we propose a hybrid approach that combines the use of sparse-sparse matrix multiplication between <span class="math inline"><em>S</em></span> and <span class="math inline"><em>G</em></span> (which is inherently sequential, but much faster than the SIMD dense-dense alternative) with SIMD techniques for the sparse-dense matrix multiplication between <span class="math inline"><em>S</em><em>G</em></span> and <span class="math inline"><em>ŷ</em></span>. This combination leverages the strengths of both approaches to deliver the most efficient solution.</p>
-    <h3>Multiple-Process Optimizations</h3>
+    <h5>Multiple-Process Optimizations</h5>
     <p>To implement our multiple-process algorithm, we utilized message-passsing primitives in OpenMPI. As the forecasting algorithm Prophet can be run in parallel using either OpenMP or MPI, our hierarchy and forecast values could be distributed across multiple processes before reconciliation. The task executed by each process is then defined as producing the correct reconciliation of the locally produced forecast taking into consideration all forecasts and the entire hierarchy, not just local hierarchy. For the sake of simplicity (and making note that hierarchy remains unchanged), each process will have the entire hierarchy available in-memory at the beginning of the reconciliation process, in compact storage format.</p>
     <p>We present two classes of approach: gather-based and data-parallelism (dp) based. We also provide an alternative version of the data-parallelism that provides speed-up in certain scenarios.</p>
     <p>In the gathered-based approach, all processes send forecasts to a single process that performs the reconciliation before distributing the results back to each process. This results in fewer messages being communicated throughout the network, but a larger amount of information being transmitted. Additionally, the process performing the reconciliation may not have access to all available resources and is confined to the physical cores available in a shared memory region. In a multi-node configuration, this means that the computation is restricted to a single node.</p>
     <p>An alternative strategy was to implement data parallelism. In this model, each process obtained a slice of <span class="math inline"><em>S</em><em>G</em></span> that was relevant to its own forecast and performed reconciliation at the same time. The optimized variant was inspired by single-process algorithmic optimization techniques and aimed to reduce communication through the nature of each type of reconciliation algorithm. Only processes that are determined to have to communicate (e.g. between leaves and root in bottom-up, and between root and leaves in top-down) will communicate their chunks of forecasts in a point-to-point fashion. This reduced the total amount of information transmitted, but increased the number of messages being sent. Additionally, since each process now performs heavy computation, fine-grained interactions between the forecast hierarchy, OpenMPI processes, shared memory regions, and OpenMP threads can lead to redundant computation (in obtaining and slicing <span class="math inline"><em>S</em><em>G</em></span>) and context switching costs.</p>
 
-    <h2>Results</h2>
-    <h3>Single-Process Performance Results</h3>
-    <h4>On Dataset M5-Hobbies</h4>
-    <p><strong>Time Performance:</strong> We observed a significant improvement in time performance when applying OpenMP to optimize our dense-matrix implementation for the M5-Hobbies dataset, resulting in a 50x speedup. Utilizing a sparse matrix also led to a significant increase in performance, with a speedup of over 500x compared to the dense-matrix solution. However, the application of OpenMP on the sparse-matrix solution did not provide any additional improvement. This may be because the sparse-matrix solution already requires a larger portion of the matrices and more computation, and the overhead of parallelization cannot be offset by the already efficient nature of the sparse-matrix solution.</p>
+    <h4>Results</h4>
+    <h5>Single-Process Performance Results</h5>
+    <h6>On Dataset M5-Hobbies</h6>
+    <p>Time Performance:</p>
+    <p>For the dataset hobbies, we can observe by applying OpenMP to optimize our dense-matrix implementation, we achieved a speeup around 50x. The utilization of sparse matrix also improved the time performance significantly, achieving more than 500x speedup from the dense-matrix solution. However, applying OpenMP on the sparse-matrix solution did not offer any improvement of performance. This could be because of the fact that the sparse-algo solution requires a larger portion of the matrices and more computation and that the sparse-matrix solution is already efficient and that the overhead cannot be hidden by the improvement of parallelization.</p>
     <img src="img/m5-hobbies/m5-hobbies on Single Process (log scale).png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> Our analysis of CPU usage revealed that the OpenMP dense-algo solution significantly reduced CPU usage in the dense-matrix implementation. This may be due to the algorithm solution requiring less computation than the purely matrix solution, as well as OpenMP’s ability to divide the work among multiple threads that can be executed in parallel on different processors or cores. The sparse-matrix solution demonstrated the lowest CPU usage, likely because sparse matrices and their computations are inherently sequential in Eigen. However, the sparse-algo solution showed a higher CPU usage, which may be attributed to the solution storing and computing a larger portion of the matrices than the purely matrix solution and the frequent contention of multiple threads accessing shared variables.</p>
-    <p>Our analysis of memory usage showed that the dense-algo solution had lower memory usage than the dense-matrix solution. This may be due to the algorithm solution allocating less space for the matrices and requiring less matrix computation than the purely matrix solution. The sparse-matrix solution had the lowest memory usage, as sparse matrices require less memory to store than dense matrices. However, the sparse-algo solution allocated more memory space to access a larger portion of the matrices, which may result in higher memory usage compared to the sparse-matrix solution.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>For CPU usage, we observe that the OpenMP dense-algo solution reduced the CPU usage significantly in the dense-matrix implementation. This could be because the algorithm solution requires less matrix computation than the purely matrix solution. This could also be because OpenMP allows the work to be divided among multiple threads, each of which can be executed in parallel on a different processor or core, which reduces the CPU usage. For the sparse-matrix solution, the CPU usage is the lowest because sparse matrices and their computations can be processed more efficiently. However, the sparse-algo solution has a higher CPU usage, potentially caused by sparse-slgo solution storing and computing larger portion of the matrices than the purely matrix solution and the contention of multiple threads accessing shared variables frequently.</p>
+    <p>For memory usage, we observe that the dense-algo solution has lower memory usage than the dense-matrix solution. This could be because the algorithm solution allocates less space for the matrices and need less matrix computation than the purely matrix solution. The sparse-matrix solution has the lowest memory usage because sparse matrices require less memory to store than dense matrices. The sparse-algo solution allocates more memory space to access a larger portion of the matrices than the sparse-matrix solution, which could lead to a higher memory usage.</p>
     <img src="img/m5-hobbies/M5-hobbies Single-Process CPU Usage.png" class="center">
     <img src="img/m5-hobbies/M5-hobbies Single-Process Memory Usage.png" class="center">
-    <h4>On Dataset M5-Full</h4>
-    <p><strong>Time Performance:</strong> As this dataset is larger than the previous one, the dense-matrix solution experienced a memory outage. The utilization of sparse matrices addressed this problem and resulted in a significant speedup of over 50 times. While OpenMP did not have a notable effect on the efficiency of the sparse-matrix-based solution, this could be due to the already optimized nature of the solution and the inability to conceal the overhead of parallelization with improvements.</p>
+    <h6>On Dataset M5-Full</h6>
+    <p>Time Performance:</p>
+    <p>Since this dataset is larger than the previous, the dense-matrix solution went out of memory for this dataset. However, we can observe significant speedup, more than 50x, by utilizing sparse matrices. The improvement of using OpenMP on sparse-matrix-based solution is not significant. This could be due to the fact that the sparse-matrix solution is already efficient and that the overhead cannot be hidden by the improvement of parallelization.</p>
     <img src="img/m5-full/Single-process m5-full.png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The trend in CPU and memory usage for this dataset is comparable to that of the M5-Hobbies dataset, likely due to similar underlying causes.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU and memory usage of this dataset shows similar trend as the m5-hobbies for similar reasons.</p>
     <img src="img/m5-full/M5-full Single-process CPU Usage.png" class="center">
     <img src="img/m5-full/M5-full Single-Process Memory Usage.png Usage.png" class="center">
-    <h4>On Dataset Wikipedia</h4>
-    <p><strong>Time Performance:</strong> As this is the largest dataset we have tested, the dense solution encountered an our-of-memory error. The sparse-algo solution using OpenMP was slower than the sparse-matrix solution, possibly because the sparse-matrix solution was already efficient and the overhead of parallelization could not be concealed by improvements.</p>
+    <h6>On Dataset Wikipedia</h6>
+    <p>Time Performance:</p>
+    <p>This is our largest dataset tested. The dense solution were out of memory. The sparse-algo solution using OpenMP is slower than the sparse-matrix solution potentially due to the fact that the sparse-matrix solution is already efficient and that the overhead cannot be hidden by the improvement of parallelization.</p>
     <img src="img/Wikipedia/Wikipedia Single-process .png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The trend in CPU and memory usage for this dataset mirrors that of the previous two datasets, likely due to similar underlying causes. However, we noticed that the differences in CPU and memory usage between the sparse-algo and sparse-matrix solution were less pronounced compared to the previous two datasets. This may be due to the fact that the Wikipedia dataset is large enough that the differences between the matrices accessed and computed by the two solutions narrowed.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU and memory usage of this dataset shows similar trend as the previous two datasets for similar reasons. However, we observe that the differences between the CPU and memory usage between the sparse-algo and sparse-matrix solution is smaller compared the previous two datasets. This could be because the Wikipedia dataset is large enough so that the differences between the portion of matrices accessed and computed by the two solutions grew smaller.</p>
     <img src="img/Wikipedia/Wikipedia Single-process CPU Usage.png" class="center">
     <img src="img/Wikipedia/Wikipedia Single-Process Memory Usage.png" class="center">
-    <h4>On Dataset Tourism</h4>
-    <p><strong>Time Performance:</strong> We can observe that the performance of our optimized dense-matrix solution using OpenMP and our sparse-matrix solution improved by about 3 times compared to the traditional dense-matrix solution. However, the improvement between the dense-algo and sparse-matrix and sparse-algo is limited. This is likely due to the smaller size of this dataset compared to the previous ones.</p>
+    <h6>On Dataset Tourism</h6>
+    <p>Time Performance:</p>
+    <p>We can observe that the performance improved by around 3x from the traditional dense-matrix solution with our optimization of OpenMP on dense matrix and utilization of sparse matrix and the improvement between dense-algo and sparse-matrix and sparse-algo is limited. This is because the dataset is a lot smaller than the previous ones</p>
     <img src="img/Tourism/Tourism on Single Process.png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The trend in CPU usage for this dataset is similar to that of the M5-Hobbies dataset, likely due to similar underlying causes. However, the improvement in CPU usage by OpenMP is less pronounced on this smaller dataset. Additionally, the small size of the dataset may cause the sparse matrices to resemble dense matrices in memory storage, resulting in similar memory usage for the sparse and dense solutions, as well as similar memory usage between the sparse-algo and sparse-matrix solutions.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU usage of this dataset shows similar trend as the m5-hobbies for similar reasons. However, since the dataset is small, the improvement of CPU usage by OpenMP is less significant than on larger datasets. Since the dataset is small, the sparse matrices could resemble the dense matrices in memory storage, causing the memory usage of the sparse solutions to be similar to the dense solutions, and the memory usage of the sparse-algo solution to be similar to the sparse-matrix solution.</p>
     <img src="img/Tourism/TourismSmall Single-Process_ CPU Usage.png" class="center">
     <img src="img/Tourism/TourismSmall Single-Process_ Memory Usage.png" class="center">    
-    <h4>On Dataset Labour</h4>
-    <p><strong>Time Performance:</strong> The trend in time performance for this dataset is similar to that of the Tourism dataset, likely due to similar underlying causes.</p>
+    <h6>On Dataset Labour</h6>
+    <p>Time Performance:</p>
+    <p>The time performance of this dataset shows similar trend as the Tourism dataset for similar reasons.</p>
     <img src="img/Labour/Labour on Single Process .png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The CPU and memory usage of this dataset shows similar trend as the Tourism dataset for similar reasons.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU and memory usage of this dataset shows similar trend as the Tourism dataset for similar reasons.</p>
     <img src="img/Labour/Labour Single-Process_ CPU Usage.png" class="center">
     <img src="img/Labour/Labour Single-Process_ Memory Usage.png" class="center">
-    <h3>Multiple-Process Performance Results</h3>
-    <h4>On Dataset M5-Hobbies</h4>
-    <p><strong>Time Performance:</strong> As the graph illustrates, the dp-optimized solution performs slightly better than dp-matrix and the naive gather solutions on one node.</p>
-    <p>On two nodes, gather performs better in terms of time due to its simpler communication pattern. Additionally, the bottom-up dp-optimized method is much slower than the other solutions because the data (the leaves) are highly interdependent during the computation process and require more scattered communication.</p>
+    <h5>Multiple-Process Performance Results</h5>
+    <h6>On Dataset M5-Hobbies</h6>
+    <p>Time Performance:</p>
+    <p>As shown in the graph, the dp-optimized solution performs slightly better than dp-matrix and the naive gather solutions on 1-node but the improvement is not significant. This is because the dataset is relatively small, and the benefit of parallelizing the computation is not significant.</p>
+    <p>On 2-node, gather performs better time-wise due to it have less data dependency and thus, less communication cost. Also dp-optimized of the bottom up method is much slower than the rest of the solutions because the data (the leaves) are highly inter-dependent in the process of computation and requires more communication.</p>
     <img src="img/m5-hobbies/m5- hobbies with MPI on 1-node.png" class="center">
     <img src="img/m5-hobbies/m5-hobbies with MPI on 2-node.png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The CPU usage of the three methods is similar because they require a similar amount of computation in total. The gather method uses the least amount of memory, while the dp-matrix method uses the most. This is because gather has few data dependencies and requires less memory storage for shared variables in MPI.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU usage of the three methods are very close because they require similar amount of computation in total. The gather method uses the least memory while the dp-matrix method uses the most. This is because gather has little data dependency and need less memory storage for shared variables in MPI.</p>
     <img src="img/m5-hobbies/M5-hobbies MPI CPU Usage.png" class="center">
     <img src="img/m5-hobbies/M5-hobbies MPI Memory Usage.png" class="center">
-    <h4>On Dataset M5-Full</h4>
-    <p><strong>Time Performance:</strong> As the graph shows, the dp-matrix and dp-optimized solutions perform better than dp-matrix and the naive gather solutions on one node due to the larger size of the dataset, which benefits more significantly from parallelized computation.</p>
-    <p>The time performance on two nodes is similar to that of the M5-Hobbies dataset for similar reasons.</p>
+    <h6>On Dataset M5-Full</h6>
+    <p>Time Performance:</p>
+    <p>As shown in the graph, the dp-matrix and the dp-optimized solutions perform better than dp-matrix and the naive gather solutions on 1-node because the dataset is larger, and the improvement induced by performing computations in parallel is more significant.</p>
+    <p>The time performance on 2-node resembles it of M5-hobbies for similar reasons.</p>
     <img src="img/m5-full/m5-full with MPI on 1-node.png" class="center">
     <img src="img/m5-full/m5-full with MPI on 2-node.png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The CPU and memory usage of this dataset resembles the trend of the previous dataset for similar reasons.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU and memory usage of this dataset resembles the trend of the previous dataset for similar reasons.</p>
     <img src="img/m5-full/M5-full MPI CPU Usage.png" class="center">
     <img src="img/m5-full/M5-full MPI Memory Usage.png" class="center">
-    <h4>On Dataset Wikipedia</h4>
-    <p><strong>Time Performance:</strong> The dp-matrix solution encountered an out-of-memory error. The time performance on one node of this dataset is similar to that of the M5-full dataset for similar reasons.</p>
-    <p>On two nodes, we have sufficient memory for the dp-matrix solution due to the additional memory availability. The Wikipedia dataset is larger, which means that the benefits of parallelized computation are greater, making the scattered communication cost of dp-matrix and dp-optimized less impactful.</p>
+    <h6>On Dataset Wikipedia</h6>
+    <p>Time Performance:</p>
+    <p>The dp-matrix solution went out of memory. The time performance on 1-node of this dataset resembles the trend of the M5-full dataset for similar reasons.</p>
+    <p>On 2-node, we have enough memory for dp-matrix since we have more memory available on 2-node. Wikipedia is a larger dataset, which means that the benefit of performing computations in parallel is greater which makes the high communication cost of dp-matrix and dp-optimized to be less significant.</p>
     <img src="img/Wikipedia/Wikipedia_ MPI 1-node.png" class="center">
     <img src="img/Wikipedia/Wikipedia_ MPI 2-node.png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The dp-matrix solution was out of memory on 1-node. The CPU and memory usage of this dataset resembles the trend of the previous dataset for similar reasons.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The dp-matrix solution was out of memory. The CPU and memory usage of this dataset resembles the trend of the previous dataset for similar reasons.</p>
     <img src="img/Wikipedia/Wikipedia MPI CPU Usage.png" class="center">
     <img src="img/Wikipedia/Wikipedia MPI Memory Usage.png" class="center">
-    <h4>On Dataset Tourism</h4>
-    <p><strong>Time Performance:</strong> The smaller size of this dataset renders the benefits of utilizing multiple processes for computation minimal, and the high communication cost of the dp-optimized solution significantly diminishes its time performance. This is also reflected in the time performance of Tourism on 2-node, which is similar to that of M5-hobbies for similar reasons.</p>
+    <h6>On Dataset Tourism</h6>
+    <p>Time Performance:</p>
+    <p>Since this dataset is a lot smaller than the previous ones, the benefit of performing the computations on multiple processes is minimal, and the high communication cost of the dp-optimized solution reduces the time performance significantly.</p>
+    <p>The time performace of Tourism on 2-node resembles it of M5-hobbies for similar reasons.</p>
     <img src="img/Tourism/Tourism with MPI on 1-node.png" class="center">
     <img src="img/Tourism/Tourism with MPI on 2-node.png" class="center">
-    <p><strong>CPU and Memory Usage:</strong> The CPU usage of the three methods are similar for reasons discussed above. And since this dataset is small, the differences between the memory usage is also insignificant since there is less information needed for storage.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU usage of the three methods are similar for reasons discussed above. And since this dataset is small, the differences between the memory usage is also insignificant since there is less information needed for storage.</p>
     <img src="img/Tourism/TourismSmall MPI_ CPU Usage.png" class="center">
     <img src="img/Tourism/TourismSmall MPI_ Memory Usage.png" class="center">
-    <h4>On Dataset Labour</h4>
-    <p><strong>Time Performance:</strong> The time performance of this dataset resembles the trend of the Tourism dataset for similar reasons.</p>
+    <h6>On Dataset Labour</h6>
+    <p>Time Performance:</p>
+    <p>The time performance of this dataset resembles the trend of the Tourism dataset for similar reasons.</p>
     <img src="img/Labour/Labour with MPI on 1-node.png" class="center">
     <img src="img/Labour/Labour MPI on 2-node.png" class="center">    
-    <p><strong>CPU and Memory Usage:</strong> The CPU and memory usage of this dataset resembles the trend of the Tourism dataset for similar reasons.</p>
+    <p>CPU and Memory Usage:</p>
+    <p>The CPU and memory usage of this dataset resembles the trend of the Tourism dataset for similar reasons.</p>
     <img src="img/Labour/Labour MPI_ CPU Usage.png" class="center">
     <img src="img/Labour/Labour MPI_ Memory Usage.png" class="center">      
-    <h3>Single-Process Compared with Nixtla</h3>
-    <p>We only tested Nixtla on smaller datasets, as it is not designed for large-scale processing. Our single-process implementation utilizing dense matrices and written in C++ achieved hundreds of times faster performance compared to the Nixtla implementation in Python. Additionally, our sparse implementation exhibited over 2000 times faster performance compared to the Nixtla dense-matrix implementation.</p>
+    <h5>Single-Process Compared with Nixtla</h5>
+    <p>We only ran Nixtla on the smaller datasets since it is not built for large-scale. Our single-process implementation with dense-matrix using C++ achieved hundreds of times speedup to the Nixtla Python implementation. Our sparse implementations achieved more than 2000x speedup compared to the Nixtla dense-matrix implementation.</p>
     <img src="img/Tourism/Time Performance of Nixtla and lhts on Tourism.png" class="center">    
     <img src="img/Labour/Time Performance of Nixtla and lhts on Labour.png" class="center">
-    <h3>Single-Process with and without SIMD</h3>
-    <h4>On Dataset M5-hobbies</h4>
-    <p>Our results demonstrate that the dense-matrix solution experienced the greatest improvement from SIMD, with a speedup of approximately 7x. The dense-algo solution also benefited from SIMD, performing about 1.4x faster than without it. However, this improvement was less significant compared to the dense-matrix solution, potentially due to the smaller amount of computation required for the dense-algo solution and the overhead introduced by OpenMP parallelization. The impact of SIMD on the sparse-matrix solution was relatively limited, and it even had a negative effect on the sparse-algo solution due to the smaller size of the computation and the overhead of parallelization.</p>
+    <h5>Single-Process with and without SIMD</h5>
+    <h6>On Dataset M5-hobbies</h6>
+    <p>We can see that the dense-matrix solution benefits the most from SIMD, with a speedup around 7x. The dense-algo solution with SIMD performs around 1.4x better than without SIMD. This is less significant compared to the dense-matrix solution potentially due to the smaller amount of computation needed for the dense-algo solution and the overhead brought by OpenMP parallelization. The speedup of SIMD on the sparse-matrix solution is very limited, and SIMD has a negative impact on the sparse-algo solution due to the smaller computation size and thus, the overhead of parallelization.</p>
     <img src="img/m5-hobbies/M5-hobbies Single-Process_ SIMD_no SIMD (dense_matrix).png" style="float:left">    
     <img src="img/m5-hobbies/M5-hobbies Single-Process_ SIMD_no SIMD (dense_algo).png" style="float:left">
     <img src="img/m5-hobbies/M5-hobbies Single-Process_ SIMD_no SIMD (sparse_matrix).png" style="float:left">
     <img src="img/m5-hobbies/M5-hobbies Single-Process_ SIMD_no SIMD (sparse_algo).png" style="float:left">
-    <h4>On Dataset Tourism</h4>
-    <p>As the Tourism dataset is smaller in size compared to the M5-Hobbies dataset, the potential benefits of utilizing SIMD technology are significantly reduced. In fact, only the dense-matrix solution demonstrates a notable improvement in performance, with a speedup of approximately 1.4 times. The other solutions show little to no improvement upon implementing SIMD.</p>
+    <h6>On Dataset Tourism</h6>
+    <p>Since the Tourism dataset is smaller than M5-hobbies dataset, we observe the benefit of SIMD to be even more limited with reasons discussed above. Only the dense-matrix solution has around 1.4x speedup with SIMD and the other solutions little to none speedup.</p>
     <img src="img/Tourism/TourismSmall_ Dense matrix w_o SIMD.png" style="float:left">    
     <img src="img/Tourism/TourismSmall_ Dense algo w_o SIMD.png" style="float:left">    
     <img src="img/Tourism/TourismSmall_ Sparse matrix w_o SIMD.png" style="float:left">    
     <img src="img/Tourism/TourismSmall_ Sparse algo w_o SIMD.png" style="float:left">        
-    <h4>On Dataset Labour</h4>
+    <h6>On Dataset Labour</h6>
     <p>With Labour being our smallest dataset, we observe that the dense-matrix solution is slower with SIMD, potentially due to the high overhead of parallelization.</p>
     <img src="img/Labour/Labour_ Dense matrix w_o SIMD.png" style="float:left">    
     <img src="img/Labour/Labour_ Dense algo w_o SIMD.png" style="float:left">    
     <img src="img/Labour/Labour_ Sparse matrix w_o SIMD.png" style="float:left">    
     <img src="img/Labour/Labour_ Sparse algo w_o SIMD.png" style="float:left">        
-    <h3>Multiple-Process (MPI) Compared with Single Process</h3>
-    <p>Our implementation of the MPI multiple-process approach did not yield significant speed improvements compared to the optimized single-process implementations, with the exception of the Wikipedia dataset, which showed a speedup of approximately 2 times. This lack of improvement can be interpreted as a difference in settings - in a single-process scenario, all forecasts are situiated in the same process in continugous memory already, which is not the case for the MPI scenario. There is also little difference in CPU usage between the single-process solution and the MPI solution for similar reasons.</p>
-    <h3>Multiple-Process on 1-Node and 2-Node</h3>
-    <p>Our analysis reveals that the MPI implementation performs significantly slower on a two-node system compared to a single-node system for all datasets, although the magnitude of this difference decreases as the dataset size increases. This is likely due to the high network latency between the two nodes, as well as the communication complexity involved in distributing the workload. However, as the size of the dataset increases, the benefits of utilizing the additional resources and memory storage provided by the two-node system become more significant, leading to a decrease in the performance gap between the single-node and two-node configurations.</p>
+    <h5>Multiple-Process (MPI) Compared with Single Process</h5>
+    <p>Our MPI multiple-process implementation did not show significant speedup compared to the optimized single-process implementations except for on dataset Wikipedia, our largest dataset, which showed a speedup around 2x. We speculate that this is because our dataset used for testing are not large enough so that the communication cost and overhead induced by the MPI model could be hiden by the improvement of the parallelized work from each process. There is no significant difference in CPU usage between the single-process solution and the MPI solution for similar reasons.</p>
+    <p>The memory usage of the MPI solution does show improvement, correlated positively with the size of the datasets, from the single-process solution, with Wikipedia achieving an improvement around 2x. This could be because the MPI library uses more memory-efficient algorithms.</p>
+    <h5>Multiple-Process on 1-Node and 2-Node</h5>
+    <p>We can observe that our MPI implementation performs significantly slower on 2-node than on 1-node on all dataset, although the difference decreases as the dataset size increases. This is because the communication complexity is high across two nodes, yet with the size of the dataset increasing, the benefit of performing the computation on 2-nodes, which has more resources and memory storage, is more significant.</p>
     <img src="img/m5-hobbies.png" class="center">
     <img src="img/m5-full.png" class="center">
     <img src="img/wiki.png" class="center">
     <img src="img/tourism.png" class="center">
     <img src="img/Labour.png" class="center">
-    <h3>Integration with Data Science Workload</h3>
+    <h5>Integration with Data Science Workload</h5>
     <p>In our artifacts, we hae also demonstrated a simple integration of <code>LHTS</code> into a data science workload. The user could launch a multi-process Python script to train a forecasting model on a large dataset over many processes, and readily reconcile them using our <code>LHTS</code> by calling functions <code>distrib.reconcile_dp_optimized</code> with <code>distrib = lhts.Distributed()</code>, and calculate performance metrics using functions like <code>lhts.smape(yhat, gt)</code>.</p>
     
-    <h2>Conclusion</h2>
-    <p>The manuscript proposes the design and implementation of <span class="smallcaps">LHTS</span> to perform large-scale forecast reconciliation with the following components,</p>
+    <h4>Conclusion</h4>
+    <p>We implemented these solutions in our project:</p>
     <ul>
     <li><p>A dense-matrix based single-process solution (dense-matrix)</p></li>
     <li><p>A dense-matrix based single-process solution with OpenMP (dense-algo)</p></li>
@@ -348,11 +376,11 @@ d-figure > figure {
     <li><p>An MPI solution that utilizes data-parallelism (dp-matrix)</p></li>
     <li><p>An MPI solution that utilizes data-parallelism with optimized communication (dp-optimized)</p></li>
     </ul>
-    <p>We tested these solutions on Google Cloud Platform VM instances using the Labour, Tourism, M5-hobbies, M5-full, and Wikipedia datasets (ranked from smallest to largest).</p>
-    <p>Overall, our dense-matrix single-process implementation with SIMD achieved hundreds of times speedup on smaller datasets such as Tourism and Labour, and a further 50x+ speedup with OpenMP parallelization on larger datasets like M5-Hobbies. Our sparse-matrix single-process implementation also provided significant improvements in time performance and CPU and memory usage on larger datasets.</p>
-    <p>Our multi-process implementation with MPI achieved significant improvements in time performance or CPU usage on our largest dataset, Wikipedia. In single-node experiments, data parallelism-based solutions performed better, while gather-based methods performed better in multi-node experiments due to lower number of message sent. However, the slow link present in multi-node experiments exacerbated the communication problem, highlighting the need for communication-aware and computation-optimized large-scale hierarchical time-series forecast reconciliation algorithms like <span class="smallcaps">LHTS</span>.</p>
+    <p>We prepared datasets Labour, Tourism, M5-hobbies, M5-full, Wikipedia (ranked from small-large) and tested our solutions with these datasets on Google Cloud Platform VM instances.</p>
+    <p>Overall, we have achieved hundreds of times speedup with our dense-matrix single-process implementation with SIMD on smaller dataset such as Tourism and Labour, and a further 50+x speedup with OpenMP parallelization on larger datasets like m5-hobbies. Our other approach of applying sparse matrices on single-process implementation provided significant improvement of time performance and CPU and memory usage on larger dataset as well.</p>
+    <p>Our multi-process implementation with MPI was not able to achieve significant improvement in time performance or CPU usage except for our largest dataset Wikipedia. The memory usage does improve with the size of the dataset. We speculate that this could be because our dataset sizes are limited. Given more time, we would prepare larger datasets to run on larger machines to test our MPI solution.</p>
 
-    <h2>References</h2>
+    <h4>References</h4>
     <div style="text-indent: -36px; padding-left: 36px;"">
       <p>George Athanasopoulos, Rob J. Hyndman, Nikolaos Kourentzes, and Fotios Petropoulos. Forecasting with temporal hierarchies. European Journal of Operational Research, 262(1):60–74, 2017. ISSN 0377-2217. doi: https://doi.org/10.1016/j.ejor.2017.02.046. URL https://www.sciencedirect.com/science/article/pii/S0377221717301911.</p> 
       <p>Gaël Guennebaud, Benoît Jacob, et al. Eigen v3. http://eigen.tuxfamily.org, 2010.</p>
@@ -372,14 +400,11 @@ d-figure > figure {
 
   <d-appendix>
     <a>The corresponding code artifacts are available at <a href="https://github.com/liaopeiyuan/large-scale-hts-reconciliation">https://github.com/liaopeiyuan/large-scale-hts-reconciliation</a>.
-    <h2>Milestone Report</h2>
->>>>>>> b421904 (update website)
+    <h4>Milestone Report</h4>
     <iframe src="/pdfs/milestone.pdf" height="800"></iframe>
 
-    <h2>Project Proposal</h2>
+    <h4>Project Proposal</h4>
     <iframe src="/pdfs/proposal.pdf" height="800"></iframe>
-
-  <d-appendix>
     <d-footnote-list></d-footnote-list>
     <d-citation-list></d-citation-list>
   </d-appendix>
