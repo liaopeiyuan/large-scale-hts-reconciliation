@@ -12,7 +12,7 @@ import sys
 import numpy as np
 from timeit import default_timer as timer
 
-DATASETS = ["wikipedia"] #["m5_hobbies", "m5_full", "tourism_small", "labour"]
+DATASETS = ["tourism_small", "labour"]
 
 hierarchy_prefix = {
     "m5_hobbies": "m5",
